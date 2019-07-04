@@ -15,8 +15,8 @@ sig_x = ta.array([[0, 1], [1, 0]])
 sig_y = ta.array([[0, -1j], [1j, 0]])
 sig_z = ta.array([[1, 0], [0, -1]])
 
-def make_system(a=1, W=7, L=101, barrier=1, barrierpos=(0, 2, 98, 100),
-                mu=0.4, Delta=0.1, t=1.0):
+def make_system(a=1, W=7, L=21, barrier=.5, barrierpos=(0, 2, 18, 20),
+                mu=0.3, Delta=0.1, t=1.0):
     # On each site, electron and hole orbitals.
     lat = kwant.lattice.square(norbs=2)
     # Create an empty tight binding model.
@@ -46,16 +46,31 @@ def make_system(a=1, W=7, L=101, barrier=1, barrierpos=(0, 2, 98, 100),
 
     return syst
 
-def plot_conductance(syst, energies):
+def plotConductanceLead(syst, energies):
     # Compute conductance at the first lead
     data = []
     for energy in energies:
         smatrix = kwant.smatrix(syst, energy)
         # Conductance is N - R_ee + R_he
-        data.append(smatrix.submatrix((0, 0), (0, 0)).shape[0] -
-                    smatrix.transmission((0, 0), (0, 0)) +  # e to e
-                    smatrix.transmission((0, 1), (0, 0)) +
-                    smatrix.transmission((1, 0), (1, 0)))   # h to e
+        data.append(smatrix.submatrix((0, 0), (0, 0)).shape[0] # N
+            - smatrix.transmission((0, 0), (0, 0))      # R_ee l1 to l1
+            - smatrix.transmission((1, 0), (0, 0))      # R_ee l2 to l1
+            + smatrix.transmission((0, 1), (0, 0)))     # R_he
+    plt.figure()
+    plt.plot(energies, data)
+    plt.xlabel("energy [t]")
+    plt.ylabel("conductance [e^2/h]")
+    plt.show()
+
+def plotConductanceSystem(syst, energies):
+    data = []
+    for energy in energies:
+        smatrix = kwant.smatrix(syst, energy)
+        # Conductance is N - R_ee + R_he
+        data.append(smatrix.submatrix((0, 0), (0, 0)).shape[0]
+            + smatrix.transmission((0, 0), (1, 0))
+            + smatrix.transmission((1, 0), (1, 0))
+            + smatrix.transmission((1, 0), (1, 1)))# e to h
     plt.figure()
     plt.plot(energies, data)
     plt.xlabel("energy [t]")
@@ -70,7 +85,8 @@ def main():
     syst = syst.finalized()
 
     # Compute and plot the conductance
-    plot_conductance(syst, energies=[0.01 * i for i in range(-100, 100)])
+    plotConductanceLead(syst, energies=[0.005 * i for i in range(-80, 80)])
+    plotConductanceSystem(syst, energies=[0.05 * i for i in range(-50, 200)])
 
 if __name__ == '__main__':
     main()
