@@ -15,7 +15,7 @@ sig_x = ta.array([[0, 1], [1, 0]])
 sig_y = ta.array([[0, -1j], [1j, 0]])
 sig_z = ta.array([[1, 0], [0, -1]])
 
-def make_system(a=1, W=7, L=21, barrier=.5, barrierpos=(0, 2, 18, 20),
+def make_system(a=1, W=7, L=20, barrier=.5, barrierpos=(0, 3, 17, 20),
                 mu=0.3, Delta=0.1, t=1.0):
     # On each site, electron and hole orbitals.
     lat = kwant.lattice.square(norbs=2)
@@ -86,7 +86,7 @@ def main():
 
     # Compute and plot the conductance
     plotConductanceLead(syst, energies=[0.005 * i for i in range(-80, 80)])
-    plotConductanceSystem(syst, energies=[0.05 * i for i in range(-50, 200)])
+    plotConductanceSystem(syst, energies=[0.05 * i for i in range(-30, 30)])
 
 if __name__ == '__main__':
     main()
