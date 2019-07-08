@@ -8,17 +8,24 @@ Created on Mon Jul  8 03:16:59 2019
 
 import kwant
 import tinyarray as ta
-#import numpy as np
+import numpy as np
 import matplotlib.pyplot as plt
 
-sig_x = ta.array([[0, 1], [1, 0]])
-sig_y = ta.array([[0, -1j], [1j, 0]])
-sig_z = ta.array([[1, 0], [0, -1]])
+s_0 = np.identity(2)
+s_z = np.array([[1., 0.], [0., -1.]])
+s_x = np.array([[0., 1.], [1., 0.]])
+s_y = np.array([[0., -1j], [1j, 0.]])
 
-def make_system(W=7, L=20, barrier=5, barrierPos=(0, 3, 17, 20),
-                mu=1.9, Delta=.2, t=1.0):
+tau_z = ta.array(np.kron(s_z, s_0))
+tau_x = ta.array(np.kron(s_x, s_0))
+tau_y = ta.array(np.kron(s_y, s_0))
+sig_z = ta.array(np.kron(s_0, s_z))
+tau_zsig_x = ta.array(np.kron(s_z, s_x))
+
+def make_system(W=7, L=20, barrierPos=(0, 2, 18, 20),
+                mu=1., B=5, Delta=.2, alpha=0.4, t=1.0):
     # On each site, electron and hole orbitals.
-    lat = kwant.lattice.cubic(norbs=2)
+    lat = kwant.lattice.cubic(norbs=4)
     
     def shapeWire(pos):
         x, y, z = pos
@@ -38,20 +45,23 @@ def make_system(W=7, L=20, barrier=5, barrierPos=(0, 3, 17, 20),
     
     # Super
     syst[lat.shape(shapeWire, (0, 0, 0))] = \
-        (6 * t - mu) * sig_z + Delta * sig_x
-
+        (6 * t - mu) * tau_z + B * sig_z + Delta * tau_x
+        
+    barrier = .2 + mu
     # Two tunnel barriers
-    syst[lat.shape(shapeBarrier0, (0, 0, 0))] = (6 * t + barrier - mu) * sig_z
-    syst[lat.shape(shapeBarrier1, (0, L-1, 0))] = (6 * t + barrier - mu) * sig_z
+    syst[lat.shape(shapeBarrier0, (0, 0, 0))] = \
+        (6 * t + barrier) * tau_z
+    syst[lat.shape(shapeBarrier1, (0, L-1, 0))] = \
+        (6 * t + barrier) * tau_z
 
     # Hoppings
-    syst[lat.neighbors()] = -t * sig_z
+    syst[lat.neighbors()] = -t * tau_z - .5j * alpha * tau_zsig_x
     
     # Normal metal lead
     sym_left = kwant.TranslationalSymmetry((0, -1, 0))
-    lead = kwant.Builder(sym_left, conservation_law=-sig_z, particle_hole=sig_y)
-    lead[lat.shape(shapeLead, (0, 0, 0))] = (6 * t - mu) * sig_z
-    lead[lat.neighbors()] = -t * sig_z
+    lead = kwant.Builder(sym_left, conservation_law=-tau_z, particle_hole=tau_y)
+    lead[lat.shape(shapeLead, (0, 0, 0))] = (6 * t - mu) * tau_z
+    lead[lat.neighbors()] = -t * tau_z
 
     syst.attach_lead(lead)
     syst.attach_lead(lead.reversed())
@@ -107,7 +117,7 @@ def main():
 
     # Compute and plot the conductance
     plotConductanceLead(syst, energies=[0.005 * i for i in range(-120, 120)])
-    plotConductanceSystem(syst, energies=[0.05 * i for i in range(-50, 50)])
+#    plotConductanceSystem(syst, energies=[0.05 * i for i in range(-50, 50)])
 
 if __name__ == '__main__':
     main()
