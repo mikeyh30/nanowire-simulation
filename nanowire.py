@@ -156,7 +156,6 @@ def main():
 
     # Compute and plot the conductance
     plotConductanceSystem(syst, energies=[0.005 * i for i in range(-80, 80)])
-    plotConductanceLead(syst, energies=[0.05 * i for i in range(-50, 50)])
 
 if __name__ == '__main__':
     main()
