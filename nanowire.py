@@ -32,9 +32,9 @@ def make2DSystem(W=10, L=100, barrierPos=(0, 2, 98, 100),
     
     # Super
     syst[(lat(x, y) for x in range(L) for y in range(W))] = \
-        (4 * t - mu) * tau_z + B * sig_z + Delta * tau_x
+        (4 * t) * tau_z + B * sig_z + Delta * tau_x
         
-    barrier = .2 + mu
+    barrier = 1.0 + mu
     # Two tunnel barriers
     syst[(lat(x, y) for x in range(barrierPos[0], barrierPos[1])
          for y in range(W))] = (4 * t + barrier) * tau_z  
@@ -46,7 +46,7 @@ def make2DSystem(W=10, L=100, barrierPos=(0, 2, 98, 100),
     
     # Normal metal lead
     sym_left = kwant.TranslationalSymmetry((-1, 0))
-    lead = kwant.Builder(sym_left, conservation_law=-tau_z, particle_hole=tau_y)
+    lead = kwant.Builder(sym_left, conservation_law=-tau_z)
     lead[(lat(0, j) for j in range(W))] = (4 * t - mu) * tau_z
     lead[lat.neighbors()] = -t * tau_z
 
@@ -107,23 +107,10 @@ def plotConductanceSystem(syst, energies):
     for energy in energies:
         smatrix = kwant.smatrix(syst, energy)
         # Conductance is N - R_ee + R_he
-        data.append(smatrix.submatrix((0, 0), (0, 0)).shape[0] # N
-            - smatrix.transmission((0, 0), (0, 0))      # R_ee l1 to l1
-            - smatrix.transmission((1, 0), (0, 0))      # R_ee l2 to l1
-            + smatrix.transmission((1, 0), (1, 1))
-            + smatrix.transmission((0, 1), (0, 0))
-            )     # R_he
-    plt.figure()
-    plt.plot(energies, data)
-    plt.xlabel("energy [t]")
-    plt.ylabel("conductance [e^2/h]")
-    plt.show()
-
-def plotConductanceLead(syst, energies):
-    data = []
-    for energy in energies:
-        smatrix = kwant.smatrix(syst, energy)
-        data.append(smatrix.transmission(1, 0))# from lead0 to lead1
+        data.append(smatrix.submatrix((0, 0), (0, 0)).shape[0]
+                    - smatrix.transmission((0, 0), (0, 0))
+                    + smatrix.transmission((0, 1), (0, 0))
+                    )     # R_he
     plt.figure()
     plt.plot(energies, data)
     plt.xlabel("energy [t]")
@@ -146,7 +133,7 @@ def family2Dcolor(site):
 
 def main():
     syst = make2DSystem(W=8, barrierPos=(0, 2, 98, 100),
-        mu=.4, B=0., Delta=.2, alpha=0.4, t=1.0)
+        mu=0.5, B=0., Delta=.1, alpha=0.15, t=1.0)
     plt.rcParams["figure.figsize"] = (8,5)
     kwant.plot(syst, site_color=family2Dcolor)
 #    kwant.plot(syst, site_size=0.18, site_lw=0.01, hop_lw=0.1)

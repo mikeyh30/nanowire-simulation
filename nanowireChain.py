@@ -5,21 +5,13 @@ Created on Sat Jul 13 13:59:55 2019
 
 @author: Domi
 """
-import sys
-sys.path.append("/object")
-from nanowireObject import *
+
+import numpy as np
+import tinyarray as ta
+import scipy.sparse.linalg
 
 import kwant
-import numpy as np
-import scipy.sparse.linalg
 import matplotlib.pyplot as plt
-
-import tinyarray as ta
-
-class SimpleNamespace(object):
-    """A simple container for parameters."""
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
 
 s_0 = np.identity(2)
 s_z = np.array([[1., 0.], [0., -1.]])
@@ -34,18 +26,19 @@ sig_x = ta.array(np.kron(s_0, s_x))
 sig_y = ta.array(np.kron(s_0, s_y))
 tau_zsig_x = ta.array(np.kron(s_z, s_x))
 
-def onsite(site, p):
-    return tau_z * (p.mu - 2 * p.t) + \
-        sig_z * p.B + tau_x * p.Delta
+def onsite(site, mu, t, B, Delta):
+    return tau_z * (mu - 2 * t) + \
+        sig_z * B + tau_x * Delta
         
-def hopping(site0, site1, p):
-    return tau_z * p.t + 1j * tau_zsig_x * p.alpha
+def hopping(site0, site1, t, alpha):
+    return tau_z * t + 1j * tau_zsig_x * alpha
 
 def make_system(l=70):
     sys = kwant.Builder()
     lat = kwant.lattice.chain()
     sys[(lat(x) for x in range(l))] = onsite
     sys[lat.neighbors()] = hopping
+    kwant.plot(sys)
     return sys.finalized()
 
 sys = make_system()
@@ -53,13 +46,17 @@ sys = make_system()
 # Calculate and plot lowest eigenenergies in B-field.
 B_values = np.linspace(0, 0.6, 80)
 energies = []
-params = SimpleNamespace(
-    t=1, mu=-0.1, alpha=0.05, Delta=0.2)
-for params.B in B_values:
-    H = sys.hamiltonian_submatrix(
-        args=[params], sparse=True)
+params = dict(
+        t=1, mu=-0.1, alpha=0.05, Delta=0.2
+        )
+for B in B_values:
+    params["B"] = B
+    H = sys.hamiltonian_submatrix(sparse=True,  params=params)
+#    print(tupleH[2][1]) # to check use: return_norb=True,
     H = H.tocsc()
-    eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
+    eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0) # near zero!! this is zero modes
     energies.append(np.sort(eigs[0]))
 plt.plot(B_values, energies)
+plt.xlabel("B")
+plt.ylabel("energies")
 plt.show()
