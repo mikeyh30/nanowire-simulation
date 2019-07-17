@@ -6,14 +6,6 @@ Created on Mon Jul 15 01:33:22 2019
 @author: Domi
 """
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  8 03:16:59 2019
-
-@author: Domi
-"""
-
 import kwant
 import tinyarray as ta
 import numpy as np
@@ -114,7 +106,7 @@ def plotConductance(syst, energies):
 
 def main():
 #    syst = makeNIS1D()
-    syst = makeNIS2D()
+    syst = makeNIS2D(alpha=.8)
     plt.rcParams["figure.figsize"] = (8,5)
     kwant.plot(syst)
 
@@ -122,7 +114,7 @@ def main():
     syst = syst.finalized()
 
     # Compute and plot the conductance
-    plotConductance(syst, energies=[0.005 * i for i in range(-50, 200)])
+    plotConductance(syst, energies=[0.005 * i for i in range(-50, 50)])
 
 if __name__ == '__main__':
     main()

@@ -6,22 +6,6 @@ Created on Mon Jul 15 03:32:47 2019
 @author: Domi
 """
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul 15 01:33:22 2019
-
-@author: Domi
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  8 03:16:59 2019
-
-@author: Domi
-"""
-
 import kwant
 import tinyarray as ta
 import numpy as np
@@ -40,11 +24,11 @@ tau_zsig_x = ta.array(np.kron(s_z, s_x))
 
 def makeNISIN1D(
         L=20, # B = 0.22
-        mu=.5, B=0., Delta=.1, alpha=.15, t=1.0,
-        barrier = 1.
+        mu=.15, B=0., Delta=.1, alpha=.1, t=1.0,
+        barrier = .5
         ):
     onsiteSc      = (2 * t) * tau_z + B * sig_z + Delta * tau_x
-    onsiteNormal  = (2 * t - mu) * tau_z + B * sig_z
+    onsiteNormal  = (2 * t - mu) * tau_z
     onsiteBarrier = (2 * t - mu + barrier) * tau_z
     hop           = -t * tau_z - .5j * alpha * tau_zsig_x
     
@@ -74,12 +58,12 @@ def makeNISIN1D(
 
 def makeNISIN2D(
         W=5,
-        L=50,
-        mu=.4, B=0., Delta=.1, alpha=.75, t=1.0,
-        barrier = 1.
+        L=20,
+        mu=.3, B=0., Delta=.1, alpha=.8, t=1.0,
+        barrier = .5
         ):
     onsiteSc      = (4 * t) * tau_z + B * sig_z + Delta * tau_x
-    onsiteNormal  = (4 * t - mu) * tau_z + B * sig_z
+    onsiteNormal  = (4 * t - mu) * tau_z
     onsiteBarrier = (4 * t - mu + barrier) * tau_z
     hop           = -t * tau_z - .5j * alpha * tau_zsig_x
     
@@ -141,10 +125,8 @@ def plotConductance(syst, energies):
     plt.show()
 
 def main():
-    syst = makeNISIN1D()
-#    syst = makeNISIN2D(
-#            W=5, L=20, mu=.3, B=0., Delta=.1, alpha=.8, t=1.0, barrier = 1.
-#            )
+#    syst = makeNISIN1D(B=0.)
+    syst = makeNISIN2D(B=0.) #.25
     plt.rcParams["figure.figsize"] = (8,5)
     kwant.plot(syst)
 
@@ -152,8 +134,8 @@ def main():
     syst = syst.finalized()
 
     # Compute and plot the conductance
-    plotConductanceSc(syst, energies=[0.01 * i for i in range(-100, 100)])
-    plotConductance(syst, energies=[0.005 * i for i in range(-50, 50)])
+#    plotConductanceSc(syst, energies=[0.01 * i for i in range(-50, 50)])
+    plotConductance(syst, energies=[0.001 * i for i in range(-140, 140)])
 
 if __name__ == '__main__':
     main()
