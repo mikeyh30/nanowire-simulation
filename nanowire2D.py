@@ -9,6 +9,7 @@ Created on Wed Jul 17 02:30:06 2019
 import kwant
 import tinyarray as ta
 import numpy as np
+import scipy.sparse.linalg
 
 from tqdm import trange
 import matplotlib.pyplot as plt
@@ -24,7 +25,7 @@ tau_y = ta.array(np.kron(s_y, s_0))
 sig_z = ta.array(np.kron(s_0, s_z))
 tau_zsig_x = ta.array(np.kron(s_z, s_x))
 
-def makeNISIN2D(W=5, L=20, barrierLen=1):
+def makeNISIN(W=5, L=20, barrierLen=1, isWhole=True):
     def onsiteSc(site, t, B, Delta):
         return (4 * t) * tau_z + B * sig_z + Delta * tau_x
     def onsiteNormal(site, mu, t):
@@ -41,26 +42,29 @@ def makeNISIN2D(W=5, L=20, barrierLen=1):
     # S
     syst[(lat(i, j) for i in range(1,L-1) for j in range(W))] = onsiteSc
     
-    # I's
-    syst[(lat(i, j) for i in range(barrierLen) for j in range(W))] = onsiteBarrier
-    syst[(lat(i, j) for i in range(L-barrierLen, L)for j in range(W))] = onsiteBarrier
-    syst[lat.neighbors()] = hop
+    if isWhole:
+        # I's
+        syst[(lat(i, j) for i in range(barrierLen) for j in range(W))] = onsiteBarrier
+        syst[(lat(i, j) for i in range(L-barrierLen, L)for j in range(W))] = onsiteBarrier
+        syst[lat.neighbors()] = hop
     
-    # N's
-    lead = kwant.Builder(kwant.TranslationalSymmetry((-1,0)),
-                         conservation_law=-tau_z
-                         )
-    lead[(lat(0, j) for j in range(W))] = onsiteNormal
-    lead[lat.neighbors()] = hop
-
-    syst.attach_lead(lead)
-    syst.attach_lead(lead.reversed())
+        # N's
+        lead = kwant.Builder(kwant.TranslationalSymmetry((-1,0)),
+                             conservation_law=-tau_z
+                             )
+        lead[(lat(0, j) for j in range(W))] = onsiteNormal
+        lead[lat.neighbors()] = hop
+    
+        syst.attach_lead(lead)
+        syst.attach_lead(lead.reversed())
+    else:
+        syst[lat.neighbors()] = hop
 
     return syst
     
 def plotConductance(syst):
     energies = [0.001 * i for i in range(-140, 140)]
-    BValues = np.linspace(0, 0.4, 41)
+    BValues = np.linspace(0, 1.0, 101)
     data = []
     params = dict(
             mu=.3, B=0.25, Delta=.1, alpha=.8, t=1.0, barrier = .5
@@ -80,15 +84,34 @@ def plotConductance(syst):
     plt.xlabel("Zeeman Field Strength [B]")
     plt.ylabel("Bias V [t]")
     plt.show()
+   
+def plotSpectrum(syst):
+    B_values = np.linspace(0, 1.0, 101)
+    energies = []
+    params = dict(
+            mu=.3, Delta=.1, alpha=.8, t=1.0, barrier = .5
+            )
+    for B in B_values:
+        params["B"] = B
+        H = syst.hamiltonian_submatrix(sparse=True,  params=params)
+    #    print(tupleH[2][1]) # to check use: return_norb=True,
+        H = H.tocsc()
+        eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0) # near zero!! this is zero modes
+        energies.append(np.sort(eigs[0]))
+    plt.plot(B_values, energies)
+    plt.xlabel("B")
+    plt.ylabel("energies")
+    plt.show()
 
 def main():
-    syst = makeNISIN2D() #.25
+    syst = makeNISIN(isWhole=False) #.25
     plt.rcParams["figure.figsize"] = (8,5)
     kwant.plot(syst)
     syst = syst.finalized()
 
     # Compute and plot the conductance
-    plotConductance(syst)
+#    plotConductance(syst)
+    plotSpectrum(syst)
 
 if __name__ == '__main__':
     main()
