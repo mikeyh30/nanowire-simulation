@@ -23,17 +23,19 @@ tau_z = ta.array(np.kron(s_z, s_0))
 tau_x = ta.array(np.kron(s_x, s_0))
 tau_y = ta.array(np.kron(s_y, s_0))
 sig_z = ta.array(np.kron(s_0, s_z))
-tau_zsig_x = ta.array(np.kron(s_z, s_x))
+sig_x = ta.array(np.kron(s_0, s_x))
+sig_y = ta.array(np.kron(s_0, s_y))
+tau_zsig_y = ta.array(np.kron(s_z, s_y))
 
 def makeNISIN(W=5, L=20, barrierLen=1, isWhole=True):
     def onsiteSc(site, t, B, Delta):
-        return (4 * t) * tau_z + B * sig_z + Delta * tau_x
+        return (4 * t) * tau_z + B * sig_x + Delta * tau_x
     def onsiteNormal(site, mu, t):
         return (4 * t - mu) * tau_z
     def onsiteBarrier(site, mu, t, barrier):
         return (4 * t - mu + barrier) * tau_z
     def hop(site0, site1, t, alpha):
-        return -t * tau_z - .5j * alpha * tau_zsig_x
+        return -t * tau_z - .5j * alpha * tau_zsig_y
     
     # On each site, electron and hole orbitals.
     lat = kwant.lattice.square(norbs=4) 
@@ -69,7 +71,7 @@ def plotConductance(syst):
     params = dict(
             mu=.3, B=0.25, Delta=.1, alpha=.8, t=1.0, barrier = .5
             )
-    for i in trange(41):
+    for i in trange(101):
         params["B"] = BValues[i]
         cond = []
         for energy in energies:
@@ -94,7 +96,6 @@ def plotSpectrum(syst):
     for B in B_values:
         params["B"] = B
         H = syst.hamiltonian_submatrix(sparse=True,  params=params)
-    #    print(tupleH[2][1]) # to check use: return_norb=True,
         H = H.tocsc()
         eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0) # near zero!! this is zero modes
         energies.append(np.sort(eigs[0]))

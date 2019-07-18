@@ -126,7 +126,7 @@ def plotConductance(syst, energies):
 
 def main():
 #    syst = makeNISIN1D(B=0.)
-    syst = makeNISIN2D(B=0.) #.25
+    syst = makeNISIN2D(L=20, B=0.25) #.25
     plt.rcParams["figure.figsize"] = (8,5)
     kwant.plot(syst)
 
@@ -135,7 +135,7 @@ def main():
 
     # Compute and plot the conductance
 #    plotConductanceSc(syst, energies=[0.01 * i for i in range(-50, 50)])
-    plotConductance(syst, energies=[0.001 * i for i in range(-140, 140)])
+    plotConductance(syst, energies=[0.001 * i for i in range(-160, 160)])
 
 if __name__ == '__main__':
     main()

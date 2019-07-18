@@ -106,7 +106,7 @@ def plotConductance(syst, energies):
 
 def main():
 #    syst = makeNIS1D()
-    syst = makeNIS2D(alpha=.8)
+    syst = makeNIS2D(B=.25)
     plt.rcParams["figure.figsize"] = (8,5)
     kwant.plot(syst)
 
