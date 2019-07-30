@@ -25,11 +25,17 @@ tau_y = ta.array(np.kron(s_y, s_0))
 sig_z = ta.array(np.kron(s_0, s_z))
 sig_x = ta.array(np.kron(s_0, s_x))
 sig_y = ta.array(np.kron(s_0, s_y))
+tau_zsig_x = ta.array(np.kron(s_z, s_x))
 tau_zsig_y = ta.array(np.kron(s_z, s_y))
 
-def makeNISIN(W=5, L=20, barrierLen=1, isWhole=True):
+def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True):
     def onsiteSc(site, t, B, Delta):
-        return (4 * t) * tau_z + B * sig_x + Delta * tau_x
+#        print(site.pos)
+        if periodB == 0:
+            return (4 * t) * tau_z + B * sig_x + Delta * tau_x
+        else:
+            theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
+            return (4 * t) * tau_z + B * (sig_x*np.cos(theta) - sig_y*np.sin(theta)) + Delta * tau_x
     def onsiteNormal(site, mu, t):
         return (4 * t - mu) * tau_z
     def onsiteBarrier(site, mu, t, barrier):
@@ -66,12 +72,13 @@ def makeNISIN(W=5, L=20, barrierLen=1, isWhole=True):
     
 def plotConductance(syst):
     energies = [0.001 * i for i in range(-140, 140)]
-    BValues = np.linspace(0, 1.0, 101)
+    n = 36
+    BValues = np.linspace(0, 0.35, n)
     data = []
     params = dict(
             mu=.3, B=0.25, Delta=.1, alpha=.8, t=1.0, barrier = .5
             )
-    for i in trange(101):
+    for i in trange(n):
         params["B"] = BValues[i]
         cond = []
         for energy in energies:
@@ -81,8 +88,9 @@ def plotConductance(syst):
         
     data = np.transpose(data)
     plt.figure()
-    cp = plt.contour(BValues, energies, data)
-    plt.clabel(cp, inline=True, fontsize=10)
+#    cp = plt.contour(BValues, energies, data)
+#    plt.clabel(cp, inline=True, fontsize=10)
+    plt.contourf(BValues, energies, data)
     plt.xlabel("Zeeman Field Strength [B]")
     plt.ylabel("Bias V [t]")
     plt.show()
@@ -105,14 +113,14 @@ def plotSpectrum(syst):
     plt.show()
 
 def main():
-    syst = makeNISIN(isWhole=False) #.25
+    syst = makeNISIN(isWhole=True) #.25
     plt.rcParams["figure.figsize"] = (8,5)
     kwant.plot(syst)
     syst = syst.finalized()
 
     # Compute and plot the conductance
-#    plotConductance(syst)
-    plotSpectrum(syst)
+    plotConductance(syst)
+#    plotSpectrum(syst)
 
 if __name__ == '__main__':
     main()
