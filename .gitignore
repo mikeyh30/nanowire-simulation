@@ -6,3 +6,5 @@
 *.pyc
 
 nanowire\(draft\)\.py
+
+*.dat
