@@ -39,8 +39,10 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True):
         return (4 * t - mu) * tau_z
     def onsiteBarrier(site, mu, t, barrier):
         return (4 * t - mu + barrier) * tau_z
-    def hop(site0, site1, t, alpha):
-        return -t * tau_z - .5j * alpha * tau_zsig_y
+    def hopX(site0, site1, t, alpha):
+        return -t * tau_z + .5j * alpha * tau_zsig_y
+    def hopY(site0, site1, t, alpha):
+        return -t * tau_z - .5j * alpha * tau_zsig_x    
     
     # On each site, electron and hole orbitals.
     lat = kwant.lattice.square(norbs=4) 
@@ -53,19 +55,24 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True):
         # I's
         syst[(lat(i, j) for i in range(barrierLen) for j in range(W))] = onsiteBarrier
         syst[(lat(i, j) for i in range(L-barrierLen, L)for j in range(W))] = onsiteBarrier
-        syst[lat.neighbors()] = hop
+        
+        # Hopping:
+        syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
+        syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
     
         # N's
         lead = kwant.Builder(kwant.TranslationalSymmetry((-1,0)),
                              conservation_law=-tau_z
                              )
         lead[(lat(0, j) for j in range(W))] = onsiteNormal
-        lead[lat.neighbors()] = hop
+        lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
+        lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
     
         syst.attach_lead(lead)
         syst.attach_lead(lead.reversed())
     else:
-        syst[lat.neighbors()] = hop
+        syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
+        syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
 
     return syst.finalized()
 
@@ -85,7 +92,7 @@ class Nanowire:
         
         energies = []
         params = dict(
-                mu=.3, Delta=.1, alpha=.8, t=1.0, barrier = .5
+                mu=.3, Delta=.1, alpha=.8, t=1.0, barrier = 2.
                 )
         for i in trange(np.size(bValues)):
             params["B"] = bValues[i]
@@ -109,7 +116,7 @@ class Nanowire:
         
         data = []
         params = dict(
-                mu=.3, Delta=.1, alpha=.8, t=1.0, barrier = .5
+                mu=.3, Delta=.1, alpha=.8, t=1.0, barrier = 2.
                 )
         for i in trange(np.size(energies)):
             cond = []
@@ -117,7 +124,7 @@ class Nanowire:
             for b in bValues:
                 params["B"] = b
                 smatrix = kwant.smatrix(syst, energy, params=params)
-                cond.append(smatrix.transmission((1, 1), (0, 0)))
+                cond.append(smatrix.transmission(1, 0))
             data.append(cond)
         
         outcome = dict(B=bValues, BiasV=energies, Cond=data)
