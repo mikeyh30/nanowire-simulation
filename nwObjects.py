@@ -84,12 +84,11 @@ class Nanowire:
         self.barrierLen = barrierLen
         self.periodB = periodB
         
-    def spectrum(self, bValues=np.linspace(0, 1.0, 101)):
+    def spectrum(self, bValues=np.linspace(0, 1.0, 101)):        
         syst = makeNISIN(W=self.width, L=self.length, 
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
                          isWhole=False)
-        
         energies = []
         params = dict(
                 mu=.3, Delta=.1, alpha=.8, t=1.0, barrier = 2.
@@ -101,7 +100,6 @@ class Nanowire:
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
             energies.append(np.sort(eigs[0]))
             
-        # Returns dict
         outcome = dict(B=bValues, E=energies)
         return outcome
     
@@ -113,7 +111,6 @@ class Nanowire:
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
                          isWhole=True)
-        
         data = []
         params = dict(
                 mu=.3, Delta=.1, alpha=.8, t=1.0, barrier = 2.
