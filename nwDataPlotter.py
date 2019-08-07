@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 # L = 20:       0 -> 2
 # L = 100:      0 -> 10
 # L = 500:      0 -> 50
-plt.rcParams["figure.figsize"] = (10,6)
+plt.rcParams["figure.figsize"] = (15,7)
 
 print("\nPlotting Nanowire Data...")
-W = 4
-L = 70
+W = 3
+L = 30
 minPeriod = 0
 maxPeriod = 2
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
