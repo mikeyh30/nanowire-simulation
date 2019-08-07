@@ -5,13 +5,11 @@ Created on Wed Jul 31 01:42:41 2019
 
 @author: Domi
 """
-
+from tqdm import tqdm
 import kwant
 import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
-
-from tqdm import trange
 
 s_0 = np.identity(2)
 s_z = np.array([[1., 0.], [0., -1.]])
@@ -31,10 +29,10 @@ tau_zsig_y = ta.array(np.kron(s_z, s_y))
 def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True):
     def onsiteSc(site, t, B, Delta):
         if periodB == 0:
-            return (4 * t) * tau_z + B * sig_x + Delta * tau_x
+            return (4 * t) * tau_z + B * sig_z + Delta * tau_x
         else:
             theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-            return (4 * t) * tau_z + B * (sig_x*np.cos(theta) - sig_y*np.sin(theta)) + Delta * tau_x
+            return (4 * t) * tau_z + B * (sig_z*np.cos(theta) + sig_x*np.sin(theta)) + Delta * tau_x
     def onsiteNormal(site, mu, t):
         return (4 * t - mu) * tau_z
     def onsiteBarrier(site, mu, t, barrier):
@@ -78,7 +76,7 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True):
 
 ## Objects ##
 class Nanowire:
-    def __init__(self, width, length, barrierLen, periodB):
+    def __init__(self, width=5, length=20, barrierLen=1, periodB=0):
         self.width = width
         self.length = length
         self.barrierLen = barrierLen
@@ -93,7 +91,9 @@ class Nanowire:
         params = dict(
                 mu=.3, Delta=.1, alpha=.8, t=1.0, barrier = 2.
                 )
-        for i in trange(np.size(bValues)):
+        for i in tqdm(range(np.size(bValues)), 
+                      desc= "Spec for periodB = %2.1f" %(self.periodB)
+                      ):
             params["B"] = bValues[i]
             H = syst.hamiltonian_submatrix(sparse=True,  params=params)
             H = H.tocsc()
@@ -105,7 +105,7 @@ class Nanowire:
     
     def conductances(self, 
                      bValues=np.linspace(0, 0.35, 36),
-                     energies=[0.001 * i for i in range(-140, 140)]
+                     energies=[0.0005 * i for i in range(-280, 280)]
                      ):
         syst = makeNISIN(W=self.width, L=self.length, 
                          barrierLen=self.barrierLen, 
@@ -115,7 +115,9 @@ class Nanowire:
         params = dict(
                 mu=.3, Delta=.1, alpha=.8, t=1.0, barrier = 2.
                 )
-        for i in trange(np.size(energies)):
+        for i in tqdm(range(np.size(energies)), 
+                      desc= "Cond for periodB = %2.1f" %(self.periodB)
+                      ):
             cond = []
             energy = energies[i]
             for b in bValues:
@@ -123,7 +125,7 @@ class Nanowire:
                 smatrix = kwant.smatrix(syst, energy, params=params)
                 cond.append(smatrix.transmission(1, 0))
             data.append(cond)
-        
+            
         outcome = dict(B=bValues, BiasV=energies, Cond=data)
         return outcome
 
