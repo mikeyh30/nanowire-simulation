@@ -60,7 +60,8 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True):
     
         # N's
         lead = kwant.Builder(kwant.TranslationalSymmetry((-1,0)),
-                             conservation_law=-tau_z
+                             conservation_law=-tau_z,
+                             particle_hole=tau_y
                              )
         lead[(lat(0, j) for j in range(W))] = onsiteNormal
         lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
@@ -105,7 +106,7 @@ class Nanowire:
     
     def conductances(self, 
                      bValues=np.linspace(0, 0.35, 36),
-                     energies=[0.0005 * i for i in range(-280, 280)]
+                     energies=[0.0001 * i for i in range(-1200, 1200)]
                      ):
         syst = makeNISIN(W=self.width, L=self.length, 
                          barrierLen=self.barrierLen, 
