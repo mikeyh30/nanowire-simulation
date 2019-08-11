@@ -14,10 +14,10 @@ os.system("clear")
 # L = 20:       0 -> 2
 # L = 100:      0 -> 10
 # L = 500:      0 -> 50
-W = 4
-L = 70
+W = 5
+L = 100
 minPeriod = 0
-maxPeriod = .5
+maxPeriod = 2.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
 print("\nGenerating Nanowire Data (periodB = %2.1f --> %2.1f)..." 
       %(minPeriod,maxPeriod))
@@ -28,13 +28,13 @@ for i in range(np.size(periodBs)):
     
     ## Spectrum ##
     pickle.dump(nanowire.spectrum(bValues=np.linspace(0, 1, 51)),
-                open("zspec" 
+                open("tspec" 
                      + "%i.%i.%2.1f" %(W, L, periodBs[i])
                      + ".dat", "wb"))
     
     ## Conductances ##
     pickle.dump(nanowire.conductances(bValues=np.linspace(0, 1, 51)),
-                open("zcond"
+                open("tcond"
                      + "%i.%i.%2.1f" %(W, L, periodBs[i])
                      + ".dat", "wb"))
 
