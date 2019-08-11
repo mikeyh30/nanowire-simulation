@@ -123,6 +123,7 @@ dependencies:
   - sympy=1.4=py37_0
   - testpath=0.4.2=py37_0
   - tornado=6.0.3=py37he774522_0
+  - tqdm=4.32.1=py_0
   - traitlets=4.3.2=py37_0
   - urllib3=1.24.2=py37_0
   - vc=14.1=h0510ff6_4

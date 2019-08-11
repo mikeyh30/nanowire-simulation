@@ -188,17 +188,19 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True, dim=2):
 
 ## Objects ##
 class Nanowire:
-    def __init__(self, width=5, length=20, barrierLen=1, periodB=0):
+    def __init__(self, width=5, length=20, barrierLen=1, periodB=0, dim=2):
         self.width = width
         self.length = length
         self.barrierLen = barrierLen
         self.periodB = periodB
+        self.dim = dim
         
     def spectrum(self, bValues=np.linspace(0, 1.0, 101)):        
         syst = makeNISIN(W=self.width, L=self.length, 
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
-                         isWhole=False)
+                         isWhole=False,
+                         dim=self.dim)
         energies = []
         params = dict(
                 mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
@@ -222,7 +224,8 @@ class Nanowire:
         syst = makeNISIN(W=self.width, L=self.length, 
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
-                         isWhole=True)
+                         isWhole=True,
+                         dim=self.dim)
         data = []
         params = dict(
                 mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.

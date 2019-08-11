@@ -13,11 +13,10 @@ import matplotlib.pyplot as plt
 
 # L = 20:       0 -> 2
 # L = 100:      0 -> 10
-# L = 500:      0 -> 50
 plt.rcParams["figure.figsize"] = (15,7)
 
 print("\nPlotting Nanowire Data...")
-W = 5
+W = 10
 L = 100
 minPeriod = 0
 maxPeriod = 2.
