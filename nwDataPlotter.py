@@ -17,10 +17,10 @@ import matplotlib.pyplot as plt
 plt.rcParams["figure.figsize"] = (15,7)
 
 print("\nPlotting Nanowire Data...")
-W = 3
-L = 30
+W = 5
+L = 100
 minPeriod = 0
-maxPeriod = 2
+maxPeriod = 2.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
 
 for i in range(np.size(periodBs)):
@@ -28,7 +28,7 @@ for i in range(np.size(periodBs)):
     print("Plots for periodB = %2.1f" %(periodBs[i]))
     
     ## Spectrum ##
-    data = pickle.load(open("zspec" 
+    data = pickle.load(open("tspec" 
                             + "%i.%i.%2.1f" %(W, L, periodBs[i])
                             + ".dat", "rb"))
     plt.figure()
@@ -38,7 +38,7 @@ for i in range(np.size(periodBs)):
     plt.show()
     
     ## Conductances ##
-    data = pickle.load(open("zcond"
+    data = pickle.load(open("tcond"
                             + "%i.%i.%2.1f" %(W, L, periodBs[i])
                             + ".dat", "rb"))
     plt.figure()
