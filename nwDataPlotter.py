@@ -16,11 +16,13 @@ import matplotlib.pyplot as plt
 plt.rcParams["figure.figsize"] = (15,7)
 
 print("\nPlotting Nanowire Data...")
-W = 10
+W = 5
 L = 100
 minPeriod = 0
-maxPeriod = 2.
+maxPeriod = .5
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
+
+critB = []
 
 for i in range(np.size(periodBs)):
     ## Set up Nanowire Object ##
@@ -47,8 +49,21 @@ for i in range(np.size(periodBs)):
     cbar = plt.colorbar(CS)
     cbar.ax.set_ylabel("Conductance [e^2/h]")
     plt.show()
+    
+    print("Critical value = %1.2f" %(data["CritB"]))
+    critB.append(1/data["CritB"])
 
 print("\nCompleted!")
+
+critB = np.multiply(critB,1/critB[0])
+#d = np.multiply(np.add(periodBs,0.5),2)
+#d[0] = 0
+
+plt.figure()
+plt.plot(periodBs, critB)
+plt.xlabel("d")
+plt.ylabel("Critical B in Uniform/Critical B in Sinusoidal")
+plt.show()
 
 # Individual Conductance ##
 #data = pickle.load(open("conductance1.dat", "rb"))

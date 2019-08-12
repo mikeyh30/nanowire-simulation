@@ -32,7 +32,7 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True, dim=2):
     def hopX(site0, site1, t, alpha):
         return -t * tauZ + .5j * alpha * tauZsigY
     def sinuB(theta, B=0.1):
-        return sigX*np.cos(theta) - sigY*np.sin(theta)
+        return B*(sigX*np.cos(theta) - sigY*np.sin(theta))
     if dim == 1:
         def onsiteSc(site, t, B, Delta):
             if periodB == 0:
@@ -195,7 +195,9 @@ class Nanowire:
         self.periodB = periodB
         self.dim = dim
         
-    def spectrum(self, bValues=np.linspace(0, 1.0, 101)):        
+    def spectrum(self, 
+                 bValues=np.linspace(0, 1.0, 101)
+                 ):        
         syst = makeNISIN(W=self.width, L=self.length, 
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
@@ -218,7 +220,7 @@ class Nanowire:
         return outcome
     
     def conductances(self, 
-                     bValues=np.linspace(0, 0.35, 36),
+                     bValues=np.linspace(0, 1.0, 101),
                      energies=[0.001 * i for i in range(-130, 130)]
                      ):
         syst = makeNISIN(W=self.width, L=self.length, 
@@ -227,6 +229,7 @@ class Nanowire:
                          isWhole=True,
                          dim=self.dim)
         data = []
+        critB = 0
         params = dict(
                 mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
                 )
@@ -238,14 +241,44 @@ class Nanowire:
             for b in bValues:
                 params["B"] = b
                 smatrix = kwant.smatrix(syst, energy, params=params)
-                cond.append(
+                conduct = (
                         smatrix.submatrix((0, 0), (0, 0)).shape[0]  # N
                         - smatrix.transmission((0, 0), (0, 0))      # R_ee
                         + smatrix.transmission((0, 1), (0, 0)))     # R_he
+                cond.append(conduct)     # R_he
+                if energy == 0 and critB == 0:
+                    if np.abs(2 - conduct) < 0.01:
+                        critB = b
             data.append(cond)
             
-        outcome = dict(B=bValues, BiasV=energies, Cond=data)
+        outcome = dict(B=bValues, BiasV=energies, Cond=data, CritB=critB)
         return outcome
+    
+    def criticalValue(self, 
+                     bValues=np.linspace(0, 1., 101)
+                     ):
+        syst = makeNISIN(W=self.width, L=self.length, 
+                         barrierLen=self.barrierLen, 
+                         periodB=self.periodB, 
+                         isWhole=True,
+                         dim=self.dim)
+        params = dict(
+                mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
+                )
+        
+        for i in tqdm(range(np.size(bValues)), 
+                      desc= "Spec for periodB = %2.1f" %(self.periodB)
+                      ):
+            critB = bValues[i]
+            params["B"] = critB
+            smatrix = kwant.smatrix(syst, 0, params=params)
+            cond = (smatrix.submatrix((0, 0), (0, 0)).shape[0]  # N
+                    - smatrix.transmission((0, 0), (0, 0))      # R_ee
+                    + smatrix.transmission((0, 1), (0, 0)))     # R_he
+            if np.abs(2 - cond) < 0.01:
+                return critB
+            
+        return 0
 
 def main():
     pass

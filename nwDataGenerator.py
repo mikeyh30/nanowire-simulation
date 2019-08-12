@@ -12,7 +12,7 @@ import nwObjects
 os.system("clear")
 # L = 20:       0 -> 2
 # L = 100:      0 -> 10
-W = 10
+W = 5
 L = 100
 minPeriod = 0
 maxPeriod = 2.
@@ -26,13 +26,13 @@ for i in range(np.size(periodBs)):
     nanowire = nwObjects.Nanowire(width=W, length=L, periodB=periodBs[i])
     
     ## Spectrum ##
-    pickle.dump(nanowire.spectrum(bValues=np.linspace(0, 1, 51)),
+    pickle.dump(nanowire.spectrum(bValues=np.linspace(0, 1, 101)),
                 open("tspec" 
                      + "%i.%i.%2.1f" %(W, L, periodBs[i])
                      + ".dat", "wb"))
 
     ## Conductance ##
-    pickle.dump(nanowire.conductances(bValues=np.linspace(0, 1, 51)),
+    pickle.dump(nanowire.conductances(bValues=np.linspace(0, 1, 101)),
                 open("tcond"
                      + "%i.%i.%2.1f" %(W, L, periodBs[i])
                      + ".dat", "wb"))
