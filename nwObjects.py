@@ -39,7 +39,7 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True, dim=2):
                 return (2 * t) * tauZ + B * sigZ + Delta * tauX
             else:
                 theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-                return (2 * t) * tauZ + B * sigZ + Delta * tauX + sinuB(theta)
+                return (2 * t) * tauZ + Delta * tauX + sinuB(theta, B)
         def onsiteNormal(site, mu, t):
             return (2 * t - mu) * tauZ
         def onsiteBarrier(site, mu, t, barrier):
@@ -83,7 +83,7 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True, dim=2):
                     return (4 * t) * tauZ + B * sigZ + Delta * tauX
                 else:
                     theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-                    return (4 * t) * tauZ + B * sigZ + Delta * tauX + sinuB(theta)
+                    return (4 * t) * tauZ + Delta * tauX + sinuB(theta)
             def onsiteNormal(site, mu, t):
                 return (4 * t - mu) * tauZ
             def onsiteBarrier(site, mu, t, barrier):
@@ -130,7 +130,7 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True, dim=2):
                     return (6 * t) * tauZ + B * sigX + Delta * tauX
                 else:
                     theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-                    return (6 * t) * tauZ + B * sigZ + Delta * tauX + sinuB(theta)
+                    return (6 * t) * tauZ + Delta * tauX + sinuB(theta)
             def onsiteNormal(site, mu, t):
                 return (6 * t - mu) * tauZ
             def onsiteBarrier(site, mu, t, barrier):

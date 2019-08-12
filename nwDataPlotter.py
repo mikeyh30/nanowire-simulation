@@ -18,8 +18,8 @@ plt.rcParams["figure.figsize"] = (15,7)
 print("\nPlotting Nanowire Data...")
 W = 5
 L = 100
-minPeriod = 0
-maxPeriod = .5
+minPeriod = 0.
+maxPeriod = 2.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
 
 critB = []
