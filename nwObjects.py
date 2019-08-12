@@ -31,15 +31,15 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True, dim=2):
     ## Define site Hopping and functions ##
     def hopX(site0, site1, t, alpha):
         return -t * tauZ + .5j * alpha * tauZsigY
-    def sinuB(theta, B=0.1):
-        return B*(sigX*np.cos(theta) - sigY*np.sin(theta))
+    def sinuB(theta, M=0.05):
+        return M*(sigY*np.cos(theta) + sigX*np.sin(theta))
     if dim == 1:
         def onsiteSc(site, t, B, Delta):
             if periodB == 0:
-                return (2 * t) * tauZ + B * sigZ + Delta * tauX
+                return (2 * t) * tauX + B * sigZ + Delta * tauX
             else:
                 theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-                return (2 * t) * tauZ + Delta * tauX + sinuB(theta, B)
+                return (2 * t) * tauZ + B * sigX + Delta * tauX + sinuB(theta)
         def onsiteNormal(site, mu, t):
             return (2 * t - mu) * tauZ
         def onsiteBarrier(site, mu, t, barrier):
@@ -80,10 +80,10 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True, dim=2):
         if dim == 2:
             def onsiteSc(site, t, B, Delta):
                 if periodB == 0:
-                    return (4 * t) * tauZ + B * sigZ + Delta * tauX
+                    return (4 * t) * tauZ + B * sigX + Delta * tauX
                 else:
                     theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-                    return (4 * t) * tauZ + Delta * tauX + sinuB(theta)
+                    return (4 * t) * tauZ + B * sigX + Delta * tauX + sinuB(theta)
             def onsiteNormal(site, mu, t):
                 return (4 * t - mu) * tauZ
             def onsiteBarrier(site, mu, t, barrier):
@@ -130,7 +130,7 @@ def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True, dim=2):
                     return (6 * t) * tauZ + B * sigX + Delta * tauX
                 else:
                     theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-                    return (6 * t) * tauZ + Delta * tauX + sinuB(theta)
+                    return (6 * t) * tauZ + B * sigX + Delta * tauX + sinuB(theta)
             def onsiteNormal(site, mu, t):
                 return (6 * t - mu) * tauZ
             def onsiteBarrier(site, mu, t, barrier):
@@ -204,19 +204,24 @@ class Nanowire:
                          isWhole=False,
                          dim=self.dim)
         energies = []
+        critB = 0
         params = dict(
                 mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
                 )
         for i in tqdm(range(np.size(bValues)), 
                       desc= "Spec for periodB = %2.1f" %(self.periodB)
                       ):
-            params["B"] = bValues[i]
+            b = bValues[i]
+            params["B"] = b
             H = syst.hamiltonian_submatrix(sparse=True,  params=params)
             H = H.tocsc()
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
-            energies.append(np.sort(eigs[0]))
+            eigs = np.sort(eigs[0])
+            energies.append(eigs)
+            if critB==0 and np.abs(eigs[10] - eigs[9])/2 < 1e-3:
+                critB = b
             
-        outcome = dict(B=bValues, E=energies)
+        outcome = dict(B=bValues, E=energies, CritB=critB)
         return outcome
     
     def conductances(self, 
@@ -246,9 +251,8 @@ class Nanowire:
                         - smatrix.transmission((0, 0), (0, 0))      # R_ee
                         + smatrix.transmission((0, 1), (0, 0)))     # R_he
                 cond.append(conduct)     # R_he
-                if energy == 0 and critB == 0:
-                    if np.abs(2 - conduct) < 0.01:
-                        critB = b
+                if energy == 0 and critB == 0 and np.abs(2 - conduct) < 0.01:
+                    critB = b
             data.append(cond)
             
         outcome = dict(B=bValues, BiasV=energies, Cond=data, CritB=critB)
