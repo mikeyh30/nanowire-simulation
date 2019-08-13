@@ -27,173 +27,77 @@ tauZsigY = ta.array(np.kron(sZ, sY))
 tauYsigY = ta.array(np.kron(sY, sY))
 
 ## Functions ##
-def makeNISIN(W=5, L=20, barrierLen=1, periodB=.5, isWhole=True, dim=2):
+def makeNISIN(width=5, length=20, barrierLen=1, 
+              periodB=.5, M=0.1,
+              isWhole=True
+              ):
     ## Define site Hopping and functions ##
     def hopX(site0, site1, t, alpha):
         return -t * tauZ + .5j * alpha * tauZsigY
+    def hopY(site0, site1, t, alpha):
+        return -t * tauZ - .5j * alpha * tauZsigX
+        
     def sinuB(theta, M=0.05):
         return M*(sigY*np.cos(theta) + sigX*np.sin(theta))
-    if dim == 1:
-        def onsiteSc(site, t, B, Delta):
-            if periodB == 0:
-                return (2 * t) * tauX + B * sigZ + Delta * tauX
-            else:
-                theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-                return (2 * t) * tauZ + B * sigX + Delta * tauX + sinuB(theta)
-        def onsiteNormal(site, mu, t):
-            return (2 * t - mu) * tauZ
-        def onsiteBarrier(site, mu, t, barrier):
-            return (2 * t - mu + barrier) * tauZ
-        
-        ## Create the system and leads ##
-        # On each site, electron and hole orbitals.
-        lat = kwant.lattice.chain(norbs=4) 
-        syst = kwant.Builder()
-            
-        # S
-        syst[(lat(i) for i in range(1,L-1))] = onsiteSc
-            
-        if isWhole:
-            # I's
-            syst[(lat(i) for i in range(barrierLen))] = onsiteBarrier
-            syst[(lat(i) for i in range(L-barrierLen, L))] = onsiteBarrier
-            
-            # Hopping:
-            syst[lat.neighbors()] = hopX
-        
-            # N's
-            lead = kwant.Builder(kwant.TranslationalSymmetry(*lat.prim_vecs),
-                                 conservation_law=-tauZ,
-                                 particle_hole=tauYsigY
-                                 )
-            lead[(lat(0))] = onsiteNormal
-            lead[lat.neighbors()] = hopX
-            
-            syst.attach_lead(lead)
-            syst.attach_lead(lead.reversed())
+   
+    def onsiteSc(site, muSc, t, B, Delta):
+        if periodB == 0:
+            return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX
         else:
-            # Hopping:
-            syst[lat.neighbors()] = hopX
-    elif (dim == 2 or dim == 3):
-        def hopY(site0, site1, t, alpha):
-            return -t * tauZ - .5j * alpha * tauZsigX
-        if dim == 2:
-            def onsiteSc(site, t, B, Delta):
-                if periodB == 0:
-                    return (4 * t) * tauZ + B * sigX + Delta * tauX
-                else:
-                    theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-                    return (4 * t) * tauZ + B * sigX + Delta * tauX + sinuB(theta)
-            def onsiteNormal(site, mu, t):
-                return (4 * t - mu) * tauZ
-            def onsiteBarrier(site, mu, t, barrier):
-                return (4 * t - mu + barrier) * tauZ
-            
-            ## Create the system and leads ##
-            # On each site, electron and hole orbitals.
-            lat = kwant.lattice.square(norbs=4) 
-            syst = kwant.Builder()
-                
-            # S
-            syst[(lat(i, j) for i in range(1,L-1) for j in range(W))] = onsiteSc
-                
-            if isWhole:
-                # I's
-                syst[(lat(i, j) for i in range(barrierLen) for j in range(W))] = onsiteBarrier
-                syst[(lat(i, j) for i in range(L-barrierLen, L)for j in range(W))] = onsiteBarrier
-                
-                # Hopping:
-                syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
-                syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
-            
-                # N's
-                lead = kwant.Builder(kwant.TranslationalSymmetry((-1,0)),
-                                     conservation_law=-tauZ,
-                                     particle_hole=tauYsigY
-                                     )
-                lead[(lat(0, j) for j in range(W))] = onsiteNormal
-                lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
-                lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
-                
-                syst.attach_lead(lead)
-                syst.attach_lead(lead.reversed())
-            else:
-                # Hopping:
-                syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
-                syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
-                
-        else:
-            def hopZ(site0, site1, t, alpha):
-                return -t * tauZ
-            def onsiteSc(site, t, B, Delta):
-                if periodB == 0:
-                    return (6 * t) * tauZ + B * sigX + Delta * tauX
-                else:
-                    theta = 2*np.pi*periodB*(site.pos[0] - barrierLen)/(L - 1 - 2*barrierLen)
-                    return (6 * t) * tauZ + B * sigX + Delta * tauX + sinuB(theta)
-            def onsiteNormal(site, mu, t):
-                return (6 * t - mu) * tauZ
-            def onsiteBarrier(site, mu, t, barrier):
-                return (6 * t - mu + barrier) * tauZ
-            
-            def wireShape(pos):
-                x, y, z = pos
-                return 1 <= x < L-1 and 0 <= y**2 + z**2 < W
-            def barrier0Shape(pos):
-                x, y, z = pos
-                return x == 0 and 0 <= y**2 + z**2 < W
-            def barrier1Shape(pos):
-                x, y, z = pos
-                return x == L-1 and 0 <= y**2 + z**2 < W
-            
-             ## Create the system and leads ##
-            # On each site, electron and hole orbitals.
-            lat = kwant.lattice.cubic(norbs=4) 
-            syst = kwant.Builder()
-            
-            # S
-            syst[lat.shape(wireShape, (0, 0, 0))] = onsiteSc
-            
-            if isWhole:
-                # I's
-                syst[lat.shape(barrier0Shape, (0, 0, 0))] = onsiteBarrier
-                syst[lat.shape(barrier1Shape, (L-1, 0, 0))] = onsiteBarrier
-                
-                # Hopping:
-                syst[kwant.builder.HoppingKind((1, 0, 0), lat, lat)] = hopX
-                syst[kwant.builder.HoppingKind((0, 1, 0), lat, lat)] = hopY
-                syst[kwant.builder.HoppingKind((0, 0, 1), lat, lat)] = hopZ
-            
-                # N's
-                lead = kwant.Builder(kwant.TranslationalSymmetry((-1, 0, 0)),
-                                     conservation_law=-tauZ,
-                                     particle_hole=tauYsigY
-                                     )
-                lead[lat.shape(barrier0Shape, (0, 0, 0))] = onsiteNormal
-                lead[kwant.builder.HoppingKind((1, 0, 0), lat, lat)] = hopX
-                lead[kwant.builder.HoppingKind((0, 1, 0), lat, lat)] = hopY
-                lead[kwant.builder.HoppingKind((0, 0, 1), lat, lat)] = hopZ
-            
-                syst.attach_lead(lead)
-                syst.attach_lead(lead.reversed())
-            else:
-                syst[kwant.builder.HoppingKind((1, 0, 0), lat, lat)] = hopX
-                syst[kwant.builder.HoppingKind((0, 1, 0), lat, lat)] = hopY
-                syst[kwant.builder.HoppingKind((0, 0, 1), lat, lat)] = hopZ
+            theta = 2*np.pi*periodB* \
+                (site.pos[0] - barrierLen)/(length - 1 - 2*barrierLen)
+            return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX \
+                    + sinuB(theta)
+    def onsiteNormal(site, mu, t):
+        return (4 * t - mu) * tauZ
+    def onsiteBarrier(site, mu, t, barrier):
+        return (4 * t - mu + barrier) * tauZ
+    
+    # On each site, electron and hole orbitals.
+    lat = kwant.lattice.square(norbs=4) 
+    syst = kwant.Builder()
+        
+    # S
+    syst[(lat(i, j) for i in range(1,length-1) for j in range(width))] \
+        = onsiteSc
+        
+    if isWhole:
+        # I's
+        syst[(lat(i, j) for i in range(barrierLen) for j in range(width))] = onsiteBarrier
+        syst[(lat(i, j) for i in range(length-barrierLen, length)for j in range(width))] = onsiteBarrier
+        
+        # Hopping:
+        syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
+        syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
+    
+        # N's
+        lead = kwant.Builder(kwant.TranslationalSymmetry((-1,0)),
+                             conservation_law=-tauZ,
+                             particle_hole=tauYsigY
+                             )
+        lead[(lat(0, j) for j in range(width))] = onsiteNormal
+        lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
+        lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
+        
+        syst.attach_lead(lead)
+        syst.attach_lead(lead.reversed())
     else:
-         print("Wrong dimensions")
-         pass
+        # Hopping:
+        syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
+        syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
     
     return syst.finalized()
 
 ## Objects ##
 class Nanowire:
-    def __init__(self, width=5, length=20, barrierLen=1, periodB=0, dim=2):
+    def __init__(self, width=5, length=20, mu=0.0, barrierLen=1, periodB=0, dim=2, M=0.1):
         self.width = width
         self.length = length
+        self.mu = mu
         self.barrierLen = barrierLen
         self.periodB = periodB
         self.dim = dim
+        self.M = M
         
     def spectrum(self, 
                  bValues=np.linspace(0, 1.0, 101)
@@ -202,7 +106,7 @@ class Nanowire:
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
                          isWhole=False,
-                         dim=self.dim)
+                         M=self.M)
         energies = []
         critB = 0
         params = dict(
@@ -232,7 +136,7 @@ class Nanowire:
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
                          isWhole=True,
-                         dim=self.dim)
+                         M=self.M)
         data = []
         critB = 0
         params = dict(
