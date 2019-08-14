@@ -16,22 +16,20 @@ os.system("clear")
 W = 5
 L = 100
 minPeriod = 0
-maxPeriod = 4.
+maxPeriod = 2.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
-M = 0.07
+M = 0.1
 
 print("\nGenerating Nanowire Data (periodB = %2.1f --> %2.1f)..." 
       %(minPeriod,maxPeriod))
 
 for i in range(np.size(periodBs)):
     ## Set up Nanowire Object ##
-    nanowire = nwObjects.Nanowire(width=W, length=L, periodB=periodBs[i], M=M)
-    data = nanowire.spectrum(bValues=np.linspace(0, .5, 101))
+    nanowire = nwObjects.Nanowire(width=W, length=L, periodB=periodBs[i], M=M) 
     
-    
-    ## Spectrum ##
-    pickle.dump(data,
-                open("spec" 
+    ## Phase ##
+    pickle.dump(nanowire.phaseTransition(),
+                open("phas" 
                      + "%i.%i.%2.1f.%1.2f" %(W, L, periodBs[i], M)
                      + ".dat", "wb"))
     

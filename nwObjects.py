@@ -109,9 +109,7 @@ class Nanowire:
                          M=self.M)
         energies = []
         critB = 0
-        params = dict(
-                muSc=.0, mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
-                )
+        params = dict(muSc=.0, mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(bValues)), 
                       desc= "Spec for periodB = %2.1f" %(self.periodB)
                       ):
@@ -139,9 +137,7 @@ class Nanowire:
                          M=self.M)
         data = []
         critB = 0
-        params = dict(
-                muSc=.0, mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
-                )
+        params = dict(muSc=.0, mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(energies)), 
                       desc= "Cond for periodB = %2.1f" %(self.periodB)
                       ):
@@ -162,31 +158,37 @@ class Nanowire:
         outcome = dict(B=bValues, BiasV=energies, Cond=data, CritB=critB)
         return outcome
     
-    def phaseTransition(self, 
-                     bValues=np.linspace(0, 1., 101)
+    def phaseTransition(self,
+                        bValues=np.linspace(0, .5, 101),
+                        muValues=np.linspace(0, .5, 101)
                      ):
         syst = makeNISIN(width=self.width, length=self.length, 
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
                          isWhole=True,
                          M=self.M)
-        params = dict(
-                mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
-                )
-        
-        for i in tqdm(range(np.size(bValues)), 
+        criticalPoints = muValues
+        params = dict(mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.)
+        for i in tqdm(range(np.size(muValues)),
                       desc= "Spec for periodB = %2.1f" %(self.periodB)
-                      ):
-            critB = bValues[i]
-            params["B"] = critB
-            smatrix = kwant.smatrix(syst, 0, params=params)
-            cond = (smatrix.submatrix((0, 0), (0, 0)).shape[0]  # N
-                    - smatrix.transmission((0, 0), (0, 0))      # R_ee
-                    + smatrix.transmission((0, 1), (0, 0)))     # R_he
-            if np.abs(2 - cond) < 0.01:
-                return critB
+                          ):
+            critB = 0
+            params["muSc"] = muValues[i]
+            for b in bValues:
+                params["B"] = b
+                H = syst.hamiltonian_submatrix(sparse=True,  params=params)
+                H = H.tocsc()
+                eigs = scipy.sparse.linalg.eigsh(H, k=2, sigma=0)
+                eigs = np.sort(eigs[0])
+                if critB==0 and np.abs(eigs[0] - eigs[1])/2 < 1e-3:
+                    critB = b
+                    break
+            else:
+                continue
+            criticalPoints[i] = critB
             
-        return 0
+        outcome = dict(MuSc=muValues, CritB=criticalPoints)
+        return outcome
 
 def main():
     pass
