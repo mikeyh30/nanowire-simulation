@@ -38,7 +38,7 @@ def makeNISIN(width=5, length=20, barrierLen=1,
         return -t * tauZ - .5j * alpha * tauZsigX
         
     def sinuB(theta, M=0.05):
-        return M*(sigY*np.cos(theta) + sigX*np.sin(theta))
+        return M*(sigX*np.cos(theta) - sigY*np.sin(theta))
    
     def onsiteSc(site, muSc, t, B, Delta):
         if periodB == 0:
@@ -102,7 +102,7 @@ class Nanowire:
     def spectrum(self, 
                  bValues=np.linspace(0, 1.0, 101)
                  ):        
-        syst = makeNISIN(W=self.width, L=self.length, 
+        syst = makeNISIN(width=self.width, length=self.length, 
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
                          isWhole=False,
@@ -110,7 +110,7 @@ class Nanowire:
         energies = []
         critB = 0
         params = dict(
-                mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
+                muSc=.0, mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
                 )
         for i in tqdm(range(np.size(bValues)), 
                       desc= "Spec for periodB = %2.1f" %(self.periodB)
@@ -132,7 +132,7 @@ class Nanowire:
                      bValues=np.linspace(0, 1.0, 101),
                      energies=[0.001 * i for i in range(-130, 130)]
                      ):
-        syst = makeNISIN(W=self.width, L=self.length, 
+        syst = makeNISIN(width=self.width, length=self.length, 
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
                          isWhole=True,
@@ -140,7 +140,7 @@ class Nanowire:
         data = []
         critB = 0
         params = dict(
-                mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
+                muSc=.0, mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
                 )
         for i in tqdm(range(np.size(energies)), 
                       desc= "Cond for periodB = %2.1f" %(self.periodB)
@@ -162,14 +162,14 @@ class Nanowire:
         outcome = dict(B=bValues, BiasV=energies, Cond=data, CritB=critB)
         return outcome
     
-    def criticalValue(self, 
+    def phaseTransition(self, 
                      bValues=np.linspace(0, 1., 101)
                      ):
-        syst = makeNISIN(W=self.width, L=self.length, 
+        syst = makeNISIN(width=self.width, length=self.length, 
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
                          isWhole=True,
-                         dim=self.dim)
+                         M=self.M)
         params = dict(
                 mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.
                 )

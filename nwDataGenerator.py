@@ -15,10 +15,10 @@ os.system("clear")
 # L = 100:      0 -> 10
 W = 5
 L = 100
-minPeriod = 0
-maxPeriod = 4.
+minPeriod = 12.5
+maxPeriod = 16.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
-M = 0.07
+M = 0.1
 
 print("\nGenerating Nanowire Data (periodB = %2.1f --> %2.1f)..." 
       %(minPeriod,maxPeriod))
