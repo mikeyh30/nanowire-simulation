@@ -159,13 +159,13 @@ class Nanowire:
         return outcome
     
     def phaseTransition(self,
-                        bValues=np.linspace(0, .5, 101),
-                        muValues=np.linspace(0, .5, 101)
+                        bValues=np.linspace(0, .5, 51),
+                        muValues=np.linspace(0, .5, 51)
                      ):
         syst = makeNISIN(width=self.width, length=self.length, 
                          barrierLen=self.barrierLen, 
                          periodB=self.periodB, 
-                         isWhole=True,
+                         isWhole=False,
                          M=self.M)
         criticalPoints = muValues
         params = dict(mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.)
