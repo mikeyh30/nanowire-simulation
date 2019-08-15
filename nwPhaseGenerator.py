@@ -16,7 +16,7 @@ os.system("clear")
 W = 5
 L = 100
 minPeriod = 0
-maxPeriod = .5
+maxPeriod = 0.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
 M = 0.1
 

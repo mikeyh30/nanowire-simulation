@@ -11,12 +11,15 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
+plt.rcParams["figure.figsize"] = (15,7)
+
+print("\nPlotting Nanowire Phase transitions...")
 # L = 20:       0 -> 2
 # L = 100:      0 -> 10
 W = 5
 L = 100
 minPeriod = 0
-maxPeriod = 2.
+maxPeriod = 0.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
 M = 0.1
 

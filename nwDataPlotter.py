@@ -19,16 +19,15 @@ print("\nPlotting Nanowire Data...")
 W = 5
 L = 100
 minPeriod = 0.
-maxPeriod = 9.5
+maxPeriod = 0.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
-periodBs = np.concatenate((periodBs,np.arange(10,101,10)),axis=1)
-M = 0.07
+#periodBs = np.concatenate((periodBs,np.arange(10,101,10)),axis=1)
+M = 0.1
 
-critB0 = []
+#critB0 = []
 #critB1 = []
 
 for i in range(np.size(periodBs)):
-    ## Set up Nanowire Object ##
     print("Plots for periodB = %2.1f" %(periodBs[i]))
     
     ## Spectrum ##
@@ -41,8 +40,8 @@ for i in range(np.size(periodBs)):
     plt.ylabel("Energies [t]")
     plt.show()
     
-    print("Critical value = %1.2f" %(data["CritB"]))
-    critB0.append(data["CritB"])
+#    print("Critical value = %1.2f" %(data["CritB"]))
+#    critB0.append(data["CritB"])
     
     ## Conductances ##
     data = pickle.load(open("tcond"
@@ -58,21 +57,20 @@ for i in range(np.size(periodBs)):
     
 #    print("Critical value = %1.2f" %(data["CritB"]))
 #    critB1.append(data["CritB"])
-
 print("\nCompleted!")
 
-critB0 = np.multiply(critB0,1/critB0[0])
+#critB0 = np.multiply(critB0,1/critB0[0])
 #critB1 = np.multiply(critB1,1/critB1[0])
 
-plt.figure()
-plt.plot(periodBs, critB0, 'b-', label="Spectrum")
-#plt.plot(periodBs, critB1, 'r-', label="Conductance")
-plt.legend()
-plt.xlabel("d")
-plt.ylabel("Critical Point with Sinusoidal/Normal Critical Point")
-plt.show()
+#plt.figure()
+#plt.plot(periodBs, critB0, 'b-', label="Spectrum")
+##plt.plot(periodBs, critB1, 'r-', label="Conductance")
+#plt.legend()
+#plt.xlabel("d")
+#plt.ylabel("Critical Point with Sinusoidal/Normal Critical Point")
+#plt.show()
 
-# Individual Conductance ##
+## Individual Conductance ##
 #data = pickle.load(open("conductance1.dat", "rb"))
 #plt.figure()
 #plt.plot(data["BiasV"], np.transpose(data["Cond"])[38])
