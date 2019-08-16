@@ -188,6 +188,42 @@ class Nanowire:
             
         outcome = dict(MuSc=muValues, CritB=criticalPoints)
         return outcome
+    
+    def phaseAid(self, 
+                 bValues=np.linspace(.0, .3, 61),
+                 muValues=np.linspace(.2, .5, 61)
+                 ):
+        syst = makeNISIN(width=self.width, length=self.length, 
+                         barrierLen=self.barrierLen, 
+                         periodB=self.periodB, 
+                         isWhole=False,
+                         M=self.M)
+        energies0 = []
+        energies1 = []
+        params = dict(muSc=muValues[0], mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
+        for i in tqdm(range(np.size(bValues)), 
+                      desc= "Spec for periodB = %2.1f" %(self.periodB)
+                      ):
+            b = bValues[i]
+            params["B"] = b
+            H = syst.hamiltonian_submatrix(sparse=True,  params=params)
+            H = H.tocsc()
+            eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
+            energies0.append(np.sort(eigs[0]))
+            
+        for i in tqdm(range(np.size(muValues)), 
+                      desc= "Spec for periodB = %2.1f" %(self.periodB)
+                      ):
+            mu = muValues[i]
+            params["muSc"] = mu
+            H = syst.hamiltonian_submatrix(sparse=True,  params=params)
+            H = H.tocsc()
+            eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
+            energies1.append(np.sort(eigs[0]))
+
+            
+        outcome = dict(B=bValues, MuSc=muValues, Eb=energies0, Em=energies1)
+        return outcome
 
 def main():
     pass
