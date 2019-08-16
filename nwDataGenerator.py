@@ -16,7 +16,7 @@ os.system("clear")
 W = 5
 L = 100
 minPeriod = 0.
-maxPeriod = 0.
+maxPeriod = 10.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
 M = 0.1
 
@@ -28,7 +28,7 @@ for i in range(np.size(periodBs)):
     nanowire = nwObjects.Nanowire(width=W, length=L, periodB=periodBs[i], M=M)
     
     ## Spectrum ##
-    pickle.dump(nanowire.spectrum(bValues=np.linspace(0, 1, 101)),
+    pickle.dump(nanowire.spectrum(bValues=np.linspace(0, 1, 501)),
                 open("spec" 
                      + "%i.%i.%2.1f.%1.2f" %(W, L, periodBs[i], M)
                      + ".dat", "wb"))

@@ -19,19 +19,19 @@ print("\nPlotting Nanowire Data...")
 W = 5
 L = 100
 minPeriod = 0.
-maxPeriod = 0.
+maxPeriod = 10.
 periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
 #periodBs = np.concatenate((periodBs,np.arange(10,101,10)),axis=1)
-M = 0.1
+M = 0.05
 
 #critB0 = []
 #critB1 = []
 
 for i in range(np.size(periodBs)):
-    print("Plots for periodB = %2.1f" %(periodBs[i]))
+    print("\nPlot for periodB = %2.1f" %(periodBs[i]))
     
     ## Spectrum ##
-    data = pickle.load(open("tspec" 
+    data = pickle.load(open("spec" 
                             + "%i.%i.%2.1f.%1.2f" %(W, L, periodBs[i], M)
                             + ".dat", "rb"))
     plt.figure()
@@ -40,11 +40,11 @@ for i in range(np.size(periodBs)):
     plt.ylabel("Energies [t]")
     plt.show()
     
-#    print("Critical value = %1.2f" %(data["CritB"]))
+    print("Critical value = %1.2f" %(data["CritB"]))
 #    critB0.append(data["CritB"])
     
     ## Conductances ##
-    data = pickle.load(open("tcond"
+    data = pickle.load(open("cond"
                             + "%i.%i.%2.1f.%1.2f" %(W, L, periodBs[i], M)
                             + ".dat", "rb"))
     plt.figure()
@@ -55,7 +55,7 @@ for i in range(np.size(periodBs)):
     cbar.ax.set_ylabel("Conductance [e^2/h]")
     plt.show()
     
-#    print("Critical value = %1.2f" %(data["CritB"]))
+    print("Critical value = %1.2f" %(data["CritB"]))
 #    critB1.append(data["CritB"])
 print("\nCompleted!")
 

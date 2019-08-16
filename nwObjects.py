@@ -37,8 +37,8 @@ def makeNISIN(width=5, length=20, barrierLen=1,
     def hopY(site0, site1, t, alpha):
         return -t * tauZ - .5j * alpha * tauZsigX
         
-    def sinuB(theta, M=0.05):
-        return M*(sigY*np.cos(theta) + sigX*np.sin(theta))
+    def sinuB(theta):
+        return sigY*np.cos(theta) + sigX*np.sin(theta)
    
     def onsiteSc(site, muSc, t, B, Delta):
         if periodB == 0:
@@ -47,7 +47,7 @@ def makeNISIN(width=5, length=20, barrierLen=1,
             theta = 2*np.pi*periodB* \
                 (site.pos[0] - barrierLen)/(length - 1 - 2*barrierLen)
             return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX \
-                    + sinuB(theta)
+                    + M*sinuB(theta)
     def onsiteNormal(site, mu, t):
         return (4 * t - mu) * tauZ
     def onsiteBarrier(site, mu, t, barrier):
@@ -100,7 +100,7 @@ class Nanowire:
         self.M = M
         
     def spectrum(self, 
-                 bValues=np.linspace(0, 1.0, 101)
+                 bValues=np.linspace(0, 1.0, 201)
                  ):        
         syst = makeNISIN(width=self.width, length=self.length, 
                          barrierLen=self.barrierLen, 
@@ -109,7 +109,7 @@ class Nanowire:
                          M=self.M)
         energies = []
         critB = 0
-        params = dict(muSc=0.2, mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
+        params = dict(muSc=0., mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(bValues)), 
                       desc= "Spec for periodB = %2.1f" %(self.periodB)
                       ):
@@ -127,8 +127,8 @@ class Nanowire:
         return outcome
     
     def conductances(self, 
-                     bValues=np.linspace(0, 1.0, 101),
-                     energies=[0.001 * i for i in range(-130, 130)]
+                     bValues=np.linspace(0, 1.0, 201),
+                     energies=[0.001 * i for i in range(-120, 120)]
                      ):
         syst = makeNISIN(width=self.width, length=self.length, 
                          barrierLen=self.barrierLen, 
@@ -137,7 +137,7 @@ class Nanowire:
                          M=self.M)
         data = []
         critB = 0
-        params = dict(muSc=.0, mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
+        params = dict(muSc=0., mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(energies)), 
                       desc= "Cond for periodB = %2.1f" %(self.periodB)
                       ):
@@ -159,8 +159,8 @@ class Nanowire:
         return outcome
     
     def phaseTransition(self,
-                        bValues=np.linspace(0, 1.0, 101),
-                        muValues=np.linspace(0, 2., 21)
+                        bValues=np.linspace(0, 1., 501),
+                        muValues=np.linspace(0, .5, 51)
                      ):
         syst = makeNISIN(width=self.width, length=self.length, 
                          barrierLen=self.barrierLen, 
@@ -172,7 +172,6 @@ class Nanowire:
         for i in tqdm(range(np.size(muValues)),
                       desc="Phase for periodB = %2.1f" %(self.periodB)
                       ):
-            
             params["muSc"] = muValues[i]
             for b in bValues:
                 params["B"] = b
@@ -182,6 +181,7 @@ class Nanowire:
                 eigs = np.sort(eigs[0])
                 if np.abs(eigs[9] - eigs[10])/2 < 1e-3:
                     criticalPoints.append(b)
+#                    print("mu = %1.2f, b = %1.2f" %(muValues[i], b))
                     break
             else:
                 continue
