@@ -11,41 +11,34 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
-# L = 20:       0 -> 2
-# L = 100:      0 -> 10
 plt.rcParams["figure.figsize"] = (15,7)
 
 print("\nPlotting Nanowire Data...")
 W = 5
-L = 100
-minPeriod = 0.
-maxPeriod = 10.
-periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
-#periodBs = np.concatenate((periodBs,np.arange(10,101,10)),axis=1)
+minN = 5
+maxN = 25
+Ns = np.arange(minN,maxN+1,5)
 M = 0.05
+added = False
 
-#critB0 = []
-#critB1 = []
-
-for i in range(np.size(periodBs)):
-    print("\nPlot for periodB = %2.1f" %(periodBs[i]))
-    
+for i in range(np.size(Ns)):
+    print("\nPlot for noSections = %i" %(Ns[i]))
+    print("\nSpectrum")
     ## Spectrum ##
     data = pickle.load(open("spec" 
-                            + "%i.%i.%2.1f.%1.2f" %(W, L, periodBs[i], M)
+                            + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                             + ".dat", "rb"))
     plt.figure()
     plt.plot(data["B"], data["E"])
     plt.xlabel("B")
     plt.ylabel("Energies [t]")
     plt.show()
-    
     print("Critical value = %1.2f" %(data["CritB"]))
-#    critB0.append(data["CritB"])
     
+    print("\nConductance")
     ## Conductances ##
-    data = pickle.load(open("cond"
-                            + "%i.%i.%2.1f.%1.2f" %(W, L, periodBs[i], M)
+    data = pickle.load(open("cond" 
+                            + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                             + ".dat", "rb"))
     plt.figure()
     CS = plt.contourf(data["B"], data["BiasV"], data["Cond"], 100, cmap="viridis")
@@ -54,26 +47,6 @@ for i in range(np.size(periodBs)):
     cbar = plt.colorbar(CS)
     cbar.ax.set_ylabel("Conductance [e^2/h]")
     plt.show()
-    
     print("Critical value = %1.2f" %(data["CritB"]))
-#    critB1.append(data["CritB"])
+
 print("\nCompleted!")
-
-#critB0 = np.multiply(critB0,1/critB0[0])
-#critB1 = np.multiply(critB1,1/critB1[0])
-
-#plt.figure()
-#plt.plot(periodBs, critB0, 'b-', label="Spectrum")
-##plt.plot(periodBs, critB1, 'r-', label="Conductance")
-#plt.legend()
-#plt.xlabel("d")
-#plt.ylabel("Critical Point with Sinusoidal/Normal Critical Point")
-#plt.show()
-
-## Individual Conductance ##
-#data = pickle.load(open("conductance1.dat", "rb"))
-#plt.figure()
-#plt.plot(data["BiasV"], np.transpose(data["Cond"])[38])
-#plt.xlabel("Bias V [t]")
-#plt.ylabel("Conductance [e^2/h]")
-#plt.show()

@@ -11,32 +11,30 @@ import pickle
 import nwObjects
 os.system("clear")
 
-# L = 20:       0 -> 2
-# L = 100:      0 -> 10
 W = 5
-L = 100
-minPeriod = 0.
-maxPeriod = 10.
-periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
-M = 0.1
+minN = 5
+maxN = 25
+Ns = np.arange(minN,maxN+1,5)
+M = 0.05
+added = False
 
-print("\nGenerating Nanowire Data (periodB = %2.1f --> %2.1f)..." 
-      %(minPeriod,maxPeriod))
+print("\nGenerating Nanowire Data (noSections = %i --> %i)..." 
+      %(minN,maxN))
 
-for i in range(np.size(periodBs)):
+for i in range(np.size(Ns)):
     ## Set up Nanowire Object ##
-    nanowire = nwObjects.Nanowire(width=W, length=L, periodB=periodBs[i], M=M)
+    nanowire = nwObjects.Nanowire(width=W, noSections=Ns[i], M=M, addedSinu=added)
     
     ## Spectrum ##
-    pickle.dump(nanowire.spectrum(bValues=np.linspace(0, 1, 501)),
+    pickle.dump(nanowire.spectrum(bValues=np.linspace(0, 1, 201)),
                 open("spec" 
-                     + "%i.%i.%2.1f.%1.2f" %(W, L, periodBs[i], M)
+                     + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                      + ".dat", "wb"))
 
     ## Conductance ##
-    pickle.dump(nanowire.conductances(bValues=np.linspace(0, 1, 101)),
-                open("cond"
-                     + "%i.%i.%2.1f.%1.2f" %(W, L, periodBs[i], M)
+    pickle.dump(nanowire.conductances(bValues=np.linspace(0, 1, 201)),
+                open("cond" 
+                     + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                      + ".dat", "wb"))
     
 print("\nCompleted!")

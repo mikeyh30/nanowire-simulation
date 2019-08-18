@@ -27,10 +27,11 @@ tauZsigY = ta.array(np.kron(sZ, sY))
 tauYsigY = ta.array(np.kron(sY, sY))
 
 ## Functions ##
-def makeNISIN(width=5, length=20, barrierLen=1, 
-              periodB=.5, M=0.1,
-              isWhole=True
+def makeNISIN(width=5, noSections=5, barrierLen=1, M=0.05,
+              addedSinu=False, isWhole=True
               ):
+    length = 20*noSections + 2*barrierLen
+    
     ## Define site Hopping and functions ##
     def hopX(site0, site1, t, alpha):
         return -t * tauZ + .5j * alpha * tauZsigY
@@ -41,13 +42,12 @@ def makeNISIN(width=5, length=20, barrierLen=1,
         return sigY*np.cos(theta) + sigX*np.sin(theta)
    
     def onsiteSc(site, muSc, t, B, Delta):
-        if periodB == 0:
-            return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX
-        else:
-            theta = 2*np.pi*periodB* \
-                (site.pos[0] - barrierLen)/(length - 1 - 2*barrierLen)
+        if addedSinu: # Note 1 magnets per 20 sites - fixed distance of Magnets
+            theta = 2 * np.pi * np.mod(site.pos[0] - 1,40)/40
             return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX \
                     + M*sinuB(theta)
+        else:
+            return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX
     def onsiteNormal(site, mu, t):
         return (4 * t - mu) * tauZ
     def onsiteBarrier(site, mu, t, barrier):
@@ -90,28 +90,27 @@ def makeNISIN(width=5, length=20, barrierLen=1,
 
 ## Objects ##
 class Nanowire:
-    def __init__(self, width=5, length=20, mu=0.0, barrierLen=1, periodB=0, dim=2, M=0.1):
+    def __init__(self, width=5, noSections=5, barrierLen=1, M=0.05,
+                 addedSinu=False, dim=2):
         self.width = width
-        self.length = length
-        self.mu = mu
+        self.noSections = noSections
         self.barrierLen = barrierLen
-        self.periodB = periodB
+        self.addedSinu = addedSinu
         self.dim = dim
         self.M = M
         
     def spectrum(self, 
                  bValues=np.linspace(0, 1.0, 201)
                  ):        
-        syst = makeNISIN(width=self.width, length=self.length, 
-                         barrierLen=self.barrierLen, 
-                         periodB=self.periodB, 
-                         isWhole=False,
-                         M=self.M)
+        syst = makeNISIN(width=self.width, noSections=self.noSections, 
+                         barrierLen=self.barrierLen, M=self.M,
+                         addedSinu=self.AddedSinu, isWhole=False
+                         )
         energies = []
         critB = 0
         params = dict(muSc=0., mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(bValues)), 
-                      desc= "Spec for periodB = %2.1f" %(self.periodB)
+                      desc="Number of sections = %i" %(self.noSections)
                       ):
             b = bValues[i]
             params["B"] = b
@@ -130,16 +129,15 @@ class Nanowire:
                      bValues=np.linspace(0, 1.0, 201),
                      energies=[0.001 * i for i in range(-120, 120)]
                      ):
-        syst = makeNISIN(width=self.width, length=self.length, 
-                         barrierLen=self.barrierLen, 
-                         periodB=self.periodB, 
-                         isWhole=True,
-                         M=self.M)
+        syst = makeNISIN(width=self.width, noSections=self.noSections, 
+                         barrierLen=self.barrierLen, M=self.M,
+                         addedSinu=self.addedSinu, isWhole=True,
+                         )
         data = []
         critB = 0
         params = dict(muSc=0., mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(energies)), 
-                      desc= "Cond for periodB = %2.1f" %(self.periodB)
+                      desc="Number of sections = %i" %(self.noSections)
                       ):
             cond = []
             energy = energies[i]
@@ -150,7 +148,7 @@ class Nanowire:
                         smatrix.submatrix((0, 0), (0, 0)).shape[0]  # N
                         - smatrix.transmission((0, 0), (0, 0))      # R_ee
                         + smatrix.transmission((0, 1), (0, 0)))     # R_he
-                cond.append(conduct)     # R_he
+                cond.append(conduct)
                 if energy == 0 and critB == 0 and np.abs(2 - conduct) < 0.01:
                     critB = b
             data.append(cond)
@@ -162,15 +160,14 @@ class Nanowire:
                         bValues=np.linspace(0, 1., 501),
                         muValues=np.linspace(0, .5, 51)
                      ):
-        syst = makeNISIN(width=self.width, length=self.length, 
-                         barrierLen=self.barrierLen, 
-                         periodB=self.periodB, 
-                         isWhole=False,
-                         M=self.M)
+        syst = makeNISIN(width=self.width, noSections=self.noSections, 
+                         barrierLen=self.barrierLen, M=self.M,
+                         addedSinu=self.AddedSinu, isWhole=False
+                         )
         criticalPoints = []
         params = dict(mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.)
         for i in tqdm(range(np.size(muValues)),
-                      desc="Phase for periodB = %2.1f" %(self.periodB)
+                      desc="Number of sections = %i" %(self.noSections)
                       ):
             params["muSc"] = muValues[i]
             for b in bValues:
@@ -193,16 +190,15 @@ class Nanowire:
                  bValues=np.linspace(.0, .3, 61),
                  muValues=np.linspace(.2, .5, 61)
                  ):
-        syst = makeNISIN(width=self.width, length=self.length, 
-                         barrierLen=self.barrierLen, 
-                         periodB=self.periodB, 
-                         isWhole=False,
-                         M=self.M)
+        syst = makeNISIN(width=self.width, noSections=self.noSections, 
+                         barrierLen=self.barrierLen, M=self.M,
+                         addedSinu=self.AddedSinu, isWhole=False
+                         )
         energies0 = []
         energies1 = []
         params = dict(muSc=muValues[0], mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(bValues)), 
-                      desc= "Spec for periodB = %2.1f" %(self.periodB)
+                      desc="Number of sections = %i" %(self.noSections)
                       ):
             b = bValues[i]
             params["B"] = b
@@ -212,7 +208,7 @@ class Nanowire:
             energies0.append(np.sort(eigs[0]))
             
         for i in tqdm(range(np.size(muValues)), 
-                      desc= "Spec for periodB = %2.1f" %(self.periodB)
+                      desc="Number of sections = %i" %(self.noSections)
                       ):
             mu = muValues[i]
             params["muSc"] = mu

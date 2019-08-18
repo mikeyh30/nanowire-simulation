@@ -16,33 +16,29 @@ from matplotlib import cm
 plt.rcParams["figure.figsize"] = (15,7)
 
 print("\nPlotting Nanowire Phase transitions...")
-# L = 20:       0 -> 2
-# L = 100:      0 -> 10
 W = 5
-L = 100
-minPeriod = 0
-maxPeriod = 10.
-periodBs = np.arange(minPeriod,maxPeriod+.5,.5)
-M = 0.1
-
-print("\nPlotting Nanowire Phases..." )
+minN = 5
+maxN = 25
+Ns = np.arange(minN,maxN+1,5)
+M = 0.05
+added = False
 
 ratio = []
 critical = []
 
-for i in range(np.size(periodBs)):
-#    print("\nPlot for periodB = %2.1f" %(periodBs[i]))
+for i in range(np.size(Ns)):
+    print("\nPlot for noSections = %i" %(Ns[i]))
     
     ## Phase Data ##
     data = pickle.load(open("phas" 
-                            + "%i.%i.%2.1f.%1.2f" %(W, L, periodBs[i], M)
+                            + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                             + ".dat", "rb"))
     ## Plot individual ##
-#    plt.figure()
-#    plt.plot(data["MuSc"], data["CritB"])
-#    plt.xlabel("Chemical Potential, mu")
-#    plt.ylabel("Critical Point, B")
-#    plt.show()
+    plt.figure()
+    plt.plot(data["MuSc"], data["CritB"])
+    plt.xlabel("Chemical Potential, mu")
+    plt.ylabel("Critical Point, B")
+    plt.show()
     
     ## Ratio: for muSc = (indices), sinusoidal/uniform ##
     ratio.append(data["CritB"][40])
@@ -53,7 +49,7 @@ print("\nCompleted!")
 ## Plotting Ratio for muSc = (indices) ##
 ratio = np.multiply(ratio,1/ratio[0])
 plt.figure()
-plt.plot(periodBs, ratio, 'b-')
+plt.plot(Ns, ratio, 'b-')
 plt.xlabel("d")
 plt.ylabel("Critical Point with Sinusoidal fields/Critical Point with Uniform fields")
 plt.show()
@@ -62,7 +58,7 @@ plt.show()
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 
-X, Y = np.meshgrid(periodBs, data["MuSc"])
+X, Y = np.meshgrid(Ns, data["MuSc"])
 critical = np.transpose(critical)
 
 # Plot the surface.
