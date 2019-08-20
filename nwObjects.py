@@ -104,7 +104,7 @@ class Nanowire:
                  ):        
         syst = makeNISIN(width=self.width, noSections=self.noSections, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.AddedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False
                          )
         energies = []
         critB = 0
@@ -162,28 +162,32 @@ class Nanowire:
                      ):
         syst = makeNISIN(width=self.width, noSections=self.noSections, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.AddedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False
                          )
-        criticalPoints = []
+        criticalPoints0 = []
+        criticalPoints1 = []
         params = dict(mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.)
         for i in tqdm(range(np.size(muValues)),
                       desc="Number of sections = %i" %(self.noSections)
                       ):
             params["muSc"] = muValues[i]
+            gapClosed = False
             for b in bValues:
                 params["B"] = b
                 H = syst.hamiltonian_submatrix(sparse=True,  params=params)
                 H = H.tocsc()
                 eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
                 eigs = np.sort(eigs[0])
-                if np.abs(eigs[9] - eigs[10])/2 < 1e-3:
-                    criticalPoints.append(b)
-#                    print("mu = %1.2f, b = %1.2f" %(muValues[i], b))
+                if not gapClosed and np.abs(eigs[9] - eigs[10])/2 < 1e-3:
+                    criticalPoints0.append(b)
+                    gapClosed = True
+                if gapClosed and np.abs(eigs[9] - eigs[10])/2 > 1e-3:
+                    criticalPoints1.append(b)
                     break
             else:
                 continue
             
-        outcome = dict(MuSc=muValues, CritB=criticalPoints)
+        outcome = dict(MuSc=muValues, CritB0=criticalPoints0, CritB1=criticalPoints1)
         return outcome
     
     def phaseAid(self, 
@@ -192,7 +196,7 @@ class Nanowire:
                  ):
         syst = makeNISIN(width=self.width, noSections=self.noSections, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.AddedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False
                          )
         energies0 = []
         energies1 = []

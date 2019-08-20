@@ -12,14 +12,14 @@ import nwObjects
 os.system("clear")
 
 W = 5
-minN = 5
-maxN = 25
-Ns = np.arange(minN,maxN+1,5)
+minN = 3
+maxN = 15
+Ns = np.arange(minN,maxN+1,2)
 M = 0.05
 added = False
 
-print("\nGenerating Nanowire Data (noSections = %i --> %i)..." 
-      %(minN,maxN))
+print("\nGenerating Nanowire Data (noSections = %i --> %i) and added: %r..." 
+      %(minN,maxN, added))
 
 for i in range(np.size(Ns)):
     ## Set up Nanowire Object ##
@@ -27,13 +27,13 @@ for i in range(np.size(Ns)):
     
     ## Spectrum ##
     pickle.dump(nanowire.spectrum(bValues=np.linspace(0, 1, 201)),
-                open("spec" 
+                open("data/spec" 
                      + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                      + ".dat", "wb"))
 
     ## Conductance ##
     pickle.dump(nanowire.conductances(bValues=np.linspace(0, 1, 201)),
-                open("cond" 
+                open("data/cond" 
                      + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                      + ".dat", "wb"))
     

@@ -25,7 +25,7 @@ for i in range(np.size(Ns)):
     print("\nPlot for noSections = %i" %(Ns[i]))
     print("\nSpectrum")
     ## Spectrum ##
-    data = pickle.load(open("spec" 
+    data = pickle.load(open("data/spec" 
                             + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                             + ".dat", "rb"))
     plt.figure()
@@ -37,7 +37,7 @@ for i in range(np.size(Ns)):
     
     print("\nConductance")
     ## Conductances ##
-    data = pickle.load(open("cond" 
+    data = pickle.load(open("data/cond" 
                             + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                             + ".dat", "rb"))
     plt.figure()

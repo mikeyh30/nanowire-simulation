@@ -12,14 +12,14 @@ import nwObjects
 os.system("clear")
 
 W = 5
-minN = 5
-maxN = 25
-Ns = np.arange(minN,maxN+1,5)
+minN = 3
+maxN = 17
+Ns = np.arange(minN,maxN+1,2)
 M = 0.05
-added = False
+added = True
 
-print("\nGenerating Nanowire Data (noSections = %i --> %i)..." 
-      %(minN,maxN))
+print("\nGenerating Nanowire Phase (noSections = %i --> %i) and added: %r..." 
+      %(minN,maxN, added))
 
 for i in range(np.size(Ns)):
     ## Set up Nanowire Object ##
@@ -27,7 +27,7 @@ for i in range(np.size(Ns)):
     
     ## Phase ##
     pickle.dump(nanowire.phaseTransition(),
-                open("phas" 
+                open("data/phas" 
                      + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                      + ".dat", "wb"))
     
