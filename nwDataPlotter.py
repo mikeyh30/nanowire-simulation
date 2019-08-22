@@ -10,32 +10,33 @@ import numpy as np
 
 import pickle
 import matplotlib.pyplot as plt
-
 plt.rcParams["figure.figsize"] = (15,7)
 
 print("\nPlotting Nanowire Data...")
-W = 5
-minN = 5
-maxN = 25
-Ns = np.arange(minN,maxN+1,5)
-M = 0.05
-added = False
+W = 7
+minN = 7
+maxN = 20
+Ns = np.arange(minN,maxN+1,1)
+M = 0.1
+added = True
 
 for i in range(np.size(Ns)):
-    print("\nPlot for noSections = %i" %(Ns[i]))
+    print("\nPlot for noMagnets = %i" %(Ns[i]))
     print("\nSpectrum")
+    plt.rcParams["figure.figsize"] = (4.5,3)
     ## Spectrum ##
     data = pickle.load(open("data/spec" 
                             + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))
                             + ".dat", "rb"))
     plt.figure()
     plt.plot(data["B"], data["E"])
-    plt.xlabel("B")
+    plt.xlabel("Zeeman Field Strength [B]")
     plt.ylabel("Energies [t]")
     plt.show()
     print("Critical value = %1.2f" %(data["CritB"]))
     
     print("\nConductance")
+    plt.rcParams["figure.figsize"] = (5,3)
     ## Conductances ##
     data = pickle.load(open("data/cond" 
                             + "w%i.no%i.m%1.2f.added%i" %(W, Ns[i], M, int(added))

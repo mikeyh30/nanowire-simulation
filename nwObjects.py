@@ -27,10 +27,10 @@ tauZsigY = ta.array(np.kron(sZ, sY))
 tauYsigY = ta.array(np.kron(sY, sY))
 
 ## Functions ##
-def makeNISIN(width=5, noSections=5, barrierLen=1, M=0.05,
+def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
               addedSinu=False, isWhole=True
               ):
-    length = 20*noSections + 2*barrierLen
+    length = 8*noMagnets - 2 + 2*barrierLen # "2*(noMagnets - 1)"
     
     ## Define site Hopping and functions ##
     def hopX(site0, site1, t, alpha):
@@ -40,10 +40,19 @@ def makeNISIN(width=5, noSections=5, barrierLen=1, M=0.05,
         
     def sinuB(theta):
         return sigY*np.cos(theta) + sigX*np.sin(theta)
-   
+    
     def onsiteSc(site, muSc, t, B, Delta):
-        if addedSinu: # Note 1 magnets per 20 sites - fixed distance of Magnets
-            theta = 2 * np.pi * np.mod(site.pos[0] - 1,40)/40
+        if addedSinu:
+            counter = np.mod(site.pos[0]-1-barrierLen, 16)
+            if -1 < counter < 4:
+                theta = 0
+            elif 3 < counter < 8:
+                theta = .2*(counter - 3)*np.pi
+            elif 7 < counter < 12:
+                theta = np.pi
+            else:
+                theta = .2*(counter - 6)*np.pi
+                    
             return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX \
                     + M*sinuB(theta)
         else:
@@ -58,13 +67,13 @@ def makeNISIN(width=5, noSections=5, barrierLen=1, M=0.05,
     syst = kwant.Builder()
         
     # S
-    syst[(lat(i, j) for i in range(1,length-1) for j in range(width))] \
+    syst[(lat(i, j) for i in range(barrierLen,length-barrierLen) for j in range(width))] \
         = onsiteSc
         
     if isWhole:
         # I's
         syst[(lat(i, j) for i in range(barrierLen) for j in range(width))] = onsiteBarrier
-        syst[(lat(i, j) for i in range(length-barrierLen, length)for j in range(width))] = onsiteBarrier
+        syst[(lat(i, j) for i in range(length-barrierLen, length) for j in range(width))] = onsiteBarrier
         
         # Hopping:
         syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
@@ -90,10 +99,10 @@ def makeNISIN(width=5, noSections=5, barrierLen=1, M=0.05,
 
 ## Objects ##
 class Nanowire:
-    def __init__(self, width=5, noSections=5, barrierLen=1, M=0.05,
+    def __init__(self, width=5, noMagnets=5, barrierLen=1, M=0.05,
                  addedSinu=False, dim=2):
         self.width = width
-        self.noSections = noSections
+        self.noMagnets = noMagnets
         self.barrierLen = barrierLen
         self.addedSinu = addedSinu
         self.dim = dim
@@ -102,7 +111,7 @@ class Nanowire:
     def spectrum(self, 
                  bValues=np.linspace(0, 1.0, 201)
                  ):        
-        syst = makeNISIN(width=self.width, noSections=self.noSections, 
+        syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
                          addedSinu=self.addedSinu, isWhole=False
                          )
@@ -110,7 +119,7 @@ class Nanowire:
         critB = 0
         params = dict(muSc=0., mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(bValues)), 
-                      desc="Number of sections = %i" %(self.noSections)
+                      desc="Number of magnets = %i" %(self.noMagnets)
                       ):
             b = bValues[i]
             params["B"] = b
@@ -129,7 +138,7 @@ class Nanowire:
                      bValues=np.linspace(0, 1.0, 201),
                      energies=[0.001 * i for i in range(-120, 120)]
                      ):
-        syst = makeNISIN(width=self.width, noSections=self.noSections, 
+        syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
                          addedSinu=self.addedSinu, isWhole=True,
                          )
@@ -137,7 +146,7 @@ class Nanowire:
         critB = 0
         params = dict(muSc=0., mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(energies)), 
-                      desc="Number of sections = %i" %(self.noSections)
+                      desc="Number of magnets = %i" %(self.noMagnets)
                       ):
             cond = []
             energy = energies[i]
@@ -160,7 +169,7 @@ class Nanowire:
                         bValues=np.linspace(0, 1., 501),
                         muValues=np.linspace(0, .5, 51)
                      ):
-        syst = makeNISIN(width=self.width, noSections=self.noSections, 
+        syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
                          addedSinu=self.addedSinu, isWhole=False
                          )
@@ -168,7 +177,7 @@ class Nanowire:
         criticalPoints1 = []
         params = dict(mu=.3, Delta=.1, alpha=.8, t=1.0, barrier=2.)
         for i in tqdm(range(np.size(muValues)),
-                      desc="Number of sections = %i" %(self.noSections)
+                      desc="Number of magnets = %i" %(self.noMagnets)
                       ):
             params["muSc"] = muValues[i]
             gapClosed = False
@@ -194,7 +203,7 @@ class Nanowire:
                  bValues=np.linspace(.0, .3, 61),
                  muValues=np.linspace(.2, .5, 61)
                  ):
-        syst = makeNISIN(width=self.width, noSections=self.noSections, 
+        syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
                          addedSinu=self.addedSinu, isWhole=False
                          )
@@ -202,7 +211,7 @@ class Nanowire:
         energies1 = []
         params = dict(muSc=muValues[0], mu=.3, Delta=.1, alpha=.8, t=1., barrier=2.)
         for i in tqdm(range(np.size(bValues)), 
-                      desc="Number of sections = %i" %(self.noSections)
+                      desc="Number of magnets = %i" %(self.noMagnets)
                       ):
             b = bValues[i]
             params["B"] = b
@@ -212,7 +221,7 @@ class Nanowire:
             energies0.append(np.sort(eigs[0]))
             
         for i in tqdm(range(np.size(muValues)), 
-                      desc="Number of sections = %i" %(self.noSections)
+                      desc="Number of magnets = %i" %(self.noMagnets)
                       ):
             mu = muValues[i]
             params["muSc"] = mu
