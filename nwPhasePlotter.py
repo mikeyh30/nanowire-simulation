@@ -17,8 +17,8 @@ plt.rcParams["figure.figsize"] = (15,7)
 
 print("\nPlotting Nanowire Phase transitions...")
 W = 5
-minN = 3
-maxN = 15
+minN = 5
+maxN = 17
 Ns = np.arange(minN,maxN+1,2)
 M = 0.05
 
@@ -71,15 +71,17 @@ for i in range(np.size(Ns)):
     
 print("\nCompleted!")
 
+ratio = (np.array(ratio0) - ratio1)/ratio0
+
 ## Plotting Ratio for muSc = (index) ##
 plt.figure()
-plt.plot(Ns, ratio1/ratio0, 'b-')
+plt.plot(Ns, ratio, 'b-')
 plt.xlabel("d")
 plt.ylabel("Critical Point with Sinusoidal fields/Critical Point with Uniform fields")
 plt.show()
 
 ## 3D Phase Diagram ##
-print("Uniform Field")
+print("\nUniform Field")
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 
@@ -106,7 +108,7 @@ X, Y = np.meshgrid(Ns, data["MuSc"])
 critical1 = np.transpose(critical1)
 
 # Plot the surface.
-print("Sinu Field")
+print("\nSinu Field")
 surf = ax.plot_surface(X, Y, critical1, cmap=cm.coolwarm,
                        linewidth=0, antialiased=False)
 
