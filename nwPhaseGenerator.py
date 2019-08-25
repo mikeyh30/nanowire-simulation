@@ -11,19 +11,19 @@ import pickle
 import nwObjects
 os.system("clear")
 
-W = 5
-minN = 3
-maxN = 17
-Ns = np.arange(minN,maxN+1,2)
-M = 0.05
+W = 7
+minN = 7
+maxN = 20
+Ns = np.arange(minN,maxN+1,1)
+M = 0.08
 added = True
 
-print("\nGenerating Nanowire Phase (noSections = %i --> %i) and added: %r..." 
-      %(minN,maxN, added))
+print("\nGenerating Nanowire Phase (noMagnets = %i --> %i) for M = %1.2f and added: %r..." 
+      %(minN,maxN,M,added))
 
 for i in range(np.size(Ns)):
     ## Set up Nanowire Object ##
-    nanowire = nwObjects.Nanowire(width=W, noSections=Ns[i], M=M, addedSinu=added)
+    nanowire = nwObjects.Nanowire(width=W, noMagnets=Ns[i], M=M, addedSinu=added)
     
     ## Phase ##
     pickle.dump(nanowire.phaseTransition(),
