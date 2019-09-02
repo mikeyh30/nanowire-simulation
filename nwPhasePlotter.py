@@ -11,13 +11,13 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
-#plt.rcParams["figure.figsize"] = (6,5)
-plt.rcParams["figure.figsize"] = (15,8)
+plt.rcParams["figure.figsize"] = (8,6)
+#plt.rcParams["figure.figsize"] = (15,8)
 
 print("\nPlotting Nanowire Phase transitions...")
 W = 7
-minN = 7
-maxN = 7
+minN = 17
+maxN = 17
 Ns = np.arange(minN,maxN+1,1)
 M = 0.1
 added = False
@@ -42,7 +42,7 @@ for i in range(np.size(Ns)):
     plt.xlabel("Chemical Potential [mu]")
     plt.ylabel("Zeeman Field Strength [B]")
     cbar = plt.colorbar(CS)
-    cbar.ax.set_ylabel("Topological State? [Pffafian]")
+    cbar.ax.set_ylabel("Topological State? [Boolean]")
     plt.show()
     
 print("\nCompleted!")
