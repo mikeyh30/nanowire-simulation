@@ -7,34 +7,35 @@ Created on Fri Aug 16 11:53:27 2019
 """
 
 import os
-import pickle
 import numpy as np
 import nwObjects
 os.system("clear")
 
 import matplotlib.pyplot as plt
 
-plt.rcParams["figure.figsize"] = (4.5,3)
+plt.rcParams["figure.figsize"] = (5,4)
 
 print("\nPlotting Nanowire Phase Aid...")
 W = 7
-N = 10
+N = 20
 M = 0.1
 added = False
 
-print("\nPlot for noMagnets = %2.1f" %(N))
-nanowire = nwObjects.Nanowire(width=W, noMagnets=N, M=M, addedSinu=added)
-pickle.dump(nanowire.phaseAid(bValues=np.linspace(.0, .18, 37),
-                              muValues=np.linspace(.08, .2, 49)
-                              ),
-            open("aide" 
-                 + "w%i.no%i.m%1.2f.added%i" %(W, N, M, int(added))
-                 + ".dat", "wb"))
+## SOI terms ##
+al=.4
 
-## Phase Data ##
-data = pickle.load(open("aide" 
-                        + "w%i.no%i.m%1.2f.added%i" %(W, N, M, int(added))
-                        + ".dat", "rb"))
+print("Also, SO Coupling = %1.1f ..." %(al))
+
+## Set up Nanowire Object ##
+nanowire = nwObjects.Nanowire(width=W, noMagnets=N,
+                              alpha=al, M=M, addedSinu=added
+                              )
+
+## Phase ##
+data = nanowire.phaseAid(bValues=np.linspace(.0, .2, 41),
+                         muValues=np.linspace(.1, .8, 71) # add 24
+                         )
+
 ## Plot individual ##
 plt.figure()
 plt.plot(data["B"], data["Eb"])

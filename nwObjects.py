@@ -249,7 +249,7 @@ class Nanowire:
                          )
         energies0 = []
         energies1 = []
-        params = dict(muSc=muValues[0], mu=.3, Delta=.1, alpha=.8, 
+        params = dict(muSc=muValues[0], mu=.3, Delta=.1, alpha=self.alpha, 
                       t=self.t, barrier=2.)
         for i in tqdm(range(np.size(bValues)), 
                       desc="Number of magnets = %i" %(self.noMagnets)

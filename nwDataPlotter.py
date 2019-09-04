@@ -14,16 +14,16 @@ import matplotlib.pyplot as plt
 
 print("\nPlotting Nanowire Data...")
 W = 7
-minN = 17
-maxN = 17
+minN = 20
+maxN = 20
 Ns = np.arange(minN,maxN+1,1)
 M = 0.05
-added = False
+added = True
 
 ## SOI terms ##
 eM=.5
-mu=.0
-al=.4
+mu=.52
+al=.8
 
 for i in range(np.size(Ns)):
     print("\nPlot for noMagnets = %i" %(Ns[i]))
@@ -59,12 +59,12 @@ for i in range(np.size(Ns)):
     
     ## Individual Conductance ##
     plt.rcParams["figure.figsize"] = (7,5)
-    index = 20 # 20 & 40
+    index = 30 # 20 & 40
     cond = np.transpose(data["Cond"])
     plt.figure()
     plt.plot(data["BiasV"], cond[index])
-    plt.xlabel("Conductance [e^2/h]")
-    plt.ylabel("Bias V [t]")
+    plt.xlabel("Bias V [t]")
+    plt.ylabel("Conductance [e^2/h]")
     plt.show()
 
 print("\nCompleted!")

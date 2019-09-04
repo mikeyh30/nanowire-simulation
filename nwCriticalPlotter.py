@@ -23,7 +23,7 @@ Ns = np.arange(minN,maxN+1,1)
 M = 0.1
 
 ## SOI terms ##
-al=.8
+al=.0
 
 ratio0 = []
 ratio1 = []
@@ -45,10 +45,11 @@ for i in range(np.size(Ns)):
 #        plt.rcParams["figure.figsize"] = (4,4)
         print("\nPlot for noMagnets = %i" %(Ns[i]))
         plt.figure()
-        plt.plot(data["MuSc"][0:30], data["CritB"][0:30])
+#        plt.plot(data["MuSc"][0:30], data["CritB"][0:30])
+        plt.plot(data["MuSc"], data["CritB"])
         plt.xlabel("Chemical Potential [mu]")
         plt.ylabel("Critical Point [B]")
-        plt.ylim([0,.3])
+#        plt.ylim([0,.3])
         plt.show()
     
     ## Ratio: for muSc = (indices), sinusoidal/uniform ##
