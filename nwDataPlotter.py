@@ -14,16 +14,16 @@ import matplotlib.pyplot as plt
 
 print("\nPlotting Nanowire Data...")
 W = 7
-minN = 20
-maxN = 20
+minN = 7
+maxN = 15
 Ns = np.arange(minN,maxN+1,1)
-M = 0.05
-added = True
+M = 0.1
+added = False
 
 ## SOI terms ##
 eM=.5
-mu=.52
-al=.8
+mu=.22
+al=.0
 
 for i in range(np.size(Ns)):
     print("\nPlot for noMagnets = %i" %(Ns[i]))

@@ -9,6 +9,8 @@ import os
 import numpy as np
 import pickle
 import nwObjects
+import matplotlib.pyplot as plt
+from .nwPandas import add_line
 os.system("clear")
 
 W = 7
@@ -35,7 +37,19 @@ for i in range(np.size(Ns)):
                                   effectMass=eM, muSc=mu, 
                                   alpha=al, M=M, addedSinu=added
                                   )
+
+    # Log which data has been saved.
+    add_line(W, Ns[i], eM, mu, al, M, added)
+
+    ax = nanowire.plot()
+    ax.savefig("data/modelfig/model" + 
+                "w%i_no%i_eM%1.2f_mu%1.2f_al%1.1f_M%1.2f_added%i"
+                %(W, Ns[i], eM, mu, al, M, int(added))+ ".png"
+                )
+    plt.close()
     
+    
+
     ## Spectrum ##
     pickle.dump(nanowire.spectrum(bValues=np.linspace(0, .4, 81)),
                 open("data/spec_" 

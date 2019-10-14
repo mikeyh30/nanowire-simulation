@@ -107,11 +107,16 @@ class Nanowire:
                  effectMass=.5, M=0.05, muSc=.0, alpha=.8, addedSinu=False
                  ):
         # Wire Physical Properties
-        self.width=width; self.noMagnets=noMagnets; 
-        self.dim = dim; self.barrierLen=barrierLen
+        self.width=width
+        self.noMagnets=noMagnets
+        self.dim = dim
+        self.barrierLen=barrierLen
         
         # Superconducting components
-        self.t=.5/effectMass; self.M=M; self.muSc=muSc; self.alpha=alpha
+        self.t=.5/effectMass
+        self.M=M
+        self.muSc=muSc
+        self.alpha=alpha
         self.addedSinu = addedSinu
         
     def spectrum(self, 
@@ -274,6 +279,14 @@ class Nanowire:
             
         outcome = dict(B=bValues, MuSc=muValues, Eb=energies0, Em=energies1)
         return outcome
+
+    def plot(self):
+        syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
+                         barrierLen=self.barrierLen, M=self.M,
+                         addedSinu=self.addedSinu, isWhole=False
+                         )
+        
+        return kwant.plotter.plot(syst,show=False)
 
 def main():
     pass
