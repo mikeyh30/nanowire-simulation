@@ -104,7 +104,7 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
 ## Objects ##
 class Nanowire:
     def __init__(self, width=5, noMagnets=5, dim=2, barrierLen=1, 
-                 effectMass=.5, M=0.05, muSc=.0, alpha=.8, addedSinu=False
+                 effective_mass=.5, M=0.05, muSc=.0, alpha=.8, addedSinu=False
                  ):
         # Wire Physical Properties
         self.width=width
@@ -113,7 +113,7 @@ class Nanowire:
         self.barrierLen=barrierLen
         
         # Superconducting components
-        self.t=.5/effectMass
+        self.t=.5/effective_mass
         self.M=M
         self.muSc=muSc
         self.alpha=alpha

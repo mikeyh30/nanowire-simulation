@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 #plt.rcParams["figure.figsize"] = (15,7)
 
 print("\nPlotting Nanowire Data...")
-W = 7
+width = 7
 minN = 7
 maxN = 15
 Ns = np.arange(minN,maxN+1,1)
@@ -21,9 +21,9 @@ M = 0.1
 added = False
 
 ## SOI terms ##
-eM=.5
-mu=.22
-al=.0
+effective_mass=.5
+muSc=.22
+alpha=.0
 
 for i in range(np.size(Ns)):
     print("\nPlot for noMagnets = %i" %(Ns[i]))
@@ -32,7 +32,7 @@ for i in range(np.size(Ns)):
     ## Spectrum ##
     data = pickle.load(open("data/spec_" 
                             + "w%i_no%i_eM%1.2f_mu%1.2f_al%1.1f_M%1.2f_added%i" 
-                            %(W, Ns[i], eM, mu, al, M, int(added))
+                            %(width, Ns[i], effective_mass, muSc, alpha, M, int(added))
                             + ".dat", "rb"))
     plt.figure()
     plt.plot(data["B"], data["E"])
@@ -46,7 +46,7 @@ for i in range(np.size(Ns)):
     ## Conductances ##
     data = pickle.load(open("data/cond_" 
                             + "w%i_no%i_eM%1.2f_mu%1.2f_al%1.1f_M%1.2f_added%i" 
-                            %(W, Ns[i], eM, mu, al, M, int(added))
+                            %(width, Ns[i], effective_mass, muSc, alpha, M, int(added))
                             + ".dat", "rb"))
     plt.figure()
     CS = plt.contourf(data["B"], data["BiasV"], data["Cond"], 100, cmap="viridis")
