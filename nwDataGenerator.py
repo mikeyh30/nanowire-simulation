@@ -10,12 +10,12 @@ import numpy as np
 import pickle
 import nwObjects
 import matplotlib.pyplot as plt
-from .nwPandas import add_line
+from nwPandas import add_line
 os.system("clear")
 
 width = 7
 minN = 7
-maxN = 15
+maxN = 7
 Ns = np.arange(minN,maxN+1,1)
 M = 0.1
 added = False
@@ -34,7 +34,7 @@ print("Also, Effective Mass = %1.2f, Chemical Potential = %1.2f, and SO Coupling
 for i in range(np.size(Ns)):
     ## Set up Nanowire Object ##
     nanowire = nwObjects.Nanowire(width=width, noMagnets=Ns[i], 
-                                  effectMass=effective_mass, muSc=muSc, 
+                                  effective_mass=effective_mass, muSc=muSc, 
                                   alpha=alpha, M=M, addedSinu=added
                                   )
 

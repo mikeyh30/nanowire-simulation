@@ -10,6 +10,7 @@ import kwant
 import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
+from nanomagnet_field import staggered_sinusoid, staggered_cosinusoid
 
 s0 = np.identity(2)
 sZ = np.array([[1., 0.], [0., -1.]])
@@ -28,10 +29,10 @@ tauYsigY = ta.array(np.kron(sY, sY))
 
 ## Functions ##
 def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
-              addedSinu=False, isWhole=True
+              addedSinu=False, isWhole=True, stagger_ratio=0.5
               ):
     length = 8*noMagnets - 2 + 2*barrierLen # "2*(noMagnets - 1)"
-    
+
     ## Define site Hopping and functions ##
     def hopX(site0, site1, t, alpha):
         return -t * tauZ + .5j * alpha * tauZsigY
@@ -39,8 +40,9 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
         return -t * tauZ - .5j * alpha * tauZsigX
         
     def sinuB(theta):
-        return sigY*np.cos(theta) + sigX*np.sin(theta)
+        return sigY*staggered_cosinusoid(theta) + sigX*staggered_sinusoid(theta)
     
+    # This is the onsite Hamiltonian, this is where the B-field can be varied.
     def onsiteSc(site, muSc, t, B, Delta):
         if addedSinu:
             counter = np.mod(site.pos[0]-1-barrierLen, 16)
