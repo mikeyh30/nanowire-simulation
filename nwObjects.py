@@ -106,7 +106,8 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
 ## Objects ##
 class Nanowire:
     def __init__(self, width=5, noMagnets=5, dim=2, barrierLen=1, 
-                 effective_mass=.5, M=0.05, muSc=.0, alpha=.8, addedSinu=False
+                 effective_mass=.5, M=0.05, muSc=.0, alpha=.8, addedSinu=False,
+                 stagger_ratio=0.5
                  ):
         # Wire Physical Properties
         self.width=width
@@ -120,13 +121,23 @@ class Nanowire:
         self.muSc=muSc
         self.alpha=alpha
         self.addedSinu = addedSinu
-        
-    def spectrum(self, 
-                 bValues=np.linspace(0, 1.0, 201)
-                 ):        
+
+        # Nanomagnet properties
+        self.stagger_ratio = stagger_ratio
+
+        # System
+        '''self.system = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
+                                barrierLen=self.barrierLen, M=self.M,
+                                addedSinu=self.addedSinu, isWhole=False,
+                                stagger_ratio=self.stagger_ratio
+                                )
+        '''
+
+    def spectrum(self, bValues=np.linspace(0, 1.0, 201)):        
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         energies = []
         critB = 0
@@ -156,6 +167,7 @@ class Nanowire:
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
                          addedSinu=self.addedSinu, isWhole=True,
+                         stagger_ratio=self.stagger_ratio
                          )
         data = []
         critB = 0
@@ -188,7 +200,8 @@ class Nanowire:
                      ):
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         criticalPoints = []
         params = dict(mu=.3, Delta=.1, alpha=self.alpha, 
@@ -219,7 +232,8 @@ class Nanowire:
                      ):
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         phases = []
         params = dict(mu=.3, Delta=.1, alpha=self.alpha, 
@@ -252,7 +266,8 @@ class Nanowire:
                  ):
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         energies0 = []
         energies1 = []
@@ -285,7 +300,8 @@ class Nanowire:
     def plot(self):
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         
         return kwant.plotter.plot(syst,show=False)
