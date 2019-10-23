@@ -40,7 +40,7 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
         return -t * tauZ - .5j * alpha * tauZsigX
         
     def sinuB(theta):
-        return sigY*staggered_cosinusoid(theta) + sigX*staggered_sinusoid(theta)
+        return sigY*staggered_cosinusoid(theta,stagger_ratio) + sigX*staggered_sinusoid(theta,stagger_ratio)
     
     # This is the onsite Hamiltonian, this is where the B-field can be varied.
     def onsiteSc(site, muSc, t, B, Delta):
