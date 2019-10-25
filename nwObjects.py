@@ -35,9 +35,9 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
 
     ## Define site Hopping and functions ##
     def hopX(site0, site1, t, alpha):
-        return -t * tauZ + .5j * alpha * tauZsigY
+        return -t * tauZ + 1j * alpha * tauZsigY
     def hopY(site0, site1, t, alpha):
-        return -t * tauZ - .5j * alpha * tauZsigX
+        return -t * tauZ - 1j * alpha * tauZsigX
         
     def sinuB(theta):
         return sigY*staggered_cosinusoid(theta,stagger_ratio) + sigX*staggered_sinusoid(theta,stagger_ratio)
