@@ -8,11 +8,11 @@ os.system("clear")
 
 width = 7
 minN = 7
-maxN = 9
+maxN = 7
 Ns = np.arange(minN,maxN+1,1)
 ratios = [i for i in np.arange(0.35,0.55,0.05)]
 M = 0.1
-added = False
+added = True
 
 print("\nGenerating Nanowire Data (ratios = 0.2 --> 0.5) for M = %1.2f and added: %r" 
       %(M,added))
