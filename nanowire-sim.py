@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 from nwObjects import Nanowire
-from nwPandas import add_line
+from update_csv import update_csv
+from emailer import send_finished_script_email
 
 #------------Simulation parameters-----------------
 minN = 7
@@ -83,28 +84,53 @@ def simulation_single(params):
 
     save_model_figure(nanowire, data_suffix)
 
-    # Generate data of spectrum and conductance.
+    # Generate data of spectrum and conductance. This takes time
     spectrum_data = nanowire.spectrum(bValues=np.linspace(0, .4, 81))
     conductance_data = nanowire.conductances(bValues=np.linspace(0, .4, 81))
 
     # Save figures and data, and get critical fields.
     spectrum_critical_field = spectrum(nanowire, data_suffix)
-    conductance_critical_field = spectrum(conductance_data, data_suffix)
+    conductance_critical_field = conductance(conductance_data, data_suffix)
 
     # Save figure of the conductance at a given field.
     individual_conductance(conductance_data, data_suffix)
 
+    # Filenames of the saved data and figures.
+    conductance_data_filename = "data/cond/cond_" + data_suffix + ".dat"
+    spectrum_data_filename = "data/spec/spec_" + data_suffix + ".dat"
+    conductance_figure_filename = "data/fig-conductance/model" + data_suffix + ".png"
+    spectrum_figure_filename = "data/fig-spectrum/model" + data_suffix + ".png"
+    individual_conductance_figure_filename = "data/fig-ind-conductance/model" + data_suffix + ".png"
 
     # Log which data has been saved. Alter this function.
-    add_line(params['wire_width'],
-             params['N'],
-             params['effective_mass'],
-             params['muSc'],
-             params['alpha'],
-             params['M'],
-             params['added_sinusoid'],
-             params['ratio'])
-                        
+    update_csv(params['wire_width'],
+               params['N'],
+               params['effective_mass'],
+               params['muSc'],
+               params['alpha'],
+               params['M'],
+               params['added_sinusoid'],
+               params['ratio'],
+               conductance_data_filename,
+               spectrum_data_filename,
+               conductance_figure_filename,
+               spectrum_figure_filename,
+               individual_conductance_figure_filename,
+               'data/wiresdata.csv',
+               spectrum_critical_field,
+               conductance_critical_field
+               )
+
+def simulation_all(params):
+    new_params = params
+    for N in params['Ns']:
+        new_params['N'] = N
+        for ratio in params['ratios']:
+            new_params['ratio'] = ratio
+            # print(new_params)
+            simulation_single(new_params)
+    send_finished_script_email()
+
 
 if __name__ == "__main__":
-    pass
+    simulation_all(simulation_parameters)
