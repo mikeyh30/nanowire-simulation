@@ -89,7 +89,7 @@ def simulation_single(params):
     conductance_data = nanowire.conductances(bValues=np.linspace(0, .4, 81))
 
     # Save figures and data, and get critical fields.
-    spectrum_critical_field = spectrum(nanowire, data_suffix)
+    spectrum_critical_field = spectrum(spectrum_data, data_suffix)
     conductance_critical_field = conductance(conductance_data, data_suffix)
 
     # Save figure of the conductance at a given field.
