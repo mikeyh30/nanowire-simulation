@@ -39,7 +39,7 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
     def hopY(site0, site1, t, alpha):
         return -t * tauZ - 1j * alpha * tauZsigX
         
-    def sinuB(theta):
+    def sinuB(theta,stagger_ratio):
         return sigY*staggered_cosinusoid(theta,stagger_ratio) + sigX*staggered_sinusoid(theta,stagger_ratio)
     
     # This is the onsite Hamiltonian, this is where the B-field can be varied.
@@ -56,7 +56,7 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
                 theta = .2*(counter - 6)*np.pi
                     
             return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX \
-                    + M*sinuB(theta)
+                    + M*sinuB(theta,stagger_ratio)
         else:
             return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX
     def onsiteNormal(site, mu, t):
@@ -107,7 +107,7 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
 class Nanowire:
     def __init__(self, width=5, noMagnets=5, dim=2, barrierLen=1, 
                  effective_mass=.5, M=0.05, muSc=.0, alpha=.8, addedSinu=False,
-                 stagger_ratio=0.5
+                 stagger_ratio=0.5, mu=0.3, delta=0.1, barrier=2.0
                  ):
         # Wire Physical Properties
         self.width=width
@@ -125,6 +125,11 @@ class Nanowire:
         # Nanomagnet properties
         self.stagger_ratio = stagger_ratio
 
+        # Previously hard-coded parameters
+        self.mu = mu # how is this different from muSc?
+        self.delta = delta
+        self.barrier = barrier
+
         # System
         '''self.system = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                                 barrierLen=self.barrierLen, M=self.M,
@@ -141,8 +146,8 @@ class Nanowire:
                          )
         energies = []
         critB = 0
-        params = dict(muSc=self.muSc, mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(muSc=self.muSc, mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(bValues)), 
                       desc="Spec: NoMagnets = %i, added? %r" 
                       %(self.noMagnets, self.addedSinu)
@@ -151,6 +156,7 @@ class Nanowire:
             params["B"] = b
             H = syst.hamiltonian_submatrix(sparse=True,  params=params)
             H = H.tocsc()
+            # k is the number of eigenvalues, and find them near sigma.
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
             eigs = np.sort(eigs[0])
             energies.append(eigs)
@@ -171,8 +177,8 @@ class Nanowire:
                          )
         data = []
         critB = 0
-        params = dict(muSc=self.muSc, mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(muSc=self.muSc, mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(energies)), 
                       desc="Cond: NoMagnets = %i, added? %r" 
                       %(self.noMagnets, self.addedSinu)
@@ -204,8 +210,8 @@ class Nanowire:
                          stagger_ratio=self.stagger_ratio
                          )
         criticalPoints = []
-        params = dict(mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(muValues)),
                       desc="Crit: NoMagnets = %i, added? %r" 
                       %(self.noMagnets, self.addedSinu)
@@ -236,8 +242,8 @@ class Nanowire:
                          stagger_ratio=self.stagger_ratio
                          )
         phases = []
-        params = dict(mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(bValues)),
                       desc="Phas: NoMagnets = %i, added? %r" 
                       %(self.noMagnets, self.addedSinu)
@@ -271,8 +277,8 @@ class Nanowire:
                          )
         energies0 = []
         energies1 = []
-        params = dict(muSc=muValues[0], mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(muSc=muValues[0], mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(bValues)), 
                       desc="Number of magnets = %i" %(self.noMagnets)
                       ):
