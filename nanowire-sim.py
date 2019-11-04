@@ -8,12 +8,12 @@ from emailer import send_finished_script_email
 
 #------------Simulation parameters-----------------
 minN = 7
-maxN = 7
+maxN = 9
 
 simulation_parameters = dict(
     wire_width = 7,
     Ns = np.arange(minN,maxN+1,1), #N is the number of magnets
-    ratios = [i for i in np.arange(0.35,0.55,0.05)], # relative ratios of nanomagnet widths.
+    ratios = [i for i in np.arange(0.20,0.50,0.05)], # relative ratios of nanomagnet widths.
     M = 0.1, #B field strength from nanomagnets.
     added_sinusoid = True, # Indicates presence of nanomagnets
     ## SOI terms ##
