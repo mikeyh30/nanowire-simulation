@@ -10,7 +10,7 @@ import kwant
 import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
-from nanomagnet_field import staggered_sinusoid, staggered_cosinusoid
+from nanomagnet_field import staggered_sinusoid
 
 s0 = np.identity(2)
 sZ = np.array([[1., 0.], [0., -1.]])
@@ -40,7 +40,8 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
         return -t * tauZ - 1j * alpha * tauZsigX
         
     def sinuB(theta,stagger_ratio):
-        return sigY*staggered_cosinusoid(theta,stagger_ratio) + sigX*staggered_sinusoid(theta,stagger_ratio)
+        ssin, scos = staggered_sinusoid(theta,stagger_ratio)
+        return sigY*scos + sigX*ssin
     
     # This is the onsite Hamiltonian, this is where the B-field can be varied.
     def onsiteSc(site, muSc, t, B, Delta):
