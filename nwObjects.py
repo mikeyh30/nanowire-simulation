@@ -197,7 +197,7 @@ class Nanowire:
                         - smatrix.transmission((0, 0), (0, 0))      # R_ee
                         + smatrix.transmission((0, 1), (0, 0)))     # R_he
                 cond.append(conduct)
-                if energy == 0 and critB == 0 and np.abs(2 - conduct) < 0.01:
+                if np.isclose(energy,0,rel_tol=1E-6) and critB == 0 and np.abs(2 - conduct) < 0.01:
                     critB = b
             data.append(cond)
             

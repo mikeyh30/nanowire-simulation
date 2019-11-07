@@ -19,11 +19,12 @@ simulation_parameters = dict(
     added_sinusoid = True, # Indicates presence of nanomagnets
     ## SOI terms ##
     effective_mass=0.019*electron_mass, # m^*_{InAs}
-    muSc=.22, #Chemical potential in the nanowire.
-    alpha=.0, #Rashba parameter
-    mu=0.3, # Chemical potential in the semiconductor
-    delta=0.1, # superconducting gap
-    barrier=2.0 # find out more about this.
+    alpha=5.1E-30, #Rashba parameter
+    muSc=2.2E-25, #Chemical potential in the nanowire.
+    mu=3E-25, # Chemical potential in the semiconductor
+    delta=7.2E-24, # superconducting gap
+    barrier=2.0E-24, # find out more about this.
+    b_max=0.4 # T
 )
 #--------------------------------------------------
 
@@ -85,15 +86,18 @@ def simulation_single(params):
                         M=params['M'],
                         addedSinu=params['added_sinusoid'],
                         stagger_ratio=params['ratio'],
-                        mu=0.3,
-                        delta=0.1,
-                        barrier=2.0)
+                        mu=params['mu'],
+                        delta=params['delta'],
+                        barrier=params['barrier'])
 
     save_model_figure(nanowire, data_suffix)
 
     # Generate data of spectrum and conductance. This takes time
-    spectrum_data = nanowire.spectrum(bValues=np.linspace(0, .4, 81))
-    conductance_data = nanowire.conductances(bValues=np.linspace(0, .4, 81))
+    energies = np.arange(-0.120*nanowire.t, 0.120*nanowire.t, 0.001*nanowire.t)
+
+    spectrum_data = nanowire.spectrum(bValues=np.linspace(0, params['b_max'], 81))
+    conductance_data = nanowire.conductances(bValues=np.linspace(0, params['b_max'], 81),
+                                             energies=energies)
 
     # Save figures and data, and get critical fields.
     spectrum_critical_field = spectrum(spectrum_data, data_suffix)
