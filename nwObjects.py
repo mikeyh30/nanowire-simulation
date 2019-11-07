@@ -11,6 +11,9 @@ import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
 from nanomagnet_field import rick_sinusiod
+from scipy.constants import physical_constants
+
+bohr_magneton = physical_constants['Bohr magneton'][0]
 
 s0 = np.identity(2)
 sZ = np.array([[1., 0.], [0., -1.]])
@@ -44,7 +47,7 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
         return sigY*scos + sigX*ssin
     
     # This is the onsite Hamiltonian, this is where the B-field can be varied.
-    def onsiteSc(site, muSc, t, B, Delta):
+    def onsiteSc(site, muSc, t, B, Delta, gfactor=10):
         if addedSinu:
             counter = np.mod(site.pos[0]-1-barrierLen, 16)
             if -1 < counter < 4:
@@ -56,10 +59,10 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
             else:
                 theta = .2*(counter - 6)*np.pi
                     
-            return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX \
-                    + M*sinuB(theta,stagger_ratio)
+            return (4 * t - muSc) * tauZ + 0.5*gfactor*bohr_magneton*B*sigX + Delta * tauX \
+                    + 0.5*gfactor*bohr_magneton*M*sinuB(theta,stagger_ratio)
         else:
-            return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX
+            return (4 * t - muSc) * tauZ + 0.5*gfactor*bohr_magneton*B*sigX + Delta * tauX
     def onsiteNormal(site, mu, t):
         return (4 * t - mu) * tauZ
     def onsiteBarrier(site, mu, t, barrier):
@@ -117,7 +120,7 @@ class Nanowire:
         self.barrierLen=barrierLen
         
         # Superconducting components
-        self.t=.5/effective_mass
+        self.t=.5/effective_mass # check that this definition is correct.
         self.M=M
         self.muSc=muSc
         self.alpha=alpha

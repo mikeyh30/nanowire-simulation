@@ -5,6 +5,7 @@ import pickle
 from nwObjects import Nanowire
 from update_csv import update_csv
 from emailer import send_finished_script_email
+from scipy.constants import electron_mass
 
 #------------Simulation parameters-----------------
 minN = 6
@@ -14,12 +15,15 @@ simulation_parameters = dict(
     wire_width = 7,
     Ns = np.arange(minN,maxN+1,1), #N is the number of magnets
     ratio = 0.5, #ratios=[i for i in np.arange(0.20,0.50,0.05)], # relative ratios of nanomagnet widths.
-    M = 0.1, #B field strength from nanomagnets.
+    M = 1, #B field strength from nanomagnets.
     added_sinusoid = True, # Indicates presence of nanomagnets
     ## SOI terms ##
-    effective_mass=.5, #Of electrons
+    effective_mass=0.019*electron_mass, # m^*_{InAs}
     muSc=.22, #Chemical potential in the nanowire.
-    alpha=.0 #Rashba parameter
+    alpha=.0, #Rashba parameter
+    mu=0.3, # Chemical potential in the semiconductor
+    delta=0.1, # superconducting gap
+    barrier=2.0 # find out more about this.
 )
 #--------------------------------------------------
 
@@ -80,7 +84,10 @@ def simulation_single(params):
                         alpha=params['alpha'],
                         M=params['M'],
                         addedSinu=params['added_sinusoid'],
-                        stagger_ratio=params['ratio'])
+                        stagger_ratio=params['ratio'],
+                        mu=0.3,
+                        delta=0.1,
+                        barrier=2.0)
 
     save_model_figure(nanowire, data_suffix)
 
