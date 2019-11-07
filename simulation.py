@@ -2,39 +2,18 @@ import kwant
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
-from nwObjects import Nanowire
+from nanowire import Nanowire
 from update_csv import update_csv
 from emailer import send_finished_script_email
-from scipy.constants import electron_mass
+from simulation_parameters import simulation_parameters
 
-#------------Simulation parameters-----------------
-minN = 6
-maxN = 9
-
-simulation_parameters = dict(
-    wire_width = 7,
-    Ns = np.arange(minN,maxN+1,1), #N is the number of magnets
-    ratio = 0.5, #ratios=[i for i in np.arange(0.20,0.50,0.05)], # relative ratios of nanomagnet widths.
-    M = 1, #B field strength from nanomagnets.
-    added_sinusoid = True, # Indicates presence of nanomagnets
-    ## SOI terms ##
-    effective_mass=0.019*electron_mass, # m^*_{InAs}
-    alpha=5.1E-30, #Rashba parameter
-    muSc=2.2E-25, #Chemical potential in the nanowire.
-    mu=3E-25, # Chemical potential in the semiconductor
-    delta=7.2E-24, # superconducting gap
-    barrier=2.0E-24, # find out more about this.
-    b_max=0.4 # T
-)
-#--------------------------------------------------
-
-def save_model_figure(nanowire, suffix):
+def save_model_figure(nanowire, suffix, data_folder):
     ax = nanowire.plot()
-    ax.savefig("data/modelfig/model" + suffix+ ".png")
+    ax.savefig(data_folder + "/modelfig/model" + suffix+ ".png")
     plt.close()
 
-def spectrum(spectrum_data, suffix):
-    pickle.dump(spectrum_data, open("data/spec/spec_" + suffix + ".dat", "wb"))
+def spectrum(spectrum_data, suffix, data_folder):
+    pickle.dump(spectrum_data, open(data_folder + "/spec/spec_" + suffix + ".dat", "wb"))
     
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (7,5)
@@ -42,12 +21,12 @@ def spectrum(spectrum_data, suffix):
     ax.plot(spectrum_data["B"], spectrum_data["E"])
     ax.set_xlabel("Zeeman Field Strength [B]")
     ax.set_ylabel("Energies [t]")
-    fig.savefig("data/fig-spectrum/model" + suffix + ".png")
+    fig.savefig(data_folder + "/fig-spectrum/model" + suffix + ".png")
 
     return spectrum_data["CritB"]
 
-def conductance(conductance_data, suffix):
-    pickle.dump(conductance_data, open("data/cond/cond_" + suffix + ".dat", "wb"))
+def conductance(conductance_data, suffix, data_folder):
+    pickle.dump(conductance_data, open(data_folder + "/cond/cond_" + suffix + ".dat", "wb"))
 
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (8,5)
@@ -57,11 +36,11 @@ def conductance(conductance_data, suffix):
     ax.set_ylabel("Bias V [t]")
     cbar = plt.colorbar(contour)
     cbar.ax.set_ylabel("Conductance [e^2/h]")
-    fig.savefig("data/fig-conductance/model" + suffix + ".png")
+    fig.savefig(data_folder + "/fig-conductance/model" + suffix + ".png")
 
     return conductance_data["CritB"]
 
-def individual_conductance(data, suffix, index_slice=30):
+def individual_conductance(data, suffix, data_folder, index_slice=30):
     plt.rcParams["figure.figsize"] = (7,5)
     
     cond = np.transpose(data["Cond"])
@@ -70,7 +49,7 @@ def individual_conductance(data, suffix, index_slice=30):
     ax.plot(data["BiasV"], cond[index_slice])
     ax.set_xlabel("Bias V [t]")
     ax.set_ylabel("Conductance [e^2/h]")
-    fig.savefig("data/fig-ind-conductance/model" + suffix + ".png")
+    fig.savefig(data_folder + "/fig-ind-conductance/model" + suffix + ".png")
     plt.close()
 
 def simulation_single(params):
@@ -90,7 +69,9 @@ def simulation_single(params):
                         delta=params['delta'],
                         barrier=params['barrier'])
 
-    save_model_figure(nanowire, data_suffix)
+    data_folder = "data/new"
+
+    save_model_figure(nanowire, data_suffix, data_folder)
 
     # Generate data of spectrum and conductance. This takes time
     energies = np.arange(-0.120*nanowire.t, 0.120*nanowire.t, 0.001*nanowire.t)
@@ -100,18 +81,18 @@ def simulation_single(params):
                                              energies=energies)
 
     # Save figures and data, and get critical fields.
-    spectrum_critical_field = spectrum(spectrum_data, data_suffix)
-    conductance_critical_field = conductance(conductance_data, data_suffix)
+    spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
+    conductance_critical_field = conductance(conductance_data, data_suffix, data_folder)
 
     # Save figure of the conductance at a given field.
-    individual_conductance(conductance_data, data_suffix)
+    individual_conductance(conductance_data, data_suffix, data_folder)
 
     # Filenames of the saved data and figures.
-    conductance_data_filename = "data/cond/cond_" + data_suffix + ".dat"
-    spectrum_data_filename = "data/spec/spec_" + data_suffix + ".dat"
-    conductance_figure_filename = "data/fig-conductance/model" + data_suffix + ".png"
-    spectrum_figure_filename = "data/fig-spectrum/model" + data_suffix + ".png"
-    individual_conductance_figure_filename = "data/fig-ind-conductance/model" + data_suffix + ".png"
+    conductance_data_filename = data_folder + "/cond/cond_" + data_suffix + ".dat"
+    spectrum_data_filename = data_folder + "/spec/spec_" + data_suffix + ".dat"
+    conductance_figure_filename = data_folder + "/fig-conductance/model" + data_suffix + ".png"
+    spectrum_figure_filename = data_folder + "/fig-spectrum/model" + data_suffix + ".png"
+    individual_conductance_figure_filename = data_folder + "/fig-ind-conductance/model" + data_suffix + ".png"
 
     # Log which data has been saved. Alter this function.
     update_csv(params['wire_width'],
