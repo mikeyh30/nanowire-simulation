@@ -11,9 +11,10 @@ import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
 from nanomagnet_field import rick_sinusiod
-from scipy.constants import physical_constants
+from scipy.constants import physical_constants, hbar
 
 bohr_magneton = physical_constants['Bohr magneton'][0]
+lattice_constant_InAs = 6.0583E-10 # might need to change this.
 
 s0 = np.identity(2)
 sZ = np.array([[1., 0.], [0., -1.]])
@@ -120,7 +121,7 @@ class Nanowire:
         self.barrierLen=barrierLen
         
         # Superconducting components
-        self.t=.5/effective_mass # check that this definition is correct.
+        self.t=(hbar**2)/(2*effective_mass*lattice_constant_InAs)
         self.M=M
         self.muSc=muSc
         self.alpha=alpha
