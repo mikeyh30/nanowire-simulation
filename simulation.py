@@ -6,10 +6,12 @@ from nanowire import Nanowire
 from update_csv import update_csv
 from emailer import send_finished_script_email
 from simulation_parameters import simulation_parameters
+import argparse
+import os
 
 def save_model_figure(nanowire, suffix, data_folder):
     ax = nanowire.plot()
-    ax.savefig(data_folder + "/modelfig/model" + suffix+ ".png")
+    ax.savefig(data_folder + "/modelfig/" + suffix+ ".png")
     plt.close()
 
 def spectrum(spectrum_data, suffix, data_folder):
@@ -52,10 +54,13 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
     fig.savefig(data_folder + "/fig-ind-conductance/model" + suffix + ".png")
     plt.close()
 
-def simulation_single(params):
-    data_suffix = "w{0}_no{1}_eM{2:3.2f}_mu{3}_al{4}_M{5:4.2f}_added{6}_ratio{7:4.2f}".format( 
+def simulation_single(params,row='skip'):
+    if row == 'skip':
+        data_suffix = "w{0}_no{1}_eM{2:3.2f}_mu{3}_al{4}_M{5:4.2f}_added{6}_ratio{7:4.2f}".format( 
         params['wire_width'], params['N'], params['effective_mass'], params['muSc'],
         params['alpha'], params['M'], int(params['added_sinusoid']), params['ratio'])
+    else:
+        data_suffix = "simulation{}".format(row)
 
     nanowire = Nanowire(width=params['wire_width'],
                         noMagnets=params['N'],
@@ -70,7 +75,13 @@ def simulation_single(params):
                         barrier=params['barrier'])
 
     data_folder = "data/new"
-
+    os.makedirs("./" + data_folder + '/modelfig',exist_ok=True)
+    os.makedirs("./" + data_folder + '/cond',exist_ok=True)
+    os.makedirs("./" + data_folder + '/spec',exist_ok=True)
+    os.makedirs("./" + data_folder + '/fig-conductance',exist_ok=True)
+    os.makedirs("./" + data_folder + '/fig-ind-conductance',exist_ok=True)
+    os.makedirs("./" + data_folder + '/fig-spectrum',exist_ok=True)
+    
     save_model_figure(nanowire, data_suffix, data_folder)
 
     # Generate data of spectrum and conductance. This takes time
@@ -110,7 +121,8 @@ def simulation_single(params):
                individual_conductance_figure_filename,
                'data/wiresdata.csv',
                spectrum_critical_field,
-               conductance_critical_field
+               conductance_critical_field,
+               data_folder
                )
 
 def simulation_all(params):
@@ -118,7 +130,6 @@ def simulation_all(params):
     for N in params['Ns']:
         new_params['N'] = N
         simulation_single(new_params)
-    send_finished_script_email()
 
 
 if __name__ == "__main__":

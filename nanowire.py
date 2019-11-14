@@ -48,7 +48,8 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
         return sigY*scos + sigX*ssin
     
     # This is the onsite Hamiltonian, this is where the B-field can be varied.
-    def onsiteSc(site, muSc, t, B, Delta, gfactor=10):
+    def onsiteSc(site, muSc, t, B, Delta):
+        gfactor = 10
         if addedSinu:
             counter = np.mod(site.pos[0]-1-barrierLen, 16)
             if -1 < counter < 4:
@@ -198,7 +199,7 @@ class Nanowire:
                         - smatrix.transmission((0, 0), (0, 0))      # R_ee
                         + smatrix.transmission((0, 1), (0, 0)))     # R_he
                 cond.append(conduct)
-                if np.isclose(energy,0,rel_tol=1E-6) and critB == 0 and np.abs(2 - conduct) < 0.01:
+                if np.isclose(energy,0,rtol=1E-6) and critB == 0 and np.abs(2 - conduct) < 0.01:
                     critB = b
             data.append(cond)
             
