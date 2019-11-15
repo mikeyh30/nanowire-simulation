@@ -30,4 +30,4 @@
 #$ -M michael.hynes.18@ucl.ac.uk
 
 # 8. Run the application.
-python hpc_simulation.py ~/OneDrive/quantum-devices/nanowire-simulation/swag.csv $((SGE_TASK_ID-1))
+python hpc_simulation.py /home/ucapmhy/nanowire-simulations/nanowire-simulation/2019-11-15.csv $((SGE_TASK_ID-1))

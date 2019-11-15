@@ -6,4 +6,4 @@ d = [dict(zip(simulation_parameters, v)) for v in product(*simulation_parameters
 
 df = pd.DataFrame(d)
 
-df.to_csv('./swag.csv',sep=',',index=False)
+df.to_csv('./2019-11-15.csv',sep=',',index=False)

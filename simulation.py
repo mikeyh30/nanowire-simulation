@@ -74,13 +74,13 @@ def simulation_single(params,row='skip'):
                         delta=params['delta'],
                         barrier=params['barrier'])
 
-    data_folder = "data/new"
-    os.makedirs("./" + data_folder + '/modelfig',exist_ok=True)
-    os.makedirs("./" + data_folder + '/cond',exist_ok=True)
-    os.makedirs("./" + data_folder + '/spec',exist_ok=True)
-    os.makedirs("./" + data_folder + '/fig-conductance',exist_ok=True)
-    os.makedirs("./" + data_folder + '/fig-ind-conductance',exist_ok=True)
-    os.makedirs("./" + data_folder + '/fig-spectrum',exist_ok=True)
+    data_folder = "/home/ucapmhy/Scratch/2019-11-15"
+    os.makedirs(data_folder + '/modelfig',exist_ok=True)
+    os.makedirs(data_folder + '/cond',exist_ok=True)
+    os.makedirs(data_folder + '/spec',exist_ok=True)
+    os.makedirs(data_folder + '/fig-conductance',exist_ok=True)
+    os.makedirs(data_folder + '/fig-ind-conductance',exist_ok=True)
+    os.makedirs(data_folder + '/fig-spectrum',exist_ok=True)
     
     save_model_figure(nanowire, data_suffix, data_folder)
 
@@ -119,7 +119,7 @@ def simulation_single(params,row='skip'):
                conductance_figure_filename,
                spectrum_figure_filename,
                individual_conductance_figure_filename,
-               'data/wiresdata.csv',
+               '/home/ucapmhy/Scratch/2019-11-15/wiresdata.csv',
                spectrum_critical_field,
                conductance_critical_field,
                data_folder
