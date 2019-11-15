@@ -4,7 +4,7 @@ def update_csv(width, noMagnets, effectiveMass, muSc, alpha, M, addedSinu,ratio,
                spectrum_data_filename, conductance_figure_filename, spectrum_figure_filename,
                individual_conductance_figure_filename, csv_filename, spectrum_critical_field,
                conductance_critical_field, data_folder):
-    df = pd.read_csv(csv_filename, sep=',')
+    df = pd.read_csv(data_folder+'/wiresdata.csv', sep=',')
 
     newline = df.append({'wire_width' : width,
                         'no_magnets' : noMagnets,
