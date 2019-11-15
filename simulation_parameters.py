@@ -2,13 +2,13 @@ from numpy import arange
 from scipy.constants import electron_mass
 
 #------------Simulation parameters-----------------
-minN = 6
-maxN = 9
+minN = 7
+maxN = 7
 
 simulation_parameters = dict(
     wire_width = [7],
     N = arange(minN,maxN+1,1), #N is the number of magnets
-    ratio = [0.5], #ratios=[i for i in np.arange(0.20,0.50,0.05)], # relative ratios of nanomagnet widths.
+    ratio = [i for i in arange(0.20,0.55,0.05)], # relative ratios of nanomagnet widths.
     M = [1], #B field strength from nanomagnets.
     added_sinusoid = [True], # Indicates presence of nanomagnets
     ## SOI terms ##
