@@ -15,7 +15,7 @@
 
 # 5. Set up the job array.  In this instance we have requested 10000 tasks
 # numbered 1 to 10000.
-#$ -t 1-4
+#$ -t 1-7
 
 # 6. Set the name of the job.
 #$ -N 'params'
@@ -29,5 +29,9 @@
 # 8. Setup email notifications
 #$ -M michael.hynes.18@ucl.ac.uk
 
+# 9. Setup virtual environment
+#$ -V
+# maybe need this? /home/ucapmhy/nanowire-simulations/virtualenv3/bin/activate
+
 # 8. Run the application.
-python hpc_simulation.py /home/ucapmhy/nanowire-simulations/nanowire-simulation/2019-11-15.csv $((SGE_TASK_ID-1))
+python /home/ucapmhy/nanowire-simulations/nanowire-simulation/hpc_simulation.py /home/ucapmhy/nanowire-simulations/nanowire-simulation/2019-11-15.csv $((SGE_TASK_ID-1))
