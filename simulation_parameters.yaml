@@ -1,0 +1,13 @@
+---
+  wire_width: 7
+  Ns: np.arange(minN,maxN+1,1)
+  ratio: 0.5
+  M: 1
+  added_sinusoid: True
+  effective_mass: 0.019*electron_mass
+  alpha: 5.1E-30
+  muSc: 2.2E-25
+  mu: 3.0E-25
+  delta: 7.2E-24
+  barrier: 2.0E-24
+  b_max: 0.4

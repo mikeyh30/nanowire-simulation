@@ -10,7 +10,11 @@ import kwant
 import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
-from nanomagnet_field import staggered_sinusoid, staggered_cosinusoid
+from nanomagnet_field import staggered_sinusoid
+from scipy.constants import physical_constants, hbar
+
+bohr_magneton = physical_constants['Bohr magneton'][0]
+lattice_constant_InAs = 6.0583E-10 # might need to change this.
 
 s0 = np.identity(2)
 sZ = np.array([[1., 0.], [0., -1.]])
@@ -35,15 +39,17 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
 
     ## Define site Hopping and functions ##
     def hopX(site0, site1, t, alpha):
-        return -t * tauZ + .5j * alpha * tauZsigY
+        return -t * tauZ + 1j * alpha * tauZsigY
     def hopY(site0, site1, t, alpha):
-        return -t * tauZ - .5j * alpha * tauZsigX
+        return -t * tauZ - 1j * alpha * tauZsigX
         
-    def sinuB(theta):
-        return sigY*staggered_cosinusoid(theta) + sigX*staggered_sinusoid(theta)
+    def sinuB(theta,stagger_ratio):
+        ssin, scos = staggered_sinusoid(theta,stagger_ratio)
+        return sigY*scos + sigX*ssin
     
     # This is the onsite Hamiltonian, this is where the B-field can be varied.
     def onsiteSc(site, muSc, t, B, Delta):
+        gfactor = 10
         if addedSinu:
             counter = np.mod(site.pos[0]-1-barrierLen, 16)
             if -1 < counter < 4:
@@ -55,10 +61,10 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
             else:
                 theta = .2*(counter - 6)*np.pi
                     
-            return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX \
-                    + M*sinuB(theta)
+            return (4 * t - muSc) * tauZ + 0.5*gfactor*bohr_magneton*B*sigX + Delta * tauX \
+                    + 0.5*gfactor*bohr_magneton*M*sinuB(theta,stagger_ratio)
         else:
-            return (4 * t - muSc) * tauZ + B * sigX + Delta * tauX
+            return (4 * t - muSc) * tauZ + 0.5*gfactor*bohr_magneton*B*sigX + Delta * tauX
     def onsiteNormal(site, mu, t):
         return (4 * t - mu) * tauZ
     def onsiteBarrier(site, mu, t, barrier):
@@ -106,7 +112,8 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
 ## Objects ##
 class Nanowire:
     def __init__(self, width=5, noMagnets=5, dim=2, barrierLen=1, 
-                 effective_mass=.5, M=0.05, muSc=.0, alpha=.8, addedSinu=False
+                 effective_mass=.5, M=0.05, muSc=.0, alpha=.8, addedSinu=False,
+                 stagger_ratio=0.5, mu=0.3, delta=0.1, barrier=2.0
                  ):
         # Wire Physical Properties
         self.width=width
@@ -115,23 +122,38 @@ class Nanowire:
         self.barrierLen=barrierLen
         
         # Superconducting components
-        self.t=.5/effective_mass
+        self.t=(hbar**2)/(2*effective_mass*lattice_constant_InAs)
         self.M=M
         self.muSc=muSc
         self.alpha=alpha
         self.addedSinu = addedSinu
-        
-    def spectrum(self, 
-                 bValues=np.linspace(0, 1.0, 201)
-                 ):        
+
+        # Nanomagnet properties
+        self.stagger_ratio = stagger_ratio
+
+        # Previously hard-coded parameters
+        self.mu = mu # how is this different from muSc?
+        self.delta = delta
+        self.barrier = barrier
+
+        # System
+        '''self.system = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
+                                barrierLen=self.barrierLen, M=self.M,
+                                addedSinu=self.addedSinu, isWhole=False,
+                                stagger_ratio=self.stagger_ratio
+                                )
+        '''
+
+    def spectrum(self, bValues=np.linspace(0, 1.0, 201)):        
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         energies = []
         critB = 0
-        params = dict(muSc=self.muSc, mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(muSc=self.muSc, mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(bValues)), 
                       desc="Spec: NoMagnets = %i, added? %r" 
                       %(self.noMagnets, self.addedSinu)
@@ -140,6 +162,7 @@ class Nanowire:
             params["B"] = b
             H = syst.hamiltonian_submatrix(sparse=True,  params=params)
             H = H.tocsc()
+            # k is the number of eigenvalues, and find them near sigma.
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
             eigs = np.sort(eigs[0])
             energies.append(eigs)
@@ -156,11 +179,12 @@ class Nanowire:
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
                          addedSinu=self.addedSinu, isWhole=True,
+                         stagger_ratio=self.stagger_ratio
                          )
         data = []
         critB = 0
-        params = dict(muSc=self.muSc, mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(muSc=self.muSc, mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(energies)), 
                       desc="Cond: NoMagnets = %i, added? %r" 
                       %(self.noMagnets, self.addedSinu)
@@ -175,7 +199,7 @@ class Nanowire:
                         - smatrix.transmission((0, 0), (0, 0))      # R_ee
                         + smatrix.transmission((0, 1), (0, 0)))     # R_he
                 cond.append(conduct)
-                if energy == 0 and critB == 0 and np.abs(2 - conduct) < 0.01:
+                if np.isclose(energy,0,rtol=1E-6) and critB == 0 and np.abs(2 - conduct) < 0.01:
                     critB = b
             data.append(cond)
             
@@ -188,11 +212,12 @@ class Nanowire:
                      ):
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         criticalPoints = []
-        params = dict(mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(muValues)),
                       desc="Crit: NoMagnets = %i, added? %r" 
                       %(self.noMagnets, self.addedSinu)
@@ -219,11 +244,12 @@ class Nanowire:
                      ):
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         phases = []
-        params = dict(mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(bValues)),
                       desc="Phas: NoMagnets = %i, added? %r" 
                       %(self.noMagnets, self.addedSinu)
@@ -252,12 +278,13 @@ class Nanowire:
                  ):
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         energies0 = []
         energies1 = []
-        params = dict(muSc=muValues[0], mu=.3, Delta=.1, alpha=self.alpha, 
-                      t=self.t, barrier=2.)
+        params = dict(muSc=muValues[0], mu=self.mu, Delta=self.delta, alpha=self.alpha, 
+                      t=self.t, barrier=self.barrier)
         for i in tqdm(range(np.size(bValues)), 
                       desc="Number of magnets = %i" %(self.noMagnets)
                       ):
@@ -285,7 +312,8 @@ class Nanowire:
     def plot(self):
         syst = makeNISIN(width=self.width, noMagnets=self.noMagnets, 
                          barrierLen=self.barrierLen, M=self.M,
-                         addedSinu=self.addedSinu, isWhole=False
+                         addedSinu=self.addedSinu, isWhole=False,
+                         stagger_ratio=self.stagger_ratio
                          )
         
         return kwant.plotter.plot(syst,show=False)
