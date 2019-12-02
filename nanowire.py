@@ -10,7 +10,7 @@ import kwant
 import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
-from nanomagnet_field import staggered_sinusoid
+from nanomagnet_field import rick_fourier
 from scipy.constants import physical_constants, hbar
 
 bohr_magneton = physical_constants['Bohr magneton'][0]
@@ -44,7 +44,7 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
         return -t * tauZ - 1j * alpha * tauZsigX
         
     def sinuB(theta,stagger_ratio):
-        ssin, scos = staggered_sinusoid(theta,stagger_ratio)
+        ssin, scos = rick_fourier(theta)
         return sigY*scos + sigX*ssin
     
     # This is the onsite Hamiltonian, this is where the B-field can be varied.
