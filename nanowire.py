@@ -13,8 +13,8 @@ import scipy.sparse.linalg
 from nanomagnet_field import rick_fourier
 from scipy.constants import physical_constants, hbar
 
-bohr_magneton = physical_constants['Bohr magneton'][0]
-lattice_constant_InAs = 6.0583E-10 # might need to change this.
+bohr_magneton = 1#physical_constants['Bohr magneton'][0]
+lattice_constant_InAs = 1#6.0583E-10 # might need to change this.
 
 s0 = np.identity(2)
 sZ = np.array([[1., 0.], [0., -1.]])
