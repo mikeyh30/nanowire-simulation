@@ -6,4 +6,4 @@ def gen_black_output_csv(date):
         file.write(text)
 
 if __name__ == "__main__":
-    gen_black_output_csv("2012-12-02")
+    gen_black_output_csv("2019-12-03")

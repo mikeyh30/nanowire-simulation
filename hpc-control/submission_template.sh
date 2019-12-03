@@ -31,7 +31,7 @@
 # 9. Setup virtual environment
 #$ -V
 
-DATE="2019-12-02"
+DATE="2019-12-03"
 
 # 8. Run the application. Commented version is to determine the required resources.
 # /usr/bin/time --verbose python /home/ucapmhy/nanowire-simulations/nanowire-simulation/hpc_simulation.py /home/ucapmhy/nanowire-simulations/nanowire-simulation/2019-11-15.csv $((SGE_TASK_ID-1))

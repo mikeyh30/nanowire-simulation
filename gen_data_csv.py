@@ -8,4 +8,4 @@ def gen_data_csv(date):
     df.to_csv('./'+date+'.csv',sep=',',index=False)
 
 if __name__ == "__main__":
-    gen_data_csv("2019-12-02")
+    gen_data_csv("2019-12-03")
