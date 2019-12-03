@@ -54,7 +54,7 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
     fig.savefig(data_folder + "/fig-ind-conductance/model" + suffix + ".png")
     plt.close()
 
-def simulation_single(params,row='skip'):
+def simulation_single(params,row='skip',date='no-date'):
     if row == 'skip':
         data_suffix = "w{0}_no{1}_eM{2:3.2f}_mu{3}_al{4}_M{5:4.2f}_added{6}_ratio{7:4.2f}".format( 
         params['wire_width'], params['N'], params['effective_mass'], params['muSc'],
@@ -74,7 +74,7 @@ def simulation_single(params,row='skip'):
                         delta=params['delta'],
                         barrier=params['barrier'])
 
-    data_folder = "/home/ucapmhy/Scratch/2019-11-15"
+    data_folder = "/home/ucapmhy/Scratch/"+date
     os.makedirs(data_folder + '/modelfig',exist_ok=True)
     os.makedirs(data_folder + '/cond',exist_ok=True)
     os.makedirs(data_folder + '/spec',exist_ok=True)
@@ -119,7 +119,7 @@ def simulation_single(params,row='skip'):
                conductance_figure_filename,
                spectrum_figure_filename,
                individual_conductance_figure_filename,
-               '/home/ucapmhy/Scratch/2019-11-15/wiresdata.csv',
+               '/home/ucapmhy/Scratch/'+date+'/wiresdata.csv',
                spectrum_critical_field,
                conductance_critical_field,
                data_folder
