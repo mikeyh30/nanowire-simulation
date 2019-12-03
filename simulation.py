@@ -119,7 +119,7 @@ def simulation_single(params,row='skip'):
                conductance_figure_filename,
                spectrum_figure_filename,
                individual_conductance_figure_filename,
-               '/home/ucapmhy/Scratch/2019-11-15/wiresdata.csv',
+               '/home/ucapmhy/Scratch/2019-12-02/wiresdata.csv',
                spectrum_critical_field,
                conductance_critical_field,
                data_folder
