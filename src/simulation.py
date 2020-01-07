@@ -4,7 +4,6 @@ import numpy as np
 import pickle
 from nanowire import Nanowire
 from update_csv import update_csv
-from emailer import send_finished_script_email
 from simulation_parameters import simulation_parameters
 import argparse
 import os

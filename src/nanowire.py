@@ -44,12 +44,13 @@ def makeNISIN(width=7, noMagnets=5, barrierLen=1, M=0.05,
         return -t * tauZ - 1j * alpha * tauZsigX
         
     def sinuB(theta,stagger_ratio):
-        ssin, scos = rick_fourier(theta)
-        return sigY*scos + sigX*ssin
+        # ssin, scos = rick_fourier(theta)
+        # return sigY*scos + sigX*ssin
+        return sigY*np.cos(theta) + sigX*np.sin(theta)
     
     # This is the onsite Hamiltonian, this is where the B-field can be varied.
     def onsiteSc(site, muSc, t, B, Delta):
-        gfactor = 10
+        gfactor = 2 # should be 10 in the real units
         if addedSinu:
             counter = np.mod(site.pos[0]-1-barrierLen, 16)
             if -1 < counter < 4:
@@ -122,7 +123,7 @@ class Nanowire:
         self.barrierLen=barrierLen
         
         # Superconducting components
-        self.t=(hbar**2)/(2*effective_mass*lattice_constant_InAs)
+        self.t=.5/effective_mass#(hbar**2)/(2*effective_mass*lattice_constant_InAs)
         self.M=M
         self.muSc=muSc
         self.alpha=alpha
