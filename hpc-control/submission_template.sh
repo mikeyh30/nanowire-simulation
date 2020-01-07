@@ -35,5 +35,5 @@ DATE="2019-12-03"
 
 # 8. Run the application. Commented version is to determine the required resources.
 # /usr/bin/time --verbose python /home/ucapmhy/nanowire-simulations/nanowire-simulation/hpc_simulation.py /home/ucapmhy/nanowire-simulations/nanowire-simulation/2019-11-15.csv $((SGE_TASK_ID-1))
-python /home/ucapmhy/nanowire-simulations/nanowire-simulation/hpc_simulation.py \
-    /home/ucapmhy/nanowire-simulations/nanowire-simulation/$DATE.csv $((SGE_TASK_ID-1)) $DATE
+python /home/ucapmhy/nanowire-simulations/nanowire-simulation/src/hpc_simulation.py \
+    /home/ucapmhy/nanowire-simulations/nanowire-simulation/Scratch/$DATE/$DATE.csv $((SGE_TASK_ID-1)) $DATE
