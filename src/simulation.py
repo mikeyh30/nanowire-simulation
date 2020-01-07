@@ -74,7 +74,7 @@ def simulation_single(params,row='skip',date='no-date'):
                         delta=params['delta'],
                         barrier=params['barrier'])
 
-    data_folder = "/home/ucapmhy/Scratch/"+date
+    data_folder = "./Scratch/"+date
     os.makedirs(data_folder + '/modelfig',exist_ok=True)
     os.makedirs(data_folder + '/cond',exist_ok=True)
     os.makedirs(data_folder + '/spec',exist_ok=True)
