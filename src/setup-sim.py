@@ -27,9 +27,22 @@ def gen_blank_output_csv(date,scratch):
         raise FileExistsError("output csv already exists")
 
 
+def gen_directories(date,scratch):
+    data_folder = scratch + date
+    def makedirs(data_folder, *subfolder):
+        for sub in subfolder:
+            if(not os.path.exists(data_folder + sub)):
+                os.makedirs(data_folder + sub, exist_ok=True)
+            else:
+                raise FileExistsError(sub, "already exists")
+    os.makedirs(data_folder, exist_ok=True)
+    makedirs(data_folder, "/modelfig", "/cond", "/spec", "/fig-conductance",
+            "/fig-ind-conductance", "/fig-spectrum")
+
+
 def setup(date,scratch):
     try:
-        os.makedirs(scratch + date, exist_ok=True)
+        gen_directories(date,scratch)
         gen_blank_output_csv(date,scratch)
         gen_data_csv(date,scratch)
     except FileExistsError as e:
@@ -39,8 +52,7 @@ def setup(date,scratch):
 
 
 if __name__ == "__main__":
-    date = "2020-01-07v4"
+    date = "2020-01-07v3"
     with open('./globals.yml') as f:
         scratch = yaml.load(f)["directories"]["scratch"]
     setup(date, scratch)
-

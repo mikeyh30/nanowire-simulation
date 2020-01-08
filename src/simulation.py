@@ -68,7 +68,7 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
     plt.close()
 
 
-def simulation_single(params, row="skip", date="no-date"):
+def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     if row == "skip":
         data_suffix = "w{0}_no{1}_eM{2:3.2f}_mu{3}_al{4}_M{5:4.2f}_added{6}_ratio{7:4.2f}".format(
             params["wire_width"],
@@ -97,13 +97,7 @@ def simulation_single(params, row="skip", date="no-date"):
         barrier=params["barrier"],
     )
 
-    data_folder = "./Scratch/" + date
-    os.makedirs(data_folder + "/modelfig", exist_ok=True)
-    os.makedirs(data_folder + "/cond", exist_ok=True)
-    os.makedirs(data_folder + "/spec", exist_ok=True)
-    os.makedirs(data_folder + "/fig-conductance", exist_ok=True)
-    os.makedirs(data_folder + "/fig-ind-conductance", exist_ok=True)
-    os.makedirs(data_folder + "/fig-spectrum", exist_ok=True)
+    data_folder = scratch + date
 
     save_model_figure(nanowire, data_suffix, data_folder)
 
@@ -144,7 +138,7 @@ def simulation_single(params, row="skip", date="no-date"):
         conductance_figure_filename,
         spectrum_figure_filename,
         individual_conductance_figure_filename,
-        "/home/ucapmhy/Scratch/" + date + "/wiresdata.csv",
+        scratch + date + "/wiresdata.csv",
         spectrum_critical_field,
         conductance_critical_field,
         data_folder,
