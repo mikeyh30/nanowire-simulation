@@ -38,7 +38,7 @@ class Nanowire:
         self.barrier_length = barrier_length
 
         # Superconducting components
-        self.t = 0.5 / effective_mass # (hbar**2)/(2*effective_mass*lattice_constant_InAs)
+        self.t = (hbar**2)/(2*effective_mass*lattice_constant_InAs)# 0.5 / effective_mass
         self.M = M
         self.muSc = muSc
         self.alpha = alpha
