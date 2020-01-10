@@ -3,6 +3,7 @@ from simulation_parameters import simulation_parameters
 from itertools import product
 import os
 import yaml
+import argparse
 
 
 def gen_data_csv(date,scratch):
@@ -52,7 +53,12 @@ def setup(date,scratch):
 
 
 if __name__ == "__main__":
-    date = "2020-01-07v3"
+    parser = argparse.ArgumentParser(description="take the csv, and the line number")
+    parser.add_argument("date", type=str)
+    args = parser.parse_args()
+
+    date = args.date
+
     with open('./globals.yml') as f:
         scratch = yaml.load(f)["directories"]["scratch"]
     setup(date, scratch)

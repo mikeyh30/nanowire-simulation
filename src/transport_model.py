@@ -46,7 +46,7 @@ def onsiteSc(site, muSc, t, B, Delta, M, addedSinu, barrier_length, stagger_rati
             theta = np.pi
         else:
             theta = 0.2 * (counter - 6) * np.pi
-            
+
         return (
             (4 * t - muSc) * tauZ
             + 0.5 * gfactor * bohr_magneton * B * sigX
@@ -72,41 +72,57 @@ def make_lead(width, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
         conservation_law=-tauZ,
         particle_hole=tauYsigY,
     )
+    lat = kwant.lattice.square(norbs=4)
     lead[(lat(0, j) for j in range(width))] = onsiteH
     lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
     lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
     return lead
-    
+
+def barrier_region(site, barrier_length, length, width):
+    i = site//width
+    j = site%width
+    return(
+        (
+            (0 <= i < barrier_length)
+            or
+            (length - barrier_length <= i < length)
+        )
+        and
+        (
+            0 <= j < width
+        )
+      )
+
 def make_wire(width, length, barrier_length, hamiltonian_wire=onsiteSc,
         hamiltonian_barrier=onsiteBarrier, hamiltonian_normal=onsiteNormal,
         hopX=hopX, hopY=hopY):
 
     syst=kwant.Builder()
-    
+
     syst[
         (
             lat(i, j)
-            for i in range(barrier_length + 1, length - barrier_length - 1)
+            for i in range(barrier_length, length - barrier_length)
             for j in range(width)
         )
     ] = onsiteSc
-    
+
     syst[
         (
             lat(i, j)
-            for i in range(barrier_length, barrier_length + 1)
+            for i in range(0, barrier_length + 1)
             for j in range(width)
         )
     ] = onsiteBarrier
-    
+
     syst[
         (
             lat(i, j)
-            for i in range(length - barrier_length - 1, length-1)
+            for i in range(length - barrier_length, length)
             for j in range(width)
         )
     ] = onsiteBarrier
-    
+
     # Hopping:
     syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
     syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY

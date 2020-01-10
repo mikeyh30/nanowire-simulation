@@ -12,7 +12,7 @@ import numpy as np
 import scipy.sparse.linalg
 from nanomagnet_field import rick_fourier
 from scipy.constants import physical_constants, hbar
-from transport_model import NISIN, barrier_region
+from transport_model import NISIN
 
 class Nanowire:
     def __init__(
@@ -148,6 +148,133 @@ class Nanowire:
         outcome = dict(B=bValues, BiasV=energies, Cond=data, CritB=critB)
         return outcome
 
+    def criticals(
+        self, bValues=np.linspace(0, 0.4, 81), muValues=np.linspace(0, 1.0, 101)
+    ):
+        syst = NISIN(
+            width=self.width,
+            noMagnets=self.noMagnets,
+            barrier_length=self.barrier_length,
+        )
+        criticalPoints = []
+        params = dict(
+            mu=self.mu,
+            Delta=self.delta,
+            alpha=self.alpha,
+            t=self.t,
+            barrier=self.barrier,
+            M=self.M,
+            addedSinu=self.addedSinu,
+            stagger_ratio=self.stagger_ratio,
+            barrier_length=self.barrier_length
+        )
+        for i in tqdm(
+            range(np.size(muValues)),
+            desc="Crit: NoMagnets = %i, added? %r" % (self.noMagnets, self.addedSinu),
+        ):
+            params["muSc"] = muValues[i]
+            for b in bValues:
+                params["B"] = b
+                H = syst.hamiltonian_submatrix(sparse=True, params=params)
+                H = H.tocsc()
+                eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
+                eigs = np.sort(eigs[0])
+                if np.abs(eigs[9] - eigs[10]) / 2 < 1e-3:
+                    criticalPoints.append(b)
+                    break
+            else:
+                continue
+
+        outcome = dict(MuSc=muValues, CritB=criticalPoints)
+        return outcome
+
+    def phaseTransitions(
+        self, bValues=np.linspace(0, 0.4, 81), muValues=np.linspace(0, 1.0, 101)
+    ):
+        syst = NISIN(
+            width=self.width,
+            noMagnets=self.noMagnets,
+            barrier_length=self.barrier_length,
+        )
+        phases = []
+        params = dict(
+            mu=self.mu,
+            Delta=self.delta,
+            alpha=self.alpha,
+            t=self.t,
+            barrier=self.barrier,
+            M=self.M,
+            addedSinu=self.addedSinu,
+            stagger_ratio=self.stagger_ratio,
+            barrier_length=self.barrier_length
+        )
+        for i in tqdm(
+            range(np.size(bValues)),
+            desc="Phas: NoMagnets = %i, added? %r" % (self.noMagnets, self.addedSinu),
+        ):
+            params["B"] = bValues[i]
+            transitions = []
+            for mu in muValues:
+                params["muSc"] = mu
+                H = syst.hamiltonian_submatrix(sparse=True, params=params)
+                H = H.tocsc()
+                eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
+                eigs = np.sort(eigs[0])
+                if 0.5 * np.abs(eigs[9] - eigs[10]) < 1e-3:
+                    transitions.append(1)
+                else:
+                    transitions.append(0)
+
+            phases.append(transitions)
+
+        outcome = dict(B=bValues, MuSc=muValues, Phases=phases)
+        return outcome
+
+    def phaseAid(
+        self, bValues=np.linspace(0.0, 0.3, 61), muValues=np.linspace(0.2, 0.5, 61)
+    ):
+        syst = NISIN(
+            width=self.width,
+            noMagnets=self.noMagnets,
+            barrier_length=self.barrier_length,
+        )
+        energies0 = []
+        energies1 = []
+        params = dict(
+            muSc=muValues[0],
+            mu=self.mu,
+            Delta=self.delta,
+            alpha=self.alpha,
+            t=self.t,
+            barrier=self.barrier,
+            M=self.M,
+            addedSinu=self.addedSinu,
+            stagger_ratio=self.stagger_ratio,
+            barrier_length=self.barrier_length
+        )
+        for i in tqdm(
+            range(np.size(bValues)), desc="Number of magnets = %i" % (self.noMagnets)
+        ):
+            b = bValues[i]
+            params["B"] = b
+            H = syst.hamiltonian_submatrix(sparse=True, params=params)
+            H = H.tocsc()
+            eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
+            energies0.append(np.sort(eigs[0]))
+
+        for i in tqdm(
+            range(np.size(muValues)), desc="Number of magnets = %i" % (self.noMagnets)
+        ):
+            mu = muValues[i]
+            params["muSc"] = mu
+            H = syst.hamiltonian_submatrix(sparse=True, params=params)
+            H = H.tocsc()
+            eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
+            energies1.append(np.sort(eigs[0]))
+
+        outcome = dict(B=bValues, MuSc=muValues, Eb=energies0, Em=energies1)
+        return outcome
+
     def plot(self):
         syst = NISIN(
             width=self.width,
@@ -155,10 +282,8 @@ class Nanowire:
             barrier_length=self.barrier_length,
         )
 
-        length = 8 * self.noMagnets - 2 + 2 * self.barrier_length
+        return kwant.plotter.plot(syst, show=False)
 
-        return kwant.plotter.plot(syst, show=False,
-            site_color=lambda s: 'y' if barrier_region(s, self.barrier_length, length, self.width) else 'b')
 
 def main():
     pass
