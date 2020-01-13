@@ -14,6 +14,8 @@ from nanomagnet_field import rick_fourier
 from scipy.constants import physical_constants, hbar
 from transport_model import NISIN, barrier_region
 
+lattice_constant_InAs = 20E-9 # 6.0583E-10  # might need to change this.
+
 class Nanowire:
     def __init__(
         self,
@@ -134,7 +136,7 @@ class Nanowire:
                 conduct = (
                     smatrix.submatrix((0, 0), (0, 0)).shape[0]  # N
                     - smatrix.transmission((0, 0), (0, 0))  # R_ee
-                    + smatrix.transmission((0, 1), (0, 0))
+                    + smatrix.transmission((0, 1), (0, 0)) # maybe I need to update the 1 to a lattice_constant?
                 )  # R_he
                 cond.append(conduct)
                 if (
@@ -157,7 +159,7 @@ class Nanowire:
 
         length = 8 * self.noMagnets - 2 + 2 * self.barrier_length
 
-        return kwant.plotter.plot(syst, show=False,
+        return kwant.plotter.plot(syst, show=False, unit=10E-9, site_size=10E-6, fig_size=(10,4),
             site_color=lambda s: 'y' if barrier_region(s, self.barrier_length, length, self.width) else 'b')
 
 def main():

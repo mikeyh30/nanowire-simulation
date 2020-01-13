@@ -1,9 +1,10 @@
 import kwant
 import numpy as np
 import tinyarray as ta
+from scipy.constants import physical_constants
 
-bohr_magneton = 1  # physical_constants['Bohr magneton'][0]
-lattice_constant_InAs = 1  # 6.0583E-10 # might need to change this.
+bohr_magneton =  physical_constants['Bohr magneton'][0]
+lattice_constant_InAs = 20E-9 # 6.0583E-10  # might need to change this.
 
 s0 = np.identity(2)
 sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
@@ -20,7 +21,7 @@ tauZsigX = ta.array(np.kron(sZ, sX))
 tauZsigY = ta.array(np.kron(sZ, sY))
 tauYsigY = ta.array(np.kron(sY, sY))
 
-lat = kwant.lattice.square(norbs=4)
+lat = kwant.lattice.square(a=lattice_constant_InAs,norbs=4)
 
 def hopX(site0, site1, t, alpha):
     return -t * tauZ + 1j * alpha * tauZsigY
@@ -68,11 +69,11 @@ def onsiteBarrier(site, mu, t, barrier):
 
 def make_lead(width, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
     lead = kwant.Builder(
-        kwant.TranslationalSymmetry((-1, 0)),
+        kwant.TranslationalSymmetry((-lattice_constant_InAs, 0)),
         conservation_law=-tauZ,
         particle_hole=tauYsigY,
     )
-    lat = kwant.lattice.square(norbs=4)
+    lat = kwant.lattice.square(a=lattice_constant_InAs, norbs=4)
     lead[(lat(0, j) for j in range(width))] = onsiteH
     lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
     lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
