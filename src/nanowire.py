@@ -159,7 +159,7 @@ class Nanowire:
 
         length = 8 * self.noMagnets - 2 + 2 * self.barrier_length
 
-        return kwant.plotter.plot(syst, show=False, unit=10E-9, site_size=10E-6, fig_size=(10,4),
+        return kwant.plotter.plot(syst, show=False, unit='nn', site_size=0.20,
             site_color=lambda s: 'y' if barrier_region(s, self.barrier_length, length, self.width) else 'b')
 
 def main():
