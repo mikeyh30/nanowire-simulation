@@ -26,7 +26,7 @@ class Nanowire:
         effective_mass=0.5,
         M=0.05,
         muSc=0.0,
-        alpha=0.8,
+        alpha_R=0.8,
         addedSinu=False,
         stagger_ratio=0.5,
         mu=0.3,
@@ -43,7 +43,7 @@ class Nanowire:
         self.t = (hbar**2)/(2*effective_mass*(lattice_constant_InAs**2))# 0.5 / effective_mass
         self.M = M
         self.muSc = muSc
-        self.alpha = alpha
+        self.alpha = alpha_R/lattice_constant_InAs
         self.addedSinu = addedSinu
 
         # Nanomagnet properties
