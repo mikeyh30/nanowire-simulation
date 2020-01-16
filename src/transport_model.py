@@ -2,8 +2,8 @@ import kwant
 import numpy as np
 import tinyarray as ta
 
-bohr_magneton =  58E-6 # eVT^-1 # physical_constants['Bohr magneton'][0]
-lattice_constant_InAs = 200 # angstroms # 6.0583E-10 # 20E-3 # might need to change this.
+bohr_magneton =  1 # physical_constants['Bohr magneton'][0]
+lattice_constant_InAs = 1 # angstroms # 6.0583E-10 # 20E-3 # might need to change this.
 
 s0 = np.identity(2)
 sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
@@ -35,7 +35,7 @@ def sinuB(theta, stagger_ratio):
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
 
 def onsiteSc(site, muSc, t, B, Delta, M, addedSinu, barrier_length, stagger_ratio):
-    gfactor = 10  # should be 10 in the real units
+    gfactor = 2  # should be 10 in the real units
     if addedSinu:
         counter = np.mod(site.pos[0] - 1 - barrier_length, 16)
         if -1 < counter < 4:
