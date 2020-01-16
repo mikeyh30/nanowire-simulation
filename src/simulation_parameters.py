@@ -15,7 +15,7 @@ simulation_parameters = dict(
     added_sinusoid=[True],  # Indicates presence of nanomagnets
     ## SOI terms ##
     effective_mass=[0.019],  # [0.019*electron_mass], # m^*_{InAs}
-    alpha=[0.32], # [0.0] # [5.1E-30], #Rashba parameter
+    alpha_R=[0.32], # [0.0] # [5.1E-30], #Rashba parameter
     muSc=[1.4E-6], # [0.22] # [2.2E-25], #Chemical potential in the nanowire.
     mu=[1.9E-6],  # [0.3] # [3E-25], # Chemical potential in the semiconductor
     delta=[45E-6],  # [0.1] # [7.2E-24], # superconducting gap
