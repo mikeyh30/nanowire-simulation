@@ -16,9 +16,9 @@ simulation_parameters = dict(
     ## SOI terms ##
     effective_mass=[0.019],  # [0.019*electron_mass], # m^*_{InAs}
     alpha_R=[0.32], # [0.0] # [5.1E-30], #Rashba parameter
-    muSc=[1.4E-6], # [0.22] # [2.2E-25], #Chemical potential in the nanowire.
-    mu=[1.9E-6],  # [0.3] # [3E-25], # Chemical potential in the semiconductor
-    delta=[45E-6],  # [0.1] # [7.2E-24], # superconducting gap
-    barrier=[12.5E-6],  # [2.0] # [2.0E-24], # find out more about this.
-    b_max=[0.4],  # T
+    muSc=[0.2], # [1.4E-6], # [0.22] # [2.2E-25], #Chemical potential in the nanowire.
+    mu=[0.2], # [1.9E-6],  # [0.3] # [3E-25], # Chemical potential in the semiconductor
+    delta=[45E-6], # [45E-6],  # [0.1] # [7.2E-24], # superconducting gap
+    barrier=[20E-6], # [12.5E-6],  # [2.0] # [2.0E-24], # find out more about this.
+    b_max=[40],  # T
 )
