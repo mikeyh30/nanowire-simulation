@@ -11,10 +11,9 @@ import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
 from nanomagnet_field import rick_fourier
-from scipy.constants import physical_constants, hbar
 from transport_model import NISIN, barrier_region
 
-lattice_constant_InAs = 6.0583E-10 # 20E-9 # might need to change this.
+lattice_constant_InAs = 200 # angstrom # 6.0583E-10 # 20E-9 # might need to change this.
 
 class Nanowire:
     def __init__(
@@ -40,7 +39,7 @@ class Nanowire:
         self.barrier_length = barrier_length
 
         # Superconducting components
-        self.t = (hbar**2)/(2*effective_mass*(lattice_constant_InAs**2))# 0.5 / effective_mass
+        self.t = 3.83 / effective_mass*(lattice_constant_InAs**2) # (hbar**2)/(2*effective_mass*electron_mass*(lattice_constant_InAs**2))# 0.5 / effective_mass
         self.M = M
         self.muSc = muSc
         self.alpha = alpha_R/lattice_constant_InAs
