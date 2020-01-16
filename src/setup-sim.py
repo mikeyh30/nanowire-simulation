@@ -60,5 +60,5 @@ if __name__ == "__main__":
     date = args.date
 
     with open('./globals.yml') as f:
-        scratch = yaml.load(f)["directories"]["scratch"]
+        scratch = yaml.load(f, Loader=yaml.FullLoader)["directories"]["scratch"]
     setup(date, scratch)

@@ -14,7 +14,7 @@ from nanomagnet_field import rick_fourier
 from scipy.constants import physical_constants, hbar
 from transport_model import NISIN, barrier_region
 
-lattice_constant_InAs = 20E-9 # 6.0583E-10  # might need to change this.
+lattice_constant_InAs = 6.0583E-10 # 20E-9 # might need to change this.
 
 class Nanowire:
     def __init__(
