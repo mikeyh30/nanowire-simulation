@@ -11,7 +11,7 @@ simulation_parameters = dict(
     #     i for i in arange(0.20, 0.55, 0.05)
     # ],  # relative ratios of nanomagnet widths.
     ratio=[0.5],
-    M=[1],  # [0.1] # [1],#B field strength from nanomagnets.
+    M=[0.1],  # [0.1] # [1],#B field strength from nanomagnets.
     added_sinusoid=[True],  # Indicates presence of nanomagnets
     ## SOI terms ##
     effective_mass=[3.83],  # [0.019*electron_mass], # m^*_{InAs}
