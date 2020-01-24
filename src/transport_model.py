@@ -2,8 +2,8 @@ import kwant
 import numpy as np
 import tinyarray as ta
 
-bohr_magneton =  1 # physical_constants['Bohr magneton'][0]
-lattice_constant_InAs = 1 # angstroms # 6.0583E-10 # 20E-3 # might need to change this.
+bohr_magneton =  58E-6 # eVm # physical_constants['Bohr magneton'][0]
+lattice_constant_InAs = 200 # angstroms # 6.0583E-10 # 20E-3 # might need to change this.
 
 s0 = np.identity(2)
 sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
@@ -23,9 +23,11 @@ tauYsigY = ta.array(np.kron(sY, sY))
 lat = kwant.lattice.square(a=lattice_constant_InAs,norbs=4)
 
 def hopX(site0, site1, t, alpha):
+  #  print('hopx', -t * tauZ + 1j * alpha * tauZsigY)
     return -t * tauZ + 1j * alpha * tauZsigY
 
 def hopY(site0, site1, t, alpha):
+  #  print('hopy', -t * tauZ - 1j * alpha * tauZsigX)
     return -t * tauZ - 1j * alpha * tauZsigX
 
 def sinuB(theta, stagger_ratio):
@@ -35,7 +37,7 @@ def sinuB(theta, stagger_ratio):
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
 
 def onsiteSc(site, muSc, t, B, Delta, M, addedSinu, barrier_length, stagger_ratio):
-    gfactor = 2  # should be 10 in the real units
+    gfactor = 10  # should be 10 in the real units
     if addedSinu:
         counter = np.mod(site.pos[0] - 1 - barrier_length, 16)
         if -1 < counter < 4:
@@ -46,6 +48,8 @@ def onsiteSc(site, muSc, t, B, Delta, M, addedSinu, barrier_length, stagger_rati
             theta = np.pi
         else:
             theta = 0.2 * (counter - 6) * np.pi
+
+  #      print('onsiteSC', (4 * t - muSc))
 
         return (
             (4 * t - muSc) * tauZ
@@ -61,9 +65,11 @@ def onsiteSc(site, muSc, t, B, Delta, M, addedSinu, barrier_length, stagger_rati
         )
 
 def onsiteNormal(site, mu, t):
+ #   print('onsitnormal', (4 * t - mu) * tauZ)
     return (4 * t - mu) * tauZ
 
 def onsiteBarrier(site, mu, t, barrier):
+ #   print('onsitebarrier', (4 * t - mu + barrier) * tauZ)
     return (4 * t - mu + barrier) * tauZ
 
 def make_lead(width, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
