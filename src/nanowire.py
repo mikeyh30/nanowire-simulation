@@ -83,7 +83,7 @@ class Nanowire:
         )
         for i in tqdm(
             range(np.size(bValues)),
-            desc="Spec: NoMagnets = %i, added? %r" % (self.noMagnets, self.addedSinu),
+            desc="Spec",
         ):
             b = bValues[i]
             params["B"] = b
@@ -125,7 +125,7 @@ class Nanowire:
         )
         for i in tqdm(
             range(np.size(energies)),
-            desc="Cond: NoMagnets = %i, added? %r" % (self.noMagnets, self.addedSinu),
+            desc="Cond",
         ):
             cond = []
             energy = energies[i]
