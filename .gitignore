@@ -24,3 +24,13 @@ data/
 .vscode/
 
 Scratch
+
+kwant-1.4.1/
+
+nanowire-env/
+
+*.ipynb
+
+test*
+
+resources-needed

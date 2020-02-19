@@ -11,8 +11,9 @@ import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
 from nanomagnet_field import rick_fourier
-from scipy.constants import physical_constants, hbar
 from transport_model import NISIN, barrier_region
+
+lattice_constant_InAs = 200 # angstrom # 6.0583E-10 # 20E-9 # might need to change this.
 
 class Nanowire:
     def __init__(
@@ -24,7 +25,7 @@ class Nanowire:
         effective_mass=0.5,
         M=0.05,
         muSc=0.0,
-        alpha=0.8,
+        alpha_R=0.8,
         addedSinu=False,
         stagger_ratio=0.5,
         mu=0.3,
@@ -38,10 +39,10 @@ class Nanowire:
         self.barrier_length = barrier_length
 
         # Superconducting components
-        self.t = 0.5 / effective_mass # (hbar**2)/(2*effective_mass*lattice_constant_InAs)
+        self.t = 3.83 / (effective_mass*(lattice_constant_InAs**2)) # (hbar**2)/(2*effective_mass*electron_mass*(lattice_constant_InAs**2))# 0.5 / effective_mass
         self.M = M
         self.muSc = muSc
-        self.alpha = alpha
+        self.alpha = alpha_R/lattice_constant_InAs
         self.addedSinu = addedSinu
 
         # Nanomagnet properties
@@ -82,7 +83,7 @@ class Nanowire:
         )
         for i in tqdm(
             range(np.size(bValues)),
-            desc="Spec: NoMagnets = %i, added? %r" % (self.noMagnets, self.addedSinu),
+            desc="Spec",
         ):
             b = bValues[i]
             params["B"] = b
@@ -124,7 +125,7 @@ class Nanowire:
         )
         for i in tqdm(
             range(np.size(energies)),
-            desc="Cond: NoMagnets = %i, added? %r" % (self.noMagnets, self.addedSinu),
+            desc="Cond",
         ):
             cond = []
             energy = energies[i]
@@ -134,7 +135,7 @@ class Nanowire:
                 conduct = (
                     smatrix.submatrix((0, 0), (0, 0)).shape[0]  # N
                     - smatrix.transmission((0, 0), (0, 0))  # R_ee
-                    + smatrix.transmission((0, 1), (0, 0))
+                    + smatrix.transmission((0, 1), (0, 0)) # maybe I need to update the 1 to a lattice_constant?
                 )  # R_he
                 cond.append(conduct)
                 if (
@@ -157,7 +158,7 @@ class Nanowire:
 
         length = 8 * self.noMagnets - 2 + 2 * self.barrier_length
 
-        return kwant.plotter.plot(syst, show=False,
+        return kwant.plotter.plot(syst, show=False, unit='nn', site_size=0.20,
             site_color=lambda s: 'y' if barrier_region(s, self.barrier_length, length, self.width) else 'b')
 
 def main():

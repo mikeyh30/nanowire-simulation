@@ -7,6 +7,7 @@ from update_csv import update_csv
 from simulation_parameters import simulation_parameters
 import argparse
 import os
+import pandas as pd
 
 
 def save_model_figure(nanowire, suffix, data_folder):
@@ -27,7 +28,7 @@ def spectrum(spectrum_data, suffix, data_folder):
     ax.set_xlabel("Zeeman Field Strength [B]")
     ax.set_ylabel("Energies [t]")
     fig.savefig(data_folder + "/fig-spectrum/model" + suffix + ".png")
-
+    plt.close(fig)
     return spectrum_data["CritB"]
 
 
@@ -51,7 +52,7 @@ def conductance(conductance_data, suffix, data_folder):
     cbar = plt.colorbar(contour)
     cbar.ax.set_ylabel("Conductance [e^2/h]")
     fig.savefig(data_folder + "/fig-conductance/model" + suffix + ".png")
-
+    plt.close(fig)
     return conductance_data["CritB"]
 
 
@@ -65,7 +66,7 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
     ax.set_xlabel("Bias V [t]")
     ax.set_ylabel("Conductance [e^2/h]")
     fig.savefig(data_folder + "/fig-ind-conductance/model" + suffix + ".png")
-    plt.close()
+    plt.close(fig)
 
 
 def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
@@ -75,7 +76,7 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
             params["N"],
             params["effective_mass"],
             params["muSc"],
-            params["alpha"],
+            params["alpha_R"],
             params["M"],
             int(params["added_sinusoid"]),
             params["ratio"],
@@ -88,7 +89,7 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
         noMagnets=params["N"],
         effective_mass=params["effective_mass"],
         muSc=params["muSc"],
-        alpha=params["alpha"],
+        alpha_R=params["alpha_R"],
         M=params["M"],
         addedSinu=params["added_sinusoid"],
         stagger_ratio=params["ratio"],
@@ -104,13 +105,14 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     # Generate data of spectrum and conductance. This takes time
     energies = np.arange(-0.120 * nanowire.t, 0.120 * nanowire.t, 0.001 * nanowire.t)
 
+    # Generate spectrum data and figure
     spectrum_data = nanowire.spectrum(bValues=np.linspace(0, params["b_max"], 81))
+    spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
+
+    # Generate conductance data and figure
     conductance_data = nanowire.conductances(
         bValues=np.linspace(0, params["b_max"], 81), energies=energies
     )
-
-    # Save figures and data, and get critical fields.
-    spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
     conductance_critical_field = conductance(conductance_data, data_suffix, data_folder)
 
     # Save figure of the conductance at a given field.
@@ -129,7 +131,7 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
         params["N"],
         params["effective_mass"],
         params["muSc"],
-        params["alpha"],
+        params["alpha_R"],
         params["M"],
         params["added_sinusoid"],
         params["ratio"],
@@ -144,12 +146,16 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
         data_folder,
     )
 
-
-def simulation_all(params):
+def simulation_all(params, row="skip", date="no-date", scratch="./Scratch/"):
     new_params = params
     for N in params["Ns"]:
         new_params["N"] = N
-        simulation_single(new_params)
+        simulation_single(new_params, row, date, scratch)
+
+def simulation_all_csv(csv_file, date, scratch):
+    df = pd.read_csv(csv_file)
+    for index, row in df.iterrows():
+        simulation_single(row,row=index,date=date,scratch=scratch)
 
 
 if __name__ == "__main__":
