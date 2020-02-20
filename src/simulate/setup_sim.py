@@ -1,5 +1,5 @@
 import pandas as pd
-from src.simulation_parameters import simulation_parameters
+from simulate.simulation_parameters import simulation_parameters
 from itertools import product
 import os
 import yaml

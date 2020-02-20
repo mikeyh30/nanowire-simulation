@@ -2,9 +2,9 @@ import kwant
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
-from src.nanowire.nanowire import Nanowire
-from src.update_csv import update_csv
-from src.simulation_parameters import simulation_parameters
+from nanowire.nanowire import Nanowire
+from simulate.update_csv import update_csv
+from simulate.simulation_parameters import simulation_parameters
 import argparse
 import os
 import pandas as pd
