@@ -2,12 +2,13 @@ import kwant
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
-from nanowire import Nanowire
-from update_csv import update_csv
-from simulation_parameters import simulation_parameters
+from src.nanowire.nanowire import Nanowire
+from src.update_csv import update_csv
+from src.simulation_parameters import simulation_parameters
 import argparse
 import os
 import pandas as pd
+import yaml
 
 
 def save_model_figure(nanowire, suffix, data_folder):
@@ -157,6 +158,21 @@ def simulation_all_csv(csv_file, date, scratch):
     for index, row in df.iterrows():
         simulation_single(row,row=index,date=date,scratch=scratch)
 
+def get_scratch():
+    with open('./globals.yml') as f:
+        scratch = yaml.load(f, Loader=yaml.FullLoader)["directories"]["scratch"]
+    return scratch
+
+def main():
+    parser = argparse.ArgumentParser(description="take the csv, and the line number")
+    parser.add_argument("csv_file", metavar="filename", type=str)
+    parser.add_argument("date", type=str)
+
+    args = parser.parse_args()
+
+    scratch = get_scratch()
+
+    simulation_all_csv(args.csv_file, args.date, scratch)
 
 if __name__ == "__main__":
-    simulation_all(simulation_parameters)
+    main()

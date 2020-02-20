@@ -1,5 +1,5 @@
 import pandas as pd
-from simulation_parameters import simulation_parameters
+from src.simulation_parameters import simulation_parameters
 from itertools import product
 import os
 import yaml
@@ -51,8 +51,7 @@ def setup(date,scratch):
         return 1
     return 0
 
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="take the csv, and the line number")
     parser.add_argument("date", type=str)
     args = parser.parse_args()
@@ -62,3 +61,6 @@ if __name__ == "__main__":
     with open('./globals.yml') as f:
         scratch = yaml.load(f, Loader=yaml.FullLoader)["directories"]["scratch"]
     setup(date, scratch)
+
+if __name__ == "__main__":
+    main()

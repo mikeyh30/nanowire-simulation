@@ -34,3 +34,5 @@ nanowire-env/
 test*
 
 resources-needed
+
+*.egg-info

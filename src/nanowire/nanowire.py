@@ -10,8 +10,8 @@ import kwant
 import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
-from nanomagnet_field import rick_fourier
-from transport_model import NISIN, barrier_region
+from src.nanowire.nanomagnet_field import rick_fourier
+from src.nanowire.transport_model import NISIN, barrier_region
 
 lattice_constant_InAs = 200 # angstrom # 6.0583E-10 # 20E-9 # might need to change this.
 

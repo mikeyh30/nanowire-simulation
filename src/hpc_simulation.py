@@ -1,4 +1,4 @@
-from simulation import simulation_single
+from src.simulation import simulation_single
 import pandas as pd
 import argparse
 
