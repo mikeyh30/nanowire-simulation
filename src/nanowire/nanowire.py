@@ -134,7 +134,7 @@ class Nanowire:
         ):
             cond = []
             energy = energies[i]
-            for b in tqdm(bValues, desc="bValues"):
+            for b in bValues:
                 params["B"] = b
                 smatrix = kwant.smatrix(syst, energy, params=params)
                 conduct = (
