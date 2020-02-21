@@ -74,7 +74,7 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     if row == "skip":
         data_suffix = "w{0}_no{1}_eM{2:3.2f}_mu{3}_al{4}_M{5:4.2f}_added{6}_ratio{7:4.2f}".format(
             params["wire_width"],
-            params["N"],
+            params["no_magnets"],
             params["effective_mass"],
             params["muSc"],
             params["alpha_R"],
@@ -87,12 +87,12 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
         
         nanowire = Nanowire(
         width=params["wire_width"],
-        noMagnets=params["N"],
+        noMagnets=params["no_magnets"],
         effective_mass=params["effective_mass"],
         muSc=params["muSc"],
         alpha_R=params["alpha_R"],
         M=params["M"],
-        addedSinu=params["added_sinusoid"],
+        added_sinusoid=params["added_sinusoid"],
         stagger_ratio=params["ratio"],
         mu=params["mu"],
         delta=params["delta"],
@@ -132,7 +132,7 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     # Log which data has been saved. Alter this function.
     update_csv(
         params["wire_width"],
-        params["N"],
+        params["no_magnets"],
         params["effective_mass"],
         params["muSc"],
         params["alpha_R"],
@@ -152,8 +152,8 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
 
 def simulation_all(params, row="skip", date="no-date", scratch="./Scratch/"):
     new_params = params
-    for N in params["Ns"]:
-        new_params["N"] = N
+    for no_magnets in params["Ns"]:
+        new_params["no_magnets"] = no_magnets
         simulation_single(new_params, row, date, scratch)
 
 def simulation_all_csv(csv_file, date, scratch):

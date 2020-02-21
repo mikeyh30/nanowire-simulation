@@ -24,7 +24,7 @@ class Nanowire:
         M=0.05,
         muSc=0.0,
         alpha_R=0.8,
-        addedSinu=False,
+        added_sinusoid=False,
         stagger_ratio=0.5,
         mu=0.3,
         delta=0.1,
@@ -44,7 +44,7 @@ class Nanowire:
         self.M = M
         self.muSc = muSc
         self.alpha = alpha_R/hopping_distance
-        self.addedSinu = addedSinu
+        self.added_sinusoid = added_sinusoid
 
         # Nanomagnet properties
         self.stagger_ratio = stagger_ratio
@@ -70,11 +70,11 @@ class Nanowire:
         params = dict(
             muSc=self.muSc,
             mu=self.mu,
-            Delta=self.delta,
+            delta=self.delta,
             alpha=self.alpha,
             t=self.t,
             barrier=self.barrier,
-            addedSinu=self.addedSinu,
+            added_sinusoid=self.added_sinusoid,
             M=self.M,
             stagger_ratio=self.stagger_ratio,
             barrier_length=self.barrier_length,
@@ -116,12 +116,12 @@ class Nanowire:
         params = dict(
             muSc=self.muSc,
             mu=self.mu,
-            Delta=self.delta,
+            delta=self.delta,
             alpha=self.alpha,
             t=self.t,
             barrier=self.barrier,
             M=self.M,
-            addedSinu=self.addedSinu,
+            added_sinusoid=self.added_sinusoid,
             stagger_ratio=self.stagger_ratio,
             barrier_length=self.barrier_length,
             gfactor=self.gfactor,

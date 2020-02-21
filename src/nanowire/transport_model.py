@@ -31,8 +31,8 @@ def sinuB(theta, stagger_ratio):
     return sigY * np.cos(theta) + sigX * np.sin(theta)
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
 
-def onsiteSc(site, muSc, t, B, Delta, M, addedSinu, barrier_length, stagger_ratio, gfactor,bohr_magneton):
-    if addedSinu:
+def onsiteSc(site, muSc, t, B, delta, M, added_sinusoid, barrier_length, stagger_ratio, gfactor,bohr_magneton):
+    if added_sinusoid:
         counter = np.mod(site.pos[0] - 1 - barrier_length, 16)
         if -1 < counter < 4:
             theta = 0
@@ -48,14 +48,14 @@ def onsiteSc(site, muSc, t, B, Delta, M, addedSinu, barrier_length, stagger_rati
         return (
             (4 * t - muSc) * tauZ
             + 0.5 * gfactor * bohr_magneton * B * sigX
-            + Delta * tauX
+            + delta * tauX
             + 0.5 * gfactor * bohr_magneton * M * sinuB(theta, stagger_ratio)
         )
     else:
         return (
             (4 * t - muSc) * tauZ
             + 0.5 * gfactor * bohr_magneton * B * sigX
-            + Delta * tauX
+            + delta * tauX
         )
 
 def onsiteNormal(site, mu, t):
