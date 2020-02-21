@@ -13,8 +13,6 @@ import scipy.sparse.linalg
 from nanowire.nanomagnet_field import rick_fourier
 from nanowire.transport_model import NISIN, barrier_region
 
-lattice_constant_InAs = 200 # angstrom # 6.0583E-10 # 20E-9 # might need to change this.
-
 class Nanowire:
     def __init__(
         self,
@@ -31,6 +29,9 @@ class Nanowire:
         mu=0.3,
         delta=0.1,
         barrier=2.0,
+        hopping_distance=1,
+        bohr_magneton=1,
+        gfactor=1,
     ):
         # Wire Physical Properties
         self.width = width
@@ -39,10 +40,10 @@ class Nanowire:
         self.barrier_length = barrier_length
 
         # Superconducting components
-        self.t = 3.83 / (effective_mass*(lattice_constant_InAs**2)) # (hbar**2)/(2*effective_mass*electron_mass*(lattice_constant_InAs**2))# 0.5 / effective_mass
+        self.t = 3.83 / (effective_mass*(hopping_distance**2)) # (hbar**2)/(2*effective_mass*electron_mass*(self.hopping_distance**2))# 0.5 / effective_mass
         self.M = M
         self.muSc = muSc
-        self.alpha = alpha_R/lattice_constant_InAs
+        self.alpha = alpha_R/hopping_distance
         self.addedSinu = addedSinu
 
         # Nanomagnet properties
@@ -53,19 +54,16 @@ class Nanowire:
         self.delta = delta
         self.barrier = barrier
 
-        # System
-        """self.system = NISIN(width=self.width, noMagnets=self.noMagnets, 
-                                barrier_length=self.barrier_length, M=self.M,
-                                addedSinu=self.addedSinu, 
-                                stagger_ratio=self.stagger_ratio
-                                )
-        """
+        self.gfactor=gfactor
+        self.bohr_magneton=bohr_magneton
+        self.hopping_distance=hopping_distance
 
     def spectrum(self, bValues=np.linspace(0, 1.0, 201)):
         syst = NISIN(
             width=self.width,
             noMagnets=self.noMagnets,
             barrier_length=self.barrier_length,
+            hopping_distance=self.hopping_distance
         )
         energies = []
         critB = 0
@@ -79,7 +77,10 @@ class Nanowire:
             addedSinu=self.addedSinu,
             M=self.M,
             stagger_ratio=self.stagger_ratio,
-            barrier_length=self.barrier_length
+            barrier_length=self.barrier_length,
+            gfactor=self.gfactor,
+            bohr_magneton=self.bohr_magneton,
+            hopping_distance=self.hopping_distance
         )
         for i in tqdm(
             range(np.size(bValues)),
@@ -107,7 +108,8 @@ class Nanowire:
         syst = NISIN(
             width=self.width,
             noMagnets=self.noMagnets,
-            barrier_length=self.barrier_length
+            barrier_length=self.barrier_length,
+            hopping_distance=self.hopping_distance
         )
         data = []
         critB = 0
@@ -121,7 +123,10 @@ class Nanowire:
             M=self.M,
             addedSinu=self.addedSinu,
             stagger_ratio=self.stagger_ratio,
-            barrier_length=self.barrier_length
+            barrier_length=self.barrier_length,
+            gfactor=self.gfactor,
+            bohr_magneton=self.bohr_magneton,
+            hopping_distance=self.hopping_distance
         )
         for i in tqdm(
             range(np.size(energies)),
@@ -154,6 +159,7 @@ class Nanowire:
             width=self.width,
             noMagnets=self.noMagnets,
             barrier_length=self.barrier_length,
+            hopping_distance=self.hopping_distance 
         )
 
         length = 8 * self.noMagnets - 2 + 2 * self.barrier_length

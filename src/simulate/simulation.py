@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 from nanowire.nanowire import Nanowire
 from simulate.update_csv import update_csv
-from simulate.simulation_parameters import simulation_parameters
+from simulate.get_parameters import get_simulation_parameters, get_scratch
 import argparse
 import os
 import pandas as pd
@@ -84,8 +84,8 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
         )
     else:
         data_suffix = "simulation{}".format(row)
-
-    nanowire = Nanowire(
+        
+        nanowire = Nanowire(
         width=params["wire_width"],
         noMagnets=params["N"],
         effective_mass=params["effective_mass"],
@@ -97,6 +97,9 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
         mu=params["mu"],
         delta=params["delta"],
         barrier=params["barrier"],
+        hopping_distance=params["hopping_distance"],
+        bohr_magneton=params["bohr_magneton"],
+        gfactor=params["gfactor"],
     )
 
     data_folder = scratch + date
@@ -158,11 +161,6 @@ def simulation_all_csv(csv_file, date, scratch):
     for index, row in df.iterrows():
         simulation_single(row,row=index,date=date,scratch=scratch)
 
-def get_scratch():
-    with open('./globals.yml') as f:
-        scratch = yaml.load(f, Loader=yaml.FullLoader)["directories"]["scratch"]
-    return scratch
-
 def main():
     parser = argparse.ArgumentParser(description="take the csv, and the line number")
     parser.add_argument("csv_file", metavar="filename", type=str)
@@ -170,9 +168,7 @@ def main():
 
     args = parser.parse_args()
 
-    scratch = get_scratch()
-
-    simulation_all_csv(args.csv_file, args.date, scratch)
+    simulation_all_csv(args.csv_file, args.date, get_scratch())
 
 if __name__ == "__main__":
     main()

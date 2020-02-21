@@ -9,7 +9,7 @@ nanowire\(draft\)\.py
 
 *.dat
 
-*.yml
+globals.yml
 
 Ratio/Thumbs\.db
 

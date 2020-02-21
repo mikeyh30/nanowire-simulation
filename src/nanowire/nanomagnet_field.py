@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.signal import find_peaks
+import os.path
 
 
 def staggered_sinusoid(theta, ratio):
@@ -18,7 +19,8 @@ def staggered_sinusoid(theta, ratio):
 
 
 def rick_sinusiod(theta):
-    df = pd.read_csv("./data/rick-simulation-profiles/2pi_1D_slice.csv")
+    rick_data = os.path.join(os.path.dirname(__file__), "../../data/rick-simulation-profiles/2pi_1D_slice.csv")
+    df = pd.read_csv(rick_data)
     norm_theta = (theta / (2 * np.pi)) % 1
     Xrange = df.shape[0]
     # Yrange = (np.max([df['v'].max(),np.abs(df['v'].min())]),

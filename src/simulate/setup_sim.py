@@ -1,5 +1,5 @@
 import pandas as pd
-from simulate.simulation_parameters import simulation_parameters
+from simulate.get_parameters import get_simulation_parameters, get_scratch
 from itertools import product
 import os
 import yaml
@@ -7,6 +7,7 @@ import argparse
 
 
 def gen_data_csv(date,scratch):
+    simulation_parameters = get_simulation_parameters()
     if(not os.path.exists(scratch + date + "/" + date + ".csv")):
         d = [
             dict(zip(simulation_parameters, v))
@@ -58,9 +59,7 @@ def main():
 
     date = args.date
 
-    with open('./globals.yml') as f:
-        scratch = yaml.load(f, Loader=yaml.FullLoader)["directories"]["scratch"]
-    setup(date, scratch)
+    setup(date, get_scratch())
 
 if __name__ == "__main__":
     main()
