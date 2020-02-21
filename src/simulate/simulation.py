@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 from nanowire.nanowire import Nanowire
 from simulate.update_csv import update_csv
-from simulate.get_parameters import get_simulation_parameters, get_scratch
+from simulate.get_parameters import get_scratch
 import argparse
 import os
 import pandas as pd
@@ -86,21 +86,21 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
         data_suffix = "simulation{}".format(row)
         
         nanowire = Nanowire(
-        width=params["wire_width"],
-        noMagnets=params["no_magnets"],
-        effective_mass=params["effective_mass"],
-        muSc=params["muSc"],
-        alpha_R=params["alpha_R"],
-        M=params["M"],
-        added_sinusoid=params["added_sinusoid"],
-        stagger_ratio=params["ratio"],
-        mu=params["mu"],
-        delta=params["delta"],
-        barrier=params["barrier"],
-        hopping_distance=params["hopping_distance"],
-        bohr_magneton=params["bohr_magneton"],
-        gfactor=params["gfactor"],
-    )
+            width=params["wire_width"],
+            noMagnets=params["no_magnets"],
+            effective_mass=params["effective_mass"],
+            muSc=params["muSc"],
+            alpha_R=params["alpha_R"],
+            M=params["M"],
+            added_sinusoid=params["added_sinusoid"],
+            stagger_ratio=params["ratio"],
+            mu=params["mu"],
+            delta=params["delta"],
+            barrier=params["barrier"],
+            hopping_distance=params["hopping_distance"],
+            bohr_magneton=params["bohr_magneton"],
+            gfactor=params["gfactor"],
+        )
 
     data_folder = scratch + date
 
