@@ -4,9 +4,9 @@ setup(
     name="nanowire-simulation",
     author="Michael Hynes",
     version="0.1.0",
-    packages=find_packages('src',exclude=[]),
+    packages=find_packages("src", exclude=[]),
     python_requires=">=3.5",
-    package_dir={'': 'src'},
+    package_dir={"": "src"},
     install_requires=[
         "kwant>=1.4.1",
         "numpy>=1.11.0",
@@ -16,13 +16,12 @@ setup(
         "tinyarray>=1.2",
         "tqdm",
         "pyyaml",
-        "pandas"
-        ],
-    entry_points=
-    {
+        "pandas",
+    ],
+    entry_points={
         "console_scripts": [
             "nwsetup = simulate.setup_sim:main",
-            "simulate = simulate.simulation:main"
+            "simulate = simulate.simulation:main",
         ]
-    }
+    },
 )

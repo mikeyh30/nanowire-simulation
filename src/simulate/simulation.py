@@ -84,7 +84,7 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
         )
     else:
         data_suffix = "simulation{}".format(row)
-        
+
         nanowire = Nanowire(
             width=params["wire_width"],
             noMagnets=params["no_magnets"],
@@ -122,23 +122,32 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     # Save figure of the conductance at a given field.
     individual_conductance(conductance_data, data_suffix, data_folder)
 
-    #Filenames of the saved data and figures.
+    # Filenames of the saved data and figures.
     conductance_data_filename = data_folder + "/cond/cond_" + data_suffix + ".dat"
     spectrum_data_filename = data_folder + "/spec/spec_" + data_suffix + ".dat"
-    conductance_figure_filename = data_folder + "/fig-conductance/model" + data_suffix + ".png"
-    spectrum_figure_filename = data_folder + "/fig-spectrum/model" + data_suffix + ".png"
-    individual_conductance_figure_filename = data_folder + "/fig-ind-conductance/model" + data_suffix + ".png"
+    conductance_figure_filename = (
+        data_folder + "/fig-conductance/model" + data_suffix + ".png"
+    )
+    spectrum_figure_filename = (
+        data_folder + "/fig-spectrum/model" + data_suffix + ".png"
+    )
+    individual_conductance_figure_filename = (
+        data_folder + "/fig-ind-conductance/model" + data_suffix + ".png"
+    )
 
     # Log which data has been saved.
-    update_csv(params.to_dict(),
-               spectrum_critical_field,
-               conductance_critical_field,
-               conductance_data_filename,
-               spectrum_data_filename,
-               conductance_figure_filename,
-               spectrum_figure_filename,
-               individual_conductance_figure_filename,
-               data_folder + "/wiresdata.csv")
+    update_csv(
+        params.to_dict(),
+        spectrum_critical_field,
+        conductance_critical_field,
+        conductance_data_filename,
+        spectrum_data_filename,
+        conductance_figure_filename,
+        spectrum_figure_filename,
+        individual_conductance_figure_filename,
+        data_folder + "/wiresdata.csv",
+    )
+
 
 def simulation_all(params, row="skip", date="no-date", scratch="./Scratch/"):
     new_params = params
@@ -146,10 +155,12 @@ def simulation_all(params, row="skip", date="no-date", scratch="./Scratch/"):
         new_params["no_magnets"] = no_magnets
         simulation_single(new_params, row, date, scratch)
 
+
 def simulation_all_csv(csv_file, date, scratch):
     df = pd.read_csv(csv_file)
     for index, row in df.iterrows():
-        simulation_single(row,row=index,date=date,scratch=scratch)
+        simulation_single(row, row=index, date=date, scratch=scratch)
+
 
 def main():
     parser = argparse.ArgumentParser(description="take the csv, and the line number")
@@ -159,6 +170,7 @@ def main():
     args = parser.parse_args()
 
     simulation_all_csv(args.csv_file, args.date, get_scratch())
+
 
 if __name__ == "__main__":
     main()
