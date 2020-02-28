@@ -17,6 +17,7 @@ setup(
         "tqdm",
         "pyyaml",
         "pandas",
+        "pre-commit",
     ],
     entry_points={
         "console_scripts": [
