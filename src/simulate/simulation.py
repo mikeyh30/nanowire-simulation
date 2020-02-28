@@ -122,33 +122,23 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     # Save figure of the conductance at a given field.
     individual_conductance(conductance_data, data_suffix, data_folder)
 
-    # Filenames of the saved data and figures.
+    #Filenames of the saved data and figures.
     conductance_data_filename = data_folder + "/cond/cond_" + data_suffix + ".dat"
     spectrum_data_filename = data_folder + "/spec/spec_" + data_suffix + ".dat"
     conductance_figure_filename = data_folder + "/fig-conductance/model" + data_suffix + ".png"
     spectrum_figure_filename = data_folder + "/fig-spectrum/model" + data_suffix + ".png"
     individual_conductance_figure_filename = data_folder + "/fig-ind-conductance/model" + data_suffix + ".png"
 
-    # Log which data has been saved. Alter this function.
-    update_csv(
-        params["wire_width"],
-        params["no_magnets"],
-        params["effective_mass"],
-        params["muSc"],
-        params["alpha_R"],
-        params["M"],
-        params["added_sinusoid"],
-        params["ratio"],
-        conductance_data_filename,
-        spectrum_data_filename,
-        conductance_figure_filename,
-        spectrum_figure_filename,
-        individual_conductance_figure_filename,
-        scratch + date + "/wiresdata.csv",
-        spectrum_critical_field,
-        conductance_critical_field,
-        data_folder,
-    )
+    # Log which data has been saved.
+    update_csv(params.to_dict(),
+               spectrum_critical_field,
+               conductance_critical_field,
+               conductance_data_filename,
+               spectrum_data_filename,
+               conductance_figure_filename,
+               spectrum_figure_filename,
+               individual_conductance_figure_filename,
+               data_folder + "/wiresdata.csv")
 
 def simulation_all(params, row="skip", date="no-date", scratch="./Scratch/"):
     new_params = params
