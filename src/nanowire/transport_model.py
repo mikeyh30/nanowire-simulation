@@ -2,9 +2,6 @@ import kwant
 import numpy as np
 import tinyarray as ta
 
-bohr_magneton =  58E-6 # eVm # physical_constants['Bohr magneton'][0]
-lattice_constant_InAs = 200 # angstroms # 6.0583E-10 # 20E-3 # might need to change this.
-
 s0 = np.identity(2)
 sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
 sX = np.array([[0.0, 1.0], [1.0, 0.0]])
@@ -20,25 +17,40 @@ tauZsigX = ta.array(np.kron(sZ, sX))
 tauZsigY = ta.array(np.kron(sZ, sY))
 tauYsigY = ta.array(np.kron(sY, sY))
 
-lat = kwant.lattice.square(a=lattice_constant_InAs,norbs=4)
 
 def hopX(site0, site1, t, alpha):
-  #  print('hopx', -t * tauZ + 1j * alpha * tauZsigY)
+    #  print('hopx', -t * tauZ + 1j * alpha * tauZsigY)
     return -t * tauZ + 1j * alpha * tauZsigY
 
+
 def hopY(site0, site1, t, alpha):
-  #  print('hopy', -t * tauZ - 1j * alpha * tauZsigX)
+    #  print('hopy', -t * tauZ - 1j * alpha * tauZsigX)
     return -t * tauZ - 1j * alpha * tauZsigX
+
 
 def sinuB(theta, stagger_ratio):
     # ssin, scos = rick_fourier(theta)
     # return sigY*scos + sigX*ssin
     return sigY * np.cos(theta) + sigX * np.sin(theta)
+
+
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
 
-def onsiteSc(site, muSc, t, B, Delta, M, addedSinu, barrier_length, stagger_ratio):
-    gfactor = 10  # should be 10 in the real units
-    if addedSinu:
+
+def onsiteSc(
+    site,
+    muSc,
+    t,
+    B,
+    delta,
+    M,
+    added_sinusoid,
+    barrier_length,
+    stagger_ratio,
+    gfactor,
+    bohr_magneton,
+):
+    if added_sinusoid:
         counter = np.mod(site.pos[0] - 1 - barrier_length, 16)
         if -1 < counter < 4:
             theta = 0
@@ -49,61 +61,67 @@ def onsiteSc(site, muSc, t, B, Delta, M, addedSinu, barrier_length, stagger_rati
         else:
             theta = 0.2 * (counter - 6) * np.pi
 
-  #      print('onsiteSC', (4 * t - muSc))
+        #      print('onsiteSC', (4 * t - muSc))
 
         return (
             (4 * t - muSc) * tauZ
             + 0.5 * gfactor * bohr_magneton * B * sigX
-            + Delta * tauX
+            + delta * tauX
             + 0.5 * gfactor * bohr_magneton * M * sinuB(theta, stagger_ratio)
         )
     else:
         return (
             (4 * t - muSc) * tauZ
             + 0.5 * gfactor * bohr_magneton * B * sigX
-            + Delta * tauX
+            + delta * tauX
         )
 
+
 def onsiteNormal(site, mu, t):
- #   print('onsitnormal', (4 * t - mu) * tauZ)
+    #   print('onsitnormal', (4 * t - mu) * tauZ)
     return (4 * t - mu) * tauZ
 
+
 def onsiteBarrier(site, mu, t, barrier):
- #   print('onsitebarrier', (4 * t - mu + barrier) * tauZ)
+    #   print('onsitebarrier', (4 * t - mu + barrier) * tauZ)
     return (4 * t - mu + barrier) * tauZ
 
-def make_lead(width, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
+
+def make_lead(width, hopping_distance, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
     lead = kwant.Builder(
-        kwant.TranslationalSymmetry((-lattice_constant_InAs, 0)),
+        kwant.TranslationalSymmetry((-hopping_distance, 0)),
         conservation_law=-tauZ,
         particle_hole=tauYsigY,
     )
-    lat = kwant.lattice.square(a=lattice_constant_InAs, norbs=4)
+    lat = kwant.lattice.square(a=hopping_distance, norbs=4)
     lead[(lat(0, j) for j in range(width))] = onsiteH
     lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
     lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
     return lead
 
+
 def barrier_region(site, barrier_length, length, width):
-    i = site//width
-    j = site%width
-    return(
-        (
-            (0 <= i < barrier_length)
-            or
-            (length - barrier_length <= i < length)
-        )
-        and
-        (
-            0 <= j < width
-        )
-      )
+    i = site // width
+    j = site % width
+    return ((0 <= i < barrier_length) or (length - barrier_length <= i < length)) and (
+        0 <= j < width
+    )
 
-def make_wire(width, length, barrier_length, hamiltonian_wire=onsiteSc,
-        hamiltonian_barrier=onsiteBarrier, hamiltonian_normal=onsiteNormal,
-        hopX=hopX, hopY=hopY):
 
-    syst=kwant.Builder()
+def make_wire(
+    width,
+    length,
+    barrier_length,
+    hopping_distance,
+    hamiltonian_wire=onsiteSc,
+    hamiltonian_barrier=onsiteBarrier,
+    hamiltonian_normal=onsiteNormal,
+    hopX=hopX,
+    hopY=hopY,
+):
+
+    syst = kwant.Builder()
+    lat = kwant.lattice.square(a=hopping_distance, norbs=4)
 
     syst[
         (
@@ -132,13 +150,14 @@ def make_wire(width, length, barrier_length, hamiltonian_wire=onsiteSc,
     # Hopping:
     syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
     syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
-    lead = make_lead(width, onsiteNormal, hopX, hopY)
+    lead = make_lead(width, hopping_distance, onsiteNormal, hopX, hopY)
     syst.attach_lead(lead)
     syst.attach_lead(lead.reversed())
 
     return syst
 
-def NISIN(width=7, noMagnets=5, barrier_length=1):
+
+def NISIN(width=7, noMagnets=5, barrier_length=1, hopping_distance=1):
 
     length = 8 * noMagnets - 2 + 2 * barrier_length  # "2*(noMagnets - 1)"
-    return make_wire(width, length, barrier_length).finalized()
+    return make_wire(width, length, barrier_length, hopping_distance).finalized()

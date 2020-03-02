@@ -9,7 +9,7 @@ nanowire\(draft\)\.py
 
 *.dat
 
-*.yml
+globals.yml
 
 Ratio/Thumbs\.db
 
@@ -34,3 +34,5 @@ nanowire-env/
 test*
 
 resources-needed
+
+*.egg-info

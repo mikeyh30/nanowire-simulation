@@ -1,0 +1,44 @@
+wire_width:
+  - 7
+
+no_magnets:
+  - 7
+
+ratio:
+  - 0.5
+
+M:
+  - 1
+
+added_sinusoid:
+  - True
+
+effective_mass:
+  - 1
+
+alpha_R:
+  - 0.32
+
+muSc:
+  - 0.22
+
+mu:
+  - 0.3
+
+delta:
+  - 0.1
+
+barrier:
+  - 2
+
+b_max:
+  - 1
+
+hopping_distance:
+  - 1
+
+bohr_magneton:
+  - 58.0E-6
+
+gfactor:
+  - 1

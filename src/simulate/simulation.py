@@ -2,12 +2,13 @@ import kwant
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
-from nanowire import Nanowire
-from update_csv import update_csv
-from simulation_parameters import simulation_parameters
+from nanowire.nanowire import Nanowire
+from simulate.update_csv import update_csv
+from simulate.get_parameters import get_scratch
 import argparse
 import os
 import pandas as pd
+import yaml
 
 
 def save_model_figure(nanowire, suffix, data_folder):
@@ -73,7 +74,7 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     if row == "skip":
         data_suffix = "w{0}_no{1}_eM{2:3.2f}_mu{3}_al{4}_M{5:4.2f}_added{6}_ratio{7:4.2f}".format(
             params["wire_width"],
-            params["N"],
+            params["no_magnets"],
             params["effective_mass"],
             params["muSc"],
             params["alpha_R"],
@@ -84,19 +85,22 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     else:
         data_suffix = "simulation{}".format(row)
 
-    nanowire = Nanowire(
-        width=params["wire_width"],
-        noMagnets=params["N"],
-        effective_mass=params["effective_mass"],
-        muSc=params["muSc"],
-        alpha_R=params["alpha_R"],
-        M=params["M"],
-        addedSinu=params["added_sinusoid"],
-        stagger_ratio=params["ratio"],
-        mu=params["mu"],
-        delta=params["delta"],
-        barrier=params["barrier"],
-    )
+        nanowire = Nanowire(
+            width=params["wire_width"],
+            noMagnets=params["no_magnets"],
+            effective_mass=params["effective_mass"],
+            muSc=params["muSc"],
+            alpha_R=params["alpha_R"],
+            M=params["M"],
+            added_sinusoid=params["added_sinusoid"],
+            stagger_ratio=params["ratio"],
+            mu=params["mu"],
+            delta=params["delta"],
+            barrier=params["barrier"],
+            hopping_distance=params["hopping_distance"],
+            bohr_magneton=params["bohr_magneton"],
+            gfactor=params["gfactor"],
+        )
 
     data_folder = scratch + date
 
@@ -121,42 +125,52 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     # Filenames of the saved data and figures.
     conductance_data_filename = data_folder + "/cond/cond_" + data_suffix + ".dat"
     spectrum_data_filename = data_folder + "/spec/spec_" + data_suffix + ".dat"
-    conductance_figure_filename = data_folder + "/fig-conductance/model" + data_suffix + ".png"
-    spectrum_figure_filename = data_folder + "/fig-spectrum/model" + data_suffix + ".png"
-    individual_conductance_figure_filename = data_folder + "/fig-ind-conductance/model" + data_suffix + ".png"
+    conductance_figure_filename = (
+        data_folder + "/fig-conductance/model" + data_suffix + ".png"
+    )
+    spectrum_figure_filename = (
+        data_folder + "/fig-spectrum/model" + data_suffix + ".png"
+    )
+    individual_conductance_figure_filename = (
+        data_folder + "/fig-ind-conductance/model" + data_suffix + ".png"
+    )
 
-    # Log which data has been saved. Alter this function.
+    # Log which data has been saved.
     update_csv(
-        params["wire_width"],
-        params["N"],
-        params["effective_mass"],
-        params["muSc"],
-        params["alpha_R"],
-        params["M"],
-        params["added_sinusoid"],
-        params["ratio"],
+        params.to_dict(),
+        spectrum_critical_field,
+        conductance_critical_field,
         conductance_data_filename,
         spectrum_data_filename,
         conductance_figure_filename,
         spectrum_figure_filename,
         individual_conductance_figure_filename,
-        scratch + date + "/wiresdata.csv",
-        spectrum_critical_field,
-        conductance_critical_field,
-        data_folder,
+        data_folder + "/wiresdata.csv",
     )
+
 
 def simulation_all(params, row="skip", date="no-date", scratch="./Scratch/"):
     new_params = params
-    for N in params["Ns"]:
-        new_params["N"] = N
+    for no_magnets in params["Ns"]:
+        new_params["no_magnets"] = no_magnets
         simulation_single(new_params, row, date, scratch)
+
 
 def simulation_all_csv(csv_file, date, scratch):
     df = pd.read_csv(csv_file)
     for index, row in df.iterrows():
-        simulation_single(row,row=index,date=date,scratch=scratch)
+        simulation_single(row, row=index, date=date, scratch=scratch)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="take the csv, and the line number")
+    parser.add_argument("csv_file", metavar="filename", type=str)
+    parser.add_argument("date", type=str)
+
+    args = parser.parse_args()
+
+    simulation_all_csv(args.csv_file, args.date, get_scratch())
 
 
 if __name__ == "__main__":
-    simulation_all(simulation_parameters)
+    main()
