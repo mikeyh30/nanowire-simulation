@@ -130,7 +130,7 @@ def make_wire(
             for j in range(width)
         )
     ] = onsiteSc
-
+    # fmt: off
     syst[
         (
             lat(i, j)
@@ -138,7 +138,7 @@ def make_wire(
             for j in range(width)
         )
     ] = onsiteBarrier
-
+    # fmt: on
     syst[
         (
             lat(i, j)
@@ -157,7 +157,5 @@ def make_wire(
     return syst
 
 
-def NISIN(width=7, noMagnets=5, barrier_length=1, hopping_distance=1):
-
-    length = 8 * noMagnets - 2 + 2 * barrier_length  # "2*(noMagnets - 1)"
+def NISIN(width=7, length=40, barrier_length=1, hopping_distance=1):
     return make_wire(width, length, barrier_length, hopping_distance).finalized()

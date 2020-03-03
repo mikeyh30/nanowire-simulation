@@ -18,7 +18,7 @@ class Nanowire:
     def __init__(
         self,
         width=5,
-        noMagnets=5,
+        length=40,
         dim=2,
         barrier_length=1,
         effective_mass=0.5,
@@ -36,7 +36,7 @@ class Nanowire:
     ):
         # Wire Physical Properties
         self.width = width
-        self.noMagnets = noMagnets
+        self.length = length
         self.dim = dim
         self.barrier_length = barrier_length
 
@@ -64,7 +64,7 @@ class Nanowire:
     def spectrum(self, bValues=np.linspace(0, 1.0, 201)):
         syst = NISIN(
             width=self.width,
-            noMagnets=self.noMagnets,
+            length=self.length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
         )
@@ -107,7 +107,7 @@ class Nanowire:
     ):
         syst = NISIN(
             width=self.width,
-            noMagnets=self.noMagnets,
+            length=self.length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
         )
@@ -156,12 +156,10 @@ class Nanowire:
     def plot(self):
         syst = NISIN(
             width=self.width,
-            noMagnets=self.noMagnets,
+            length=self.length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
         )
-
-        length = 8 * self.noMagnets - 2 + 2 * self.barrier_length
 
         return kwant.plotter.plot(
             syst,
@@ -169,7 +167,7 @@ class Nanowire:
             unit="nn",
             site_size=0.20,
             site_color=lambda s: "y"
-            if barrier_region(s, self.barrier_length, length, self.width)
+            if barrier_region(s, self.barrier_length, self.length, self.width)
             else "b",
         )
 
