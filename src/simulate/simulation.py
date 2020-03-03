@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 from nanowire.nanowire import Nanowire
 from simulate.update_csv import update_csv
-from simulate.get_parameters import get_scratch
+from simulate.get_parameters import get_scratch, get_yml
 import argparse
 import os
 import pandas as pd
@@ -70,7 +70,9 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
     plt.close(fig)
 
 
-def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
+def simulation_single(
+    params, row="skip", date="no-date", scratch="./Scratch/", simulate_conductance=True
+):
     if row == "skip":
         data_suffix = "w{0}_no{1}_eM{2:3.2f}_mu{3}_al{4}_M{5:4.2f}_added{6}_ratio{7:4.2f}".format(
             params["wire_width"],
@@ -113,27 +115,39 @@ def simulation_single(params, row="skip", date="no-date", scratch="./Scratch/"):
     spectrum_data = nanowire.spectrum(bValues=np.linspace(0, params["b_max"], 81))
     spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
 
-    # Generate conductance data and figure
-    conductance_data = nanowire.conductances(
-        bValues=np.linspace(0, params["b_max"], 81), energies=energies
-    )
-    conductance_critical_field = conductance(conductance_data, data_suffix, data_folder)
+    if simulate_conductance:
+        # Generate conductance data and figure
+        conductance_data = nanowire.conductances(
+            bValues=np.linspace(0, params["b_max"], 81), energies=energies
+        )
+        conductance_critical_field = conductance(
+            conductance_data, data_suffix, data_folder
+        )
 
-    # Save figure of the conductance at a given field.
-    individual_conductance(conductance_data, data_suffix, data_folder)
+        # Save figure of the conductance at a given field.
+        individual_conductance(conductance_data, data_suffix, data_folder)
 
-    # Filenames of the saved data and figures.
-    conductance_data_filename = data_folder + "/cond/cond_" + data_suffix + ".dat"
-    spectrum_data_filename = data_folder + "/spec/spec_" + data_suffix + ".dat"
-    conductance_figure_filename = (
-        data_folder + "/fig-conductance/model" + data_suffix + ".png"
-    )
-    spectrum_figure_filename = (
-        data_folder + "/fig-spectrum/model" + data_suffix + ".png"
-    )
-    individual_conductance_figure_filename = (
-        data_folder + "/fig-ind-conductance/model" + data_suffix + ".png"
-    )
+        # Filenames of the saved data and figures.
+        conductance_data_filename = data_folder + "/cond/cond_" + data_suffix + ".dat"
+        spectrum_data_filename = data_folder + "/spec/spec_" + data_suffix + ".dat"
+        conductance_figure_filename = (
+            data_folder + "/fig-conductance/model" + data_suffix + ".png"
+        )
+        spectrum_figure_filename = (
+            data_folder + "/fig-spectrum/model" + data_suffix + ".png"
+        )
+        individual_conductance_figure_filename = (
+            data_folder + "/fig-ind-conductance/model" + data_suffix + ".png"
+        )
+    else:
+        conductance_critical_field = "not simulated"
+        conductance_data_filename = "not simulated"
+        spectrum_data_filename = data_folder + "/spec/spec_" + data_suffix + ".dat"
+        conductance_figure_filename = "not simulated"
+        spectrum_figure_filename = (
+            data_folder + "/fig-spectrum/model" + data_suffix + ".png"
+        )
+        individual_conductance_figure_filename = "not simulated"
 
     # Log which data has been saved.
     update_csv(
@@ -156,10 +170,16 @@ def simulation_all(params, row="skip", date="no-date", scratch="./Scratch/"):
         simulation_single(new_params, row, date, scratch)
 
 
-def simulation_all_csv(csv_file, date, scratch):
+def simulation_all_csv(csv_file, date, scratch, simulate_conductance):
     df = pd.read_csv(csv_file)
     for index, row in df.iterrows():
-        simulation_single(row, row=index, date=date, scratch=scratch)
+        simulation_single(
+            row,
+            row=index,
+            date=date,
+            scratch=scratch,
+            simulate_conductance=simulate_conductance,
+        )
 
 
 def main():
@@ -169,7 +189,9 @@ def main():
 
     args = parser.parse_args()
 
-    simulation_all_csv(args.csv_file, args.date, get_scratch())
+    simulate_conductance = get_yml("globals.yml")["simulate_conductance"]
+
+    simulation_all_csv(args.csv_file, args.date, get_scratch(), simulate_conductance)
 
 
 if __name__ == "__main__":
