@@ -1,0 +1,8 @@
+directories:
+  scratch: "/path/to/scratch/folder/"
+  src: "/path/to/src/folder/"
+  hpc-control: "/path/to/hpc-control/folder/"
+
+use_units: True
+
+simulate_conductance: True
