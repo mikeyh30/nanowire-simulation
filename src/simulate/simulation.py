@@ -26,8 +26,8 @@ def spectrum(spectrum_data, suffix, data_folder):
     plt.rcParams["figure.figsize"] = (7, 5)
     ax = fig.gca()
     ax.plot(spectrum_data["B"], spectrum_data["E"])
-    ax.set_xlabel("Zeeman Field Strength [B]")
-    ax.set_ylabel("Energies [t]")
+    ax.set_xlabel("Zeeman Field Strength (T)")
+    ax.set_ylabel("Energies (eV)")
     fig.savefig(data_folder + "/fig-spectrum/model" + suffix + ".png")
     plt.close(fig)
     return spectrum_data["CritB"]
@@ -48,8 +48,8 @@ def conductance(conductance_data, suffix, data_folder):
         100,
         cmap="viridis",
     )
-    ax.set_xlabel("Zeeman Field Strength [B]")
-    ax.set_ylabel("Bias V [t]")
+    ax.set_xlabel("Zeeman Field Strength (T)")
+    ax.set_ylabel("Bias V")
     cbar = plt.colorbar(contour)
     cbar.ax.set_ylabel("Conductance [e^2/h]")
     fig.savefig(data_folder + "/fig-conductance/model" + suffix + ".png")
@@ -64,7 +64,7 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
     fig = plt.figure()
     ax = fig.gca()
     ax.plot(data["BiasV"], cond[index_slice])
-    ax.set_xlabel("Bias V [t]")
+    ax.set_xlabel("Bias V")
     ax.set_ylabel("Conductance [e^2/h]")
     fig.savefig(data_folder + "/fig-ind-conductance/model" + suffix + ".png")
     plt.close(fig)
