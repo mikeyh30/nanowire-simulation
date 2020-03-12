@@ -15,6 +15,7 @@ def gen_data_csv(date, scratch):
         ]
         df = pd.DataFrame(d)
         df.to_csv(scratch + date + "/" + date + ".csv", sep=",", index=False)
+        print("print number of rows: ", df.shape[0])
     else:
         raise FileExistsError("data csv already exists")
 
