@@ -23,6 +23,7 @@ setup(
         "console_scripts": [
             "nwsetup = simulate.setup_sim:main",
             "simulate = simulate.simulation:main",
+            "hpc_simulate = simulate.hpc_simulation:main",
         ]
     },
 )
