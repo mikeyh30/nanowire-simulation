@@ -85,8 +85,7 @@ class Nanowire:
             bohr_magneton=self.bohr_magneton,
             hopping_distance=self.hopping_distance,
         )
-        for i in tqdm(range(np.size(bValues)), desc="Spec",):
-            b = bValues[i]
+        for b in tqdm(bValues, desc="Spec",):
             params["B"] = b
             H = syst.hamiltonian_submatrix(sparse=True, params=params)
             H = H.tocsc()
@@ -103,7 +102,7 @@ class Nanowire:
     def conductances(
         self,
         bValues=np.linspace(0, 1.0, 201),
-        energies=[0.001 * i for i in range(-120, 120)],
+        energies=[1e-6 * i for i in range(-120, 120)],
     ):
         syst = NISIN(
             width=self.width,
@@ -128,19 +127,16 @@ class Nanowire:
             bohr_magneton=self.bohr_magneton,
             hopping_distance=self.hopping_distance,
         )
-        for i in tqdm(range(np.size(energies)), desc="Cond",):
+        for energy in tqdm(energies, desc="Cond",):
             cond = []
-            energy = energies[i]
             for b in bValues:
                 params["B"] = b
                 smatrix = kwant.smatrix(syst, energy, params=params)
                 conduct = (
                     smatrix.submatrix((0, 0), (0, 0)).shape[0]  # N
                     - smatrix.transmission((0, 0), (0, 0))  # R_ee
-                    + smatrix.transmission(
-                        (0, 1), (0, 0)
-                    )  # maybe I need to update the 1 to a lattice_constant?
-                )  # R_he
+                    + smatrix.transmission((0, 1), (0, 0))  # R_he
+                )
                 cond.append(conduct)
                 if (
                     np.isclose(energy, 0, rtol=1e-6)
