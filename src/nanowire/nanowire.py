@@ -33,6 +33,7 @@ class Nanowire:
         hopping_distance=1,
         bohr_magneton=1,
         gfactor=1,
+        period=16,
     ):
         # Wire Physical Properties
         self.width = width
@@ -60,6 +61,7 @@ class Nanowire:
         self.gfactor = gfactor
         self.bohr_magneton = bohr_magneton
         self.hopping_distance = hopping_distance
+        self.period = period
 
     def spectrum(self, bValues=np.linspace(0, 1.0, 201)):
         syst = NISIN(
@@ -84,6 +86,7 @@ class Nanowire:
             gfactor=self.gfactor,
             bohr_magneton=self.bohr_magneton,
             hopping_distance=self.hopping_distance,
+            period=self.period,
         )
         for i in tqdm(range(np.size(bValues)), desc="Spec",):
             b = bValues[i]
@@ -127,6 +130,7 @@ class Nanowire:
             gfactor=self.gfactor,
             bohr_magneton=self.bohr_magneton,
             hopping_distance=self.hopping_distance,
+            period=self.period,
         )
         for i in tqdm(range(np.size(energies)), desc="Cond",):
             cond = []

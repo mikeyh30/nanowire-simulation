@@ -102,6 +102,7 @@ def simulation_single(
             hopping_distance=params["hopping_distance"],
             bohr_magneton=params["bohr_magneton"],
             gfactor=params["gfactor"],
+            period=params["period"],
         )
 
     data_folder = scratch + date

@@ -49,19 +49,12 @@ def onsiteSc(
     stagger_ratio,
     gfactor,
     bohr_magneton,
+    period,
+    hopping_distance,
 ):
     if added_sinusoid:
-        counter = np.mod(site.pos[0] - 1 - barrier_length, 16)
-        if -1 < counter < 4:
-            theta = 0
-        elif 3 < counter < 8:
-            theta = 0.2 * (counter - 3) * np.pi
-        elif 7 < counter < 12:
-            theta = np.pi
-        else:
-            theta = 0.2 * (counter - 6) * np.pi
-
-        #      print('onsiteSC', (4 * t - muSc))
+        counter = np.mod(site.pos[0] - (1 + barrier_length) * hopping_distance, period)
+        theta = (counter / period) * 2 * np.pi
 
         return (
             (4 * t - muSc) * tauZ
