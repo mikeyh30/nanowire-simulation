@@ -19,24 +19,18 @@ tauYsigY = ta.array(np.kron(sY, sY))
 
 
 def hopX(site0, site1, t, alpha):
-    #  print('hopx', -t * tauZ + 1j * alpha * tauZsigY)
     return -t * tauZ + 1j * alpha * tauZsigY
 
 
 def hopY(site0, site1, t, alpha):
-    #  print('hopy', -t * tauZ - 1j * alpha * tauZsigX)
     return -t * tauZ - 1j * alpha * tauZsigX
 
 
 def sinuB(theta, stagger_ratio):
-    # ssin, scos = rick_fourier(theta)
-    # return sigY*scos + sigX*ssin
     return sigY * np.cos(theta) + sigX * np.sin(theta)
 
 
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
-
-
 def onsiteSc(
     site,
     muSc,
@@ -71,12 +65,10 @@ def onsiteSc(
 
 
 def onsiteNormal(site, mu, t):
-    #   print('onsitnormal', (4 * t - mu) * tauZ)
     return (4 * t - mu) * tauZ
 
 
 def onsiteBarrier(site, mu, t, barrier):
-    #   print('onsitebarrier', (4 * t - mu + barrier) * tauZ)
     return (4 * t - mu + barrier) * tauZ
 
 

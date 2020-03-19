@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jul 31 01:42:41 2019
-
-@author: Domi
-"""
 from tqdm import tqdm
 import kwant
 import tinyarray as ta
@@ -42,9 +35,7 @@ class Nanowire:
         self.barrier_length = barrier_length
 
         # Superconducting components
-        self.t = 3.83 / (
-            effective_mass * (hopping_distance ** 2)
-        )  # (hbar**2)/(2*effective_mass*electron_mass*(self.hopping_distance**2))# 0.5 / effective_mass
+        self.t = 3.83 / (effective_mass * (hopping_distance ** 2))
         self.M = M
         self.muSc = muSc
         self.alpha = alpha_R / hopping_distance
@@ -54,7 +45,7 @@ class Nanowire:
         self.stagger_ratio = stagger_ratio
 
         # Previously hard-coded parameters
-        self.mu = mu  # how is this different from muSc?
+        self.mu = mu
         self.delta = delta
         self.barrier = barrier
 
