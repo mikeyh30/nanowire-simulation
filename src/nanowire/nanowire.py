@@ -4,7 +4,8 @@ import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
 from nanowire.nanomagnet_field import rick_fourier
-from nanowire.transport_model import NISIN, barrier_region
+from nanowire.transport_model import NISIN, barrier_region, magnetic_phase
+import matplotlib.pyplot as plt
 
 
 class Nanowire:
@@ -144,13 +145,20 @@ class Nanowire:
         outcome = dict(B=bValues, BiasV=energies, Cond=data, CritB=critB)
         return outcome
 
-    def plot(self):
+    def plot(self, ax_model, ax_x, ax_y):
         syst = NISIN(
             width=self.width,
             length=self.length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
         )
+        length_A = syst.pos(self.width * self.length - 1)[0]
+        array_A = np.arange(length_A)
+        phi = magnetic_phase(
+            array_A, self.barrier_length, self.hopping_distance, self.period
+        )
+        ax_x.plot(array_A, np.sin(phi))
+        ax_y.plot(array_A, np.cos(phi))
 
         return kwant.plotter.plot(
             syst,
@@ -160,6 +168,7 @@ class Nanowire:
             site_color=lambda s: "y"
             if barrier_region(s, self.barrier_length, self.length, self.width)
             else "b",
+            ax=ax_model,
         )
 
 

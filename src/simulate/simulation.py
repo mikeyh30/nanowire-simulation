@@ -12,8 +12,17 @@ import yaml
 
 
 def save_model_figure(nanowire, suffix, data_folder):
-    ax = nanowire.plot()
-    ax.savefig(data_folder + "/modelfig/" + suffix + ".png")
+    fig = plt.figure()
+    fig.suptitle("Model grid, and nanomagnet fields")
+    ax_model = fig.add_subplot(3, 1, 1)
+    ax_model.axis("equal")
+    ax_x = fig.add_subplot(3, 1, 2)
+    ax_y = fig.add_subplot(3, 1, 3)
+    nanowire.plot(ax_model, ax_x, ax_y)
+    xlim = fig.gca().figure.axes[0].dataLim.intervalx
+    plt.xlim(xlim)
+    plt.savefig(data_folder + "/modelfig/" + suffix + ".png")
+    plt.show()
     plt.close()
 
 

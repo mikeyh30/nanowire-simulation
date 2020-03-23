@@ -18,6 +18,12 @@ tauZsigY = ta.array(np.kron(sZ, sY))
 tauYsigY = ta.array(np.kron(sY, sY))
 
 
+def magnetic_phase(position, barrier_length, hopping_distance, period):
+    counter = np.mod(position - (1 + barrier_length) * hopping_distance, period)
+    theta = (counter / period) * 2 * np.pi
+    return theta
+
+
 def hopX(site0, site1, t, alpha):
     return -t * tauZ + 1j * alpha * tauZsigY
 
@@ -26,7 +32,8 @@ def hopY(site0, site1, t, alpha):
     return -t * tauZ - 1j * alpha * tauZsigX
 
 
-def sinuB(theta, stagger_ratio):
+def sinuB(position, barrier_length, hopping_distance, period, stagger_ratio):
+    theta = magnetic_phase(position, barrier_length, hopping_distance, period)
     return sigY * np.cos(theta) + sigX * np.sin(theta)
 
 
@@ -47,14 +54,17 @@ def onsiteSc(
     hopping_distance,
 ):
     if added_sinusoid:
-        counter = np.mod(site.pos[0] - (1 + barrier_length) * hopping_distance, period)
-        theta = (counter / period) * 2 * np.pi
-
         return (
             (4 * t - muSc) * tauZ
             + 0.5 * gfactor * bohr_magneton * B * sigX
             + delta * tauX
-            + 0.5 * gfactor * bohr_magneton * M * sinuB(theta, stagger_ratio)
+            + 0.5
+            * gfactor
+            * bohr_magneton
+            * M
+            * sinuB(
+                site.pos[0], barrier_length, hopping_distance, period, stagger_ratio
+            )
         )
     else:
         return (
