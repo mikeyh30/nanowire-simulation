@@ -4,19 +4,7 @@
 
 *.pyc
 
-nanowire\(draft\)\.py
-
 *.dat
-
-*.yml
-
-Ratio/Thumbs\.db
-
-Thumbs\.db
-
-email-credentials
-
-hpc-control/new.sh
 
 data/
 
@@ -24,14 +12,16 @@ data/
 
 Scratch
 
-kwant-1.4.1/
-
 nanowire-env/
-
-*.ipynb
 
 test*
 
 resources-needed
 
 *.egg-info
+
+globals.yml
+
+sim_parameters_unitless.yml
+
+sim_parameters_units.yml

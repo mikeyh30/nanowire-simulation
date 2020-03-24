@@ -1,8 +1,8 @@
 wire_width: 
   - 7
 
-no_magnets:
-  - 7
+length:
+  - 80
 
 ratio: 
   - 0.5
@@ -20,7 +20,7 @@ alpha_R:
   - 0.32
 
 muSc:
-  - 19.9E-3
+  - 0
 
 mu:
   - 18.0E-3
@@ -29,10 +29,10 @@ delta:
   - 180.0E-6
 
 barrier:
-  - 100.0E-3
+  - 0.02
 
 b_max:
-  - 10
+  - 2.5
 
 hopping_distance:
   - 200
@@ -42,3 +42,9 @@ bohr_magneton:
 
 gfactor:
   - 10
+
+period:
+  - 16
+  - 128
+  - 1024
+  - 8192

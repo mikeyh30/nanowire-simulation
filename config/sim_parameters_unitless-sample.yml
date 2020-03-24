@@ -1,14 +1,18 @@
 wire_width:
   - 7
+  # - 10
 
-no_magnets:
-  - 7
+length:
+  # - 56
+  - 80
 
 ratio:
   - 0.5
 
 M:
   - 1
+  # - 0.05
+  # - 0.1
 
 added_sinusoid:
   - True
@@ -18,12 +22,21 @@ effective_mass:
 
 alpha_R:
   - 0.32
+  # - 0.4
+  # - 0.8
 
 muSc:
   - 0.22
+  # - 0
+  # - 0.1
+  # - 0.2
 
 mu:
   - 0.3
+  # - 0
+  # - 0.01
+  # - 0.1
+  # - 0.2
 
 delta:
   - 0.1
@@ -38,7 +51,10 @@ hopping_distance:
   - 1
 
 bohr_magneton:
-  - 58.0E-6
+  - 1
 
 gfactor:
   - 1
+
+period:
+  - 16
