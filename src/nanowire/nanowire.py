@@ -157,8 +157,8 @@ class Nanowire:
         phi = magnetic_phase(
             array_A, self.barrier_length, self.hopping_distance, self.period
         )
-        ax_x.plot(array_A, np.sin(phi))
-        ax_y.plot(array_A, np.cos(phi))
+        ax_x.plot(array_A, self.M * np.sin(phi))
+        ax_y.plot(array_A, self.M * np.cos(phi))
 
         return kwant.plotter.plot(
             syst,

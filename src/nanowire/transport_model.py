@@ -37,6 +37,33 @@ def sinuB(position, barrier_length, hopping_distance, period, stagger_ratio):
     return sigY * np.cos(theta) + sigX * np.sin(theta)
 
 
+def energy_zeeman(gfactor, bohr_magneton, B):
+    return 0.5 * gfactor * bohr_magneton * B * sigX
+
+
+def energy_superconducting(delta):
+    return delta * tauX
+
+
+def energy_nanomagnet(
+    gfactor,
+    bohr_magneton,
+    M,
+    position,
+    barrier_length,
+    hopping_distance,
+    period,
+    stagger_ratio,
+):
+    return (
+        0.5
+        * gfactor
+        * bohr_magneton
+        * M
+        * sinuB(position, barrier_length, hopping_distance, period, stagger_ratio)
+    )
+
+
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
 def onsiteSc(
     site,
@@ -56,21 +83,24 @@ def onsiteSc(
     if added_sinusoid:
         return (
             (4 * t - muSc) * tauZ
-            + 0.5 * gfactor * bohr_magneton * B * sigX
-            + delta * tauX
-            + 0.5
-            * gfactor
-            * bohr_magneton
-            * M
-            * sinuB(
-                site.pos[0], barrier_length, hopping_distance, period, stagger_ratio
+            + energy_zeeman(gfactor, bohr_magneton, B)
+            + energy_superconducting(delta)
+            + energy_nanomagnet(
+                gfactor,
+                bohr_magneton,
+                M,
+                site.pos[0],
+                barrier_length,
+                hopping_distance,
+                period,
+                stagger_ratio,
             )
         )
     else:
         return (
             (4 * t - muSc) * tauZ
-            + 0.5 * gfactor * bohr_magneton * B * sigX
-            + delta * tauX
+            + energy_zeeman(gfactor, bohr_magneton, B)
+            + energy_superconducting(delta)
         )
 
 

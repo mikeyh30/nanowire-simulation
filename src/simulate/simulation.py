@@ -19,6 +19,10 @@ def save_model_figure(nanowire, suffix, data_folder):
     ax_x = fig.add_subplot(3, 1, 2)
     ax_y = fig.add_subplot(3, 1, 3)
     nanowire.plot(ax_model, ax_x, ax_y)
+    ax_model.set_ylabel(r"Length ($\AA$)")
+    ax_x.set_ylabel(r"$M_x$")
+    ax_y.set_ylabel(r"$M_y$")
+    ax_y.set_xlabel(r"Length ($\AA$)")
     xlim = fig.gca().figure.axes[0].dataLim.intervalx
     plt.xlim(xlim)
     plt.savefig(data_folder + "/modelfig/" + suffix + ".png")
