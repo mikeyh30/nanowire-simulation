@@ -22,7 +22,6 @@ def save_model_figure(nanowire, suffix, data_folder):
     xlim = fig.gca().figure.axes[0].dataLim.intervalx
     plt.xlim(xlim)
     plt.savefig(data_folder + "/modelfig/" + suffix + ".png")
-    plt.show()
     plt.close()
 
 
@@ -37,6 +36,7 @@ def spectrum(spectrum_data, suffix, data_folder):
     ax.plot(spectrum_data["B"], spectrum_data["E"])
     ax.set_xlabel("Zeeman Field Strength (T)")
     ax.set_ylabel("Energies (eV)")
+    plt.ticklabel_format(axis="both", style="sci", scilimits=(0, 0))
     fig.savefig(data_folder + "/fig-spectrum/model" + suffix + ".png")
     plt.close(fig)
     return spectrum_data["CritB"]
@@ -58,9 +58,10 @@ def conductance(conductance_data, suffix, data_folder):
         cmap="viridis",
     )
     ax.set_xlabel("Zeeman Field Strength (T)")
-    ax.set_ylabel("Bias V")
+    ax.set_ylabel("Bias (V)")
     cbar = plt.colorbar(contour)
     cbar.ax.set_ylabel("Conductance [e^2/h]")
+    plt.ticklabel_format(axis="both", style="sci", scilimits=(0, 0))
     fig.savefig(data_folder + "/fig-conductance/model" + suffix + ".png")
     plt.close(fig)
     return conductance_data["CritB"]
@@ -73,8 +74,9 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
     fig = plt.figure()
     ax = fig.gca()
     ax.plot(data["BiasV"], cond[index_slice])
-    ax.set_xlabel("Bias V")
+    ax.set_xlabel("Bias (V)")
     ax.set_ylabel("Conductance [e^2/h]")
+    plt.ticklabel_format(axis="both", style="sci", scilimits=(0, 0))
     fig.savefig(data_folder + "/fig-ind-conductance/model" + suffix + ".png")
     plt.close(fig)
 
