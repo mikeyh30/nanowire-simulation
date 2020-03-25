@@ -91,7 +91,7 @@ def simulation_single(
     if row == "skip":
         data_suffix = "w{0}_no{1}_eM{2:3.2f}_mu{3}_al{4}_M{5:4.2f}_added{6}_ratio{7:4.2f}".format(
             params["wire_width"],
-            params["length"],
+            params["wire_length"],
             params["effective_mass"],
             params["muSc"],
             params["alpha_R"],
@@ -104,7 +104,8 @@ def simulation_single(
 
         nanowire = Nanowire(
             width=params["wire_width"],
-            length=params["length"],
+            wire_length=params["wire_length"],
+            barrier_length=params["barrier_length"],
             effective_mass=params["effective_mass"],
             muSc=params["muSc"],
             alpha_R=params["alpha_R"],
@@ -113,7 +114,7 @@ def simulation_single(
             stagger_ratio=params["ratio"],
             mu=params["mu"],
             delta=params["delta"],
-            barrier=params["barrier"],
+            barrier_height=params["barrier_height"],
             hopping_distance=params["hopping_distance"],
             bohr_magneton=params["bohr_magneton"],
             gfactor=params["gfactor"],

@@ -108,8 +108,8 @@ def onsiteNormal(site, mu, t):
     return (4 * t - mu) * tauZ
 
 
-def onsiteBarrier(site, mu, t, barrier):
-    return (4 * t - mu + barrier) * tauZ
+def onsiteBarrier(site, mu, t, barrier_height):
+    return (4 * t - mu + barrier_height) * tauZ
 
 
 def make_lead(width, hopping_distance, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
@@ -125,17 +125,17 @@ def make_lead(width, hopping_distance, onsiteH=onsiteNormal, hopX=hopX, hopY=hop
     return lead
 
 
-def barrier_region(site, barrier_length, length, width):
+def barrier_region(site, barrier_length, wire_length, width):
     i = site // width
     j = site % width
-    return ((0 <= i < barrier_length) or (length - barrier_length <= i < length)) and (
-        0 <= j < width
-    )
+    return (
+        (0 <= i < barrier_length) or (wire_length - barrier_length <= i < wire_length)
+    ) and (0 <= j < width)
 
 
 def make_wire(
     width,
-    length,
+    wire_length,
     barrier_length,
     hopping_distance,
     hamiltonian_wire=onsiteSc,
@@ -151,7 +151,7 @@ def make_wire(
     syst[
         (
             lat(i, j)
-            for i in range(barrier_length, length - barrier_length)
+            for i in range(barrier_length, wire_length - barrier_length)
             for j in range(width)
         )
     ] = onsiteSc
@@ -167,7 +167,7 @@ def make_wire(
     syst[
         (
             lat(i, j)
-            for i in range(length - barrier_length, length)
+            for i in range(wire_length - barrier_length, wire_length)
             for j in range(width)
         )
     ] = onsiteBarrier
@@ -182,5 +182,5 @@ def make_wire(
     return syst
 
 
-def NISIN(width=7, length=40, barrier_length=1, hopping_distance=1):
-    return make_wire(width, length, barrier_length, hopping_distance).finalized()
+def NISIN(width=7, wire_length=40, barrier_length=1, hopping_distance=1):
+    return make_wire(width, wire_length, barrier_length, hopping_distance).finalized()

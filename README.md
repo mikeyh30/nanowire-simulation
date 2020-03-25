@@ -1,6 +1,6 @@
 # Simulations of transport properties of a nanowire in a magnetic field
 
-This repository contains code for performing simulations of an InAs nanowire using the kwant package.
+This repository contains code for performing simulations of an InAs nanowire using the kwant package. It is a continuation of the work done in <https://github.com/dk1713/Nanowire>.
 
 ## Setup
 

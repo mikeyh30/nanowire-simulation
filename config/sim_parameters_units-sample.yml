@@ -1,8 +1,11 @@
 wire_width: 
   - 7
 
-length:
+wire_length:
   - 80
+
+barrier_length:
+  - 1
 
 ratio: 
   - 0.5
@@ -28,7 +31,7 @@ mu:
 delta:
   - 180.0E-6
 
-barrier:
+barrier_height:
   - 0.02
 
 b_max:

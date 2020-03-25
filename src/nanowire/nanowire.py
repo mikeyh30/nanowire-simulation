@@ -12,7 +12,7 @@ class Nanowire:
     def __init__(
         self,
         width=5,
-        length=40,
+        wire_length=40,
         dim=2,
         barrier_length=1,
         effective_mass=0.5,
@@ -23,7 +23,7 @@ class Nanowire:
         stagger_ratio=0.5,
         mu=0.3,
         delta=0.1,
-        barrier=2.0,
+        barrier_height=2.0,
         hopping_distance=1,
         bohr_magneton=1,
         gfactor=1,
@@ -31,7 +31,7 @@ class Nanowire:
     ):
         # Wire Physical Properties
         self.width = width
-        self.length = length
+        self.wire_length = wire_length
         self.dim = dim
         self.barrier_length = barrier_length
 
@@ -48,7 +48,7 @@ class Nanowire:
         # Previously hard-coded parameters
         self.mu = mu
         self.delta = delta
-        self.barrier = barrier
+        self.barrier_height = barrier_height
 
         self.gfactor = gfactor
         self.bohr_magneton = bohr_magneton
@@ -58,7 +58,7 @@ class Nanowire:
     def spectrum(self, bValues=np.linspace(0, 1.0, 201)):
         syst = NISIN(
             width=self.width,
-            length=self.length,
+            wire_length=self.wire_length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
         )
@@ -70,7 +70,7 @@ class Nanowire:
             delta=self.delta,
             alpha=self.alpha,
             t=self.t,
-            barrier=self.barrier,
+            barrier_height=self.barrier_height,
             added_sinusoid=self.added_sinusoid,
             M=self.M,
             stagger_ratio=self.stagger_ratio,
@@ -101,7 +101,7 @@ class Nanowire:
     ):
         syst = NISIN(
             width=self.width,
-            length=self.length,
+            wire_length=self.wire_length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
         )
@@ -113,7 +113,7 @@ class Nanowire:
             delta=self.delta,
             alpha=self.alpha,
             t=self.t,
-            barrier=self.barrier,
+            barrier_height=self.barrier_height,
             M=self.M,
             added_sinusoid=self.added_sinusoid,
             stagger_ratio=self.stagger_ratio,
@@ -148,11 +148,11 @@ class Nanowire:
     def plot(self, ax_model, ax_x, ax_y):
         syst = NISIN(
             width=self.width,
-            length=self.length,
+            wire_length=self.wire_length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
         )
-        length_A = syst.pos(self.width * self.length - 1)[0]
+        length_A = syst.pos(self.width * self.wire_length - 1)[0]
         array_A = np.arange(length_A)
         phi = magnetic_phase(
             array_A, self.barrier_length, self.hopping_distance, self.period
@@ -166,7 +166,7 @@ class Nanowire:
             unit="nn",
             site_size=0.20,
             site_color=lambda s: "y"
-            if barrier_region(s, self.barrier_length, self.length, self.width)
+            if barrier_region(s, self.barrier_length, self.wire_length, self.width)
             else "b",
             ax=ax_model,
         )
