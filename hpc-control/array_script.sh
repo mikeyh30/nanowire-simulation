@@ -7,14 +7,13 @@
 # 2. Request wallclock time (format hours:minutes:seconds).
 #$ -l h_rt=12:00:00
 
-# 3. Request 1 gigabyte of RAM (must be an integer)
-#$ -l mem=1G
+# 3. Request 1 gigabyte of RAM (must be an integer) (DISABLED)
+# -l mem=1G
 
 # 4. Request 2 gigabyte of TMPDIR space (default is 10 GB)
 
-# 5. Set up the job array.  In this instance we have requested 10000 tasks
-# numbered 1 to 10000.
-#$ -t 1-7
+# 5. Set up the job array.  (DISABLED)
+# -t 1-7
 
 # 6. Set the name of the job.
 #$ -N 'params'
@@ -31,8 +30,11 @@
 # 9. Setup virtual environment
 #$ -V
 
-DATE="2020-03-12"
+DATE=$1
 
-# 8. Run the application. Commented version is to determine the required resources.
+# 10. Run the application. Instructions to submit job:
+# qsub submission_template.sh -F <date>
+hpc_simulate /home/ucapmhy/Scratch/$DATE/$DATE.csv $((SGE_TASK_ID-1)) $DATE
+
+# /usr/bin/time is to determine the required resources.
 # /usr/bin/time --verbose python /home/ucapmhy/nanowire-simulations/nanowire-simulation/hpc_simulation.py /home/ucapmhy/nanowire-simulations/nanowire-simulation/2019-11-15.csv $((SGE_TASK_ID-1))
-hpc_simulate /home/ucapmhy/nanowire-simulations/nanowire-simulation/Scratch/$DATE/$DATE.csv $((SGE_TASK_ID-1)) $DATE
