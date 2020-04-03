@@ -25,7 +25,7 @@ def save_model_figure(nanowire, suffix, data_folder):
     ax_y.set_xlabel(r"Length ($\AA$)")
     xlim = fig.gca().figure.axes[0].dataLim.intervalx
     plt.xlim(xlim)
-    plt.savefig(data_folder + "/modelfig/" + suffix + ".png")
+    plt.savefig(data_folder + "/modelfig/" + suffix + ".png",dpi=1200)
     plt.close()
 
 
@@ -103,7 +103,7 @@ def simulation_single(
         data_suffix = "simulation{}".format(row)
 
         nanowire = Nanowire(
-            width=params["wire_width"],
+            wire_width=params["wire_width"],
             wire_length=params["wire_length"],
             barrier_length=params["barrier_length"],
             effective_mass=params["effective_mass"],

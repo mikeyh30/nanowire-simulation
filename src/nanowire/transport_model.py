@@ -108,33 +108,49 @@ def onsiteNormal(site, mu, t):
     return (4 * t - mu) * tauZ
 
 
-def onsiteBarrier(site, mu, t, barrier_height):
-    return (4 * t - mu + barrier_height) * tauZ
+def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
+    if barrier_region(site, barrier_length, wire_length, wire_width):
+        i = site[1][1] // wire_width
+        distance_from_centre = np.abs(((wire_length-1)/2) - i)
+        dbarrier_height = barrier_height / barrier_length
+        negative_distance_from_end = distance_from_centre - ((wire_length-1)/2)
+        height = barrier_height + dbarrier_height * negative_distance_from_end
+        return height
+    else:
+        raise IndexError('barrier_height called outside of barrier region')
 
 
-def make_lead(width, hopping_distance, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
+def onsiteBarrier(site, mu, t, barrier_height, barrier_length, wire_length, wire_width):
+    return (4 * t - mu + barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site)) * tauZ
+
+
+def make_lead(wire_width, hopping_distance, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
     lead = kwant.Builder(
         kwant.TranslationalSymmetry((-hopping_distance, 0)),
         conservation_law=-tauZ,
         particle_hole=tauYsigY,
     )
     lat = kwant.lattice.square(a=hopping_distance, norbs=4)
-    lead[(lat(0, j) for j in range(width))] = onsiteH
+    lead[(lat(0, j) for j in range(wire_width))] = onsiteH
     lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
     lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
     return lead
 
 
-def barrier_region(site, barrier_length, wire_length, width):
-    i = site // width
-    j = site % width
+def barrier_region(site, barrier_length, wire_length, wire_width):
+    if type(site) == kwant.builder.Site:
+        i = site[1][0]
+        j = site[1][1]
+    else:
+        i = site // wire_width
+        j = site % wire_width
     return (
         (0 <= i < barrier_length) or (wire_length - barrier_length <= i < wire_length)
-    ) and (0 <= j < width)
+    ) and (0 <= j < wire_width)
 
 
 def make_wire(
-    width,
+    wire_width,
     wire_length,
     barrier_length,
     hopping_distance,
@@ -152,15 +168,15 @@ def make_wire(
         (
             lat(i, j)
             for i in range(barrier_length, wire_length - barrier_length)
-            for j in range(width)
+            for j in range(wire_width)
         )
     ] = onsiteSc
     # fmt: off
     syst[
         (
             lat(i, j)
-            for i in range(0, barrier_length + 1)
-            for j in range(width)
+            for i in range(0, barrier_length)
+            for j in range(wire_width)
         )
     ] = onsiteBarrier
     # fmt: on
@@ -168,19 +184,19 @@ def make_wire(
         (
             lat(i, j)
             for i in range(wire_length - barrier_length, wire_length)
-            for j in range(width)
+            for j in range(wire_width)
         )
     ] = onsiteBarrier
 
     # Hopping:
     syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
     syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
-    lead = make_lead(width, hopping_distance, onsiteNormal, hopX, hopY)
+    lead = make_lead(wire_width, hopping_distance, onsiteNormal, hopX, hopY)
     syst.attach_lead(lead)
     syst.attach_lead(lead.reversed())
 
     return syst
 
 
-def NISIN(width=7, wire_length=40, barrier_length=1, hopping_distance=1):
-    return make_wire(width, wire_length, barrier_length, hopping_distance).finalized()
+def NISIN(wire_width=7, wire_length=40, barrier_length=1, hopping_distance=1):
+    return make_wire(wire_width, wire_length, barrier_length, hopping_distance).finalized()

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 class Nanowire:
     def __init__(
         self,
-        width=5,
+        wire_width=5,
         wire_length=40,
         dim=2,
         barrier_length=1,
@@ -30,7 +30,7 @@ class Nanowire:
         period=16,
     ):
         # Wire Physical Properties
-        self.width = width
+        self.wire_width = wire_width
         self.wire_length = wire_length
         self.dim = dim
         self.barrier_length = barrier_length
@@ -57,7 +57,7 @@ class Nanowire:
 
     def spectrum(self, bValues=np.linspace(0, 1.0, 201)):
         syst = NISIN(
-            width=self.width,
+            wire_width=self.wire_width,
             wire_length=self.wire_length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
@@ -65,6 +65,8 @@ class Nanowire:
         energies = []
         critB = 0
         params = dict(
+            wire_width=self.wire_width,
+            wire_length=self.wire_length,
             muSc=self.muSc,
             mu=self.mu,
             delta=self.delta,
@@ -100,7 +102,7 @@ class Nanowire:
         energies=[1e-6 * i for i in range(-120, 120)],
     ):
         syst = NISIN(
-            width=self.width,
+            wire_width=self.wire_width,
             wire_length=self.wire_length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
@@ -108,6 +110,8 @@ class Nanowire:
         data = []
         critB = 0
         params = dict(
+            wire_width=self.wire_width,
+            wire_length=self.wire_length,
             muSc=self.muSc,
             mu=self.mu,
             delta=self.delta,
@@ -147,12 +151,12 @@ class Nanowire:
 
     def plot(self, ax_model, ax_x, ax_y):
         syst = NISIN(
-            width=self.width,
+            wire_width=self.wire_width,
             wire_length=self.wire_length,
             barrier_length=self.barrier_length,
             hopping_distance=self.hopping_distance,
         )
-        length_A = syst.pos(self.width * self.wire_length - 1)[0]
+        length_A = syst.pos(self.wire_width * self.wire_length - 1)[0]
         array_A = np.arange(length_A)
         phi = magnetic_phase(
             array_A, self.barrier_length, self.hopping_distance, self.period
@@ -166,7 +170,7 @@ class Nanowire:
             unit="nn",
             site_size=0.20,
             site_color=lambda s: "y"
-            if barrier_region(s, self.barrier_length, self.wire_length, self.width)
+            if barrier_region(s, self.barrier_length, self.wire_length, self.wire_width)
             else "b",
             ax=ax_model,
         )
