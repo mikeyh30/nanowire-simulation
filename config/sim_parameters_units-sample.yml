@@ -1,52 +1,52 @@
-wire_width: 
+wire_width: # [sites]
   - 7
 
-wire_length:
+wire_length: # [sites]
   - 80
 
-barrier_length:
+barrier_length: # [sites]
   - 1
 
-ratio: 
+ratio: # []
   - 0.5
 
-M:
+M: # [T]
   - 1
 
-added_sinusoid:
+added_sinusoid: # []
   - True
 
-effective_mass:
+effective_mass: # [m_e]
   - 0.019
 
-alpha_R:
+alpha_R: # [eV Å]
   - 0.32
 
-muSc:
+muSc: # [eV]
   - 0
 
-mu:
+mu: # [eV]
   - 18.0E-3
 
-delta:
+delta: # [eV]
   - 180.0E-6
 
-barrier_height:
+barrier_height: # [eV]
   - 0.02
 
-b_max:
+b_max: # [T]
   - 2.5
 
-hopping_distance:
+hopping_distance: # [Å]
   - 200
 
-bohr_magneton:
+bohr_magneton: # [eV/T]
   - 58.0E-6
 
-gfactor:
+gfactor: # []
   - 10
 
-period:
+period: # [Å]
   - 16
   - 128
   - 1024
