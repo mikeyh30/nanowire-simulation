@@ -6,6 +6,7 @@ import yaml
 import argparse
 from shutil import copyfile
 import git
+import numpy as np
 
 
 def gen_data_csv(date, scratch):
@@ -16,6 +17,9 @@ def gen_data_csv(date, scratch):
             for v in product(*simulation_parameters.values())
         ]
         df = pd.DataFrame(d)
+        # Prepare columns for answers
+        df["spectrum_critical_field"] = np.nan
+        df["conductance_critical_field"] = np.nan
         df.to_csv(scratch + date + "/" + date + ".csv", sep=",", index=False)
         print("print number of rows: ", df.shape[0])
     else:
