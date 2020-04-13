@@ -24,10 +24,12 @@ def magnetic_phase(position, barrier_length, hopping_distance, period):
     return theta
 
 
+# I might need two t terms here
 def hopX(site0, site1, t, alpha):
     return -t * tauZ + 1j * alpha * tauZsigY
 
 
+# I might need two t terms here
 def hopY(site0, site1, t, alpha):
     return -t * tauZ - 1j * alpha * tauZsigX
 
@@ -83,6 +85,8 @@ def onsiteSc(
     if added_sinusoid:  # Might consider changing this to if M:, if float zero is good
         return (
             (4 * t - muSc) * tauZ
+            - 1j * alpha * tauZsigY / hopping_distance
+            + 1j * alpha * tauZsigX / hopping_distance
             + energy_zeeman(gfactor, bohr_magneton, B)
             + energy_superconducting(delta)
             + energy_nanomagnet(
