@@ -97,6 +97,42 @@ class Nanowire:
         outcome = dict(B=B_values, BiasV=energies, Cond=data, CritB=critB)
         return outcome
 
+    def topological_visibility(self, B):
+        syst = NISIN(
+            wire_width=self.wire_width,
+            wire_length=self.wire_length,
+            barrier_length=self.barrier_length,
+            hopping_distance=self.hopping_distance,
+        )
+        data = []
+        critB = 0
+        params = dict(
+            wire_width=self.wire_width,
+            wire_length=self.wire_length,
+            muSc=self.muSc,
+            mu=self.mu,
+            delta=self.delta,
+            alpha=self.alpha,
+            t=self.t,
+            barrier_height=self.barrier_height,
+            M=self.M,
+            added_sinusoid=self.added_sinusoid,
+            stagger_ratio=self.stagger_ratio,
+            barrier_length=self.barrier_length,
+            gfactor=self.gfactor,
+            bohr_magneton=self.bohr_magneton,
+            hopping_distance=self.hopping_distance,
+            period=self.period,
+        )
+
+        energy = 0
+        params["B"] = B
+        smatrix = kwant.smatrix(syst, energy, params=params)
+        reflection = smatrix.transmission((0, 0), (0, 0))
+        topological_visibility = np.linalg.det(reflection)
+        topological_invariant = np.sign(topological_visibility)
+        return topological_invariant
+
     def plot(self, ax_model, ax_x, ax_y):
         syst = NISIN(self.parameters)
         length_A = syst.pos(self.parameters['wire_width'] * self.parameters['wire_length'] - 1)[0]
