@@ -86,40 +86,29 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
 
 
 def simulation_single(
-    params, row="skip", date="no-date", scratch="./Scratch/", simulate_conductance=True
+    params, row, date="no-date", scratch="./Scratch/", simulate_conductance=True
 ):
-    if row == "skip":
-        data_suffix = "w{0}_no{1}_eM{2:3.2f}_mu{3}_al{4}_M{5:4.2f}_added{6}_ratio{7:4.2f}".format(
-            params["wire_width"],
-            params["wire_length"],
-            params["effective_mass"],
-            params["muSc"],
-            params["alpha_R"],
-            params["M"],
-            int(params["added_sinusoid"]),
-            params["ratio"],
-        )
-    else:
-        data_suffix = "simulation{}".format(row)
 
-        nanowire = Nanowire(
-            wire_width=params["wire_width"],
-            wire_length=params["wire_length"],
-            barrier_length=params["barrier_length"],
-            effective_mass=params["effective_mass"],
-            muSc=params["muSc"],
-            alpha_R=params["alpha_R"],
-            M=params["M"],
-            added_sinusoid=params["added_sinusoid"],
-            stagger_ratio=params["ratio"],
-            mu=params["mu"],
-            delta=params["delta"],
-            barrier_height=params["barrier_height"],
-            hopping_distance=params["hopping_distance"],
-            bohr_magneton=params["bohr_magneton"],
-            gfactor=params["gfactor"],
-            period=params["period"],
-        )
+    data_suffix = "simulation{}".format(row)
+
+    nanowire = Nanowire(
+        wire_width=params["wire_width"],
+        wire_length=params["wire_length"],
+        barrier_length=params["barrier_length"],
+        effective_mass=params["effective_mass"],
+        muSc=params["muSc"],
+        alpha_R=params["alpha_R"],
+        M=params["M"],
+        added_sinusoid=params["added_sinusoid"],
+        stagger_ratio=params["ratio"],
+        mu=params["mu"],
+        delta=params["delta"],
+        barrier_height=params["barrier_height"],
+        hopping_distance=params["hopping_distance"],
+        bohr_magneton=params["bohr_magneton"],
+        gfactor=params["gfactor"],
+        period=params["period"],
+    )
 
     data_folder = scratch + date
 
@@ -180,7 +169,7 @@ def simulation_single(
     )
 
 
-def simulation_all(params, row="skip", date="no-date", scratch="./Scratch/"):
+def simulation_all(params, row, date="no-date", scratch="./Scratch/"):
     new_params = params
     for no_magnets in params["Ns"]:
         new_params["no_magnets"] = no_magnets
