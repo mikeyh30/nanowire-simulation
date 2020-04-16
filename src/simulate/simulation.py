@@ -91,31 +91,15 @@ def simulation_single(
 
     data_suffix = "simulation{}".format(row)
 
-    nanowire = Nanowire(
-        wire_width=params["wire_width"],
-        wire_length=params["wire_length"],
-        barrier_length=params["barrier_length"],
-        effective_mass=params["effective_mass"],
-        muSc=params["muSc"],
-        alpha_R=params["alpha_R"],
-        M=params["M"],
-        added_sinusoid=params["added_sinusoid"],
-        stagger_ratio=params["ratio"],
-        mu=params["mu"],
-        delta=params["delta"],
-        barrier_height=params["barrier_height"],
-        hopping_distance=params["hopping_distance"],
-        bohr_magneton=params["bohr_magneton"],
-        gfactor=params["gfactor"],
-        period=params["period"],
-    )
+    nanowire = Nanowire(params)
 
     data_folder = scratch + date
 
     save_model_figure(nanowire, data_suffix, data_folder)
 
     # Generate data of spectrum and conductance. This takes time
-    energies = np.arange(-0.120 * nanowire.t, 0.120 * nanowire.t, 0.001 * nanowire.t)
+    t = nanowire.parameters['t']
+    energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
 
     # Generate spectrum data and figure
     spectrum_data = nanowire.spectrum(bValues=np.linspace(0, params["b_max"], 81))
@@ -180,7 +164,7 @@ def simulation_all_csv(csv_file, date, scratch, simulate_conductance):
     df = pd.read_csv(csv_file)
     for index, row in df.iterrows():
         simulation_single(
-            row,
+            row.to_dict(),
             row=index,
             date=date,
             scratch=scratch,
