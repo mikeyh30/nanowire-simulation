@@ -25,7 +25,7 @@ def save_model_figure(nanowire, suffix, data_folder):
     ax_y.set_xlabel(r"Length ($\AA$)")
     xlim = fig.gca().figure.axes[0].dataLim.intervalx
     plt.xlim(xlim)
-    plt.savefig(data_folder + "/modelfig/" + suffix + ".png",dpi=1200)
+    plt.savefig(data_folder + "/modelfig/" + suffix + ".png")
     plt.close()
 
 
@@ -141,7 +141,7 @@ def simulation_single(
 
     # Log which data has been saved.
     update_csv(
-        params.to_dict(),
+        params,
         spectrum_critical_field,
         conductance_critical_field,
         conductance_data_filename,
