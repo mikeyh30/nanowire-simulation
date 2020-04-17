@@ -7,20 +7,41 @@ wire_length: # [sites]
 barrier_length: # [sites]
   - 1
 
-ratio: # []
+stagger_ratio: # []
   - 0.5
+
+period: # [Å]
+  - 16
+  - 128
+  - 1024
+  - 8192
 
 M: # [T]
   - 1
 
+hopping_distance: # [Å]
+  - 200
+
 added_sinusoid: # []
   - True
 
-effective_mass: # [m_e]
-  - 0.019
+b_max: # [T]
+  - 2.5
+
+bohr_magneton: # [eV/T]
+  - 58.0E-6
 
 alpha_R: # [eV Å]
   - 0.32
+
+delta: # [eV]
+  - 180.0E-6
+
+gfactor: # []
+  - 10
+
+effective_mass: # [m_e]
+  - 0.019
 
 muSc: # [eV]
   - 0
@@ -28,26 +49,5 @@ muSc: # [eV]
 mu: # [eV]
   - 18.0E-3
 
-delta: # [eV]
-  - 180.0E-6
-
 barrier_height: # [eV]
   - 0.02
-
-b_max: # [T]
-  - 2.5
-
-hopping_distance: # [Å]
-  - 200
-
-bohr_magneton: # [eV/T]
-  - 58.0E-6
-
-gfactor: # []
-  - 10
-
-period: # [Å]
-  - 16
-  - 128
-  - 1024
-  - 8192

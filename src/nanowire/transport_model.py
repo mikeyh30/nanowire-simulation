@@ -80,7 +80,7 @@ def onsiteSc(
     period,
     hopping_distance,
 ):
-    if added_sinusoid:
+    if added_sinusoid:  # Might consider changing this to if M:, if float zero is good
         return (
             (4 * t - muSc) * tauZ
             + energy_zeeman(gfactor, bohr_magneton, B)
@@ -150,16 +150,17 @@ def barrier_region(site, barrier_length, wire_length, wire_width):
 
 
 def make_wire(
-    wire_width,
-    wire_length,
-    barrier_length,
-    hopping_distance,
+    params,
     hamiltonian_wire=onsiteSc,
     hamiltonian_barrier=onsiteBarrier,
     hamiltonian_normal=onsiteNormal,
     hopX=hopX,
     hopY=hopY,
 ):
+    wire_width = params['wire_width']
+    wire_length = params['wire_length']
+    barrier_length = params['barrier_length']
+    hopping_distance = params['hopping_distance']
 
     syst = kwant.Builder()
     lat = kwant.lattice.square(a=hopping_distance, norbs=4)
@@ -198,5 +199,5 @@ def make_wire(
     return syst
 
 
-def NISIN(wire_width=7, wire_length=40, barrier_length=1, hopping_distance=1):
-    return make_wire(wire_width, wire_length, barrier_length, hopping_distance).finalized()
+def NISIN(params):
+    return make_wire(params).finalized()
