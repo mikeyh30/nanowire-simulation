@@ -80,11 +80,13 @@ class Nanowire:
             for b in B_values:
                 self.parameters["B"] = b
                 smatrix = kwant.smatrix(syst, energy, params=self.parameters)
-                conduct = (
-                    smatrix.submatrix((0, 0), (0, 0)).shape[0]  # N
-                    - smatrix.transmission((0, 0), (0, 0))  # R_ee
-                    + smatrix.transmission((0, 1), (0, 0))  # R_he
-                )
+                N = smatrix.submatrix((0, 0), (0, 0)).shape[0]
+                R_ee = - smatrix.transmission((0, 0), (0, 0))
+                R_he = smatrix.transmission((0, 1), (0, 0))
+                print(N, "N")
+                print(R_ee, "R_ee")
+                print(R_he, "R_he")
+                conduct = N-R_ee+R_he
                 cond.append(conduct)
                 if (
                     np.isclose(energy, 0, rtol=1e-6)
@@ -98,39 +100,16 @@ class Nanowire:
         return outcome
 
     def topological_visibility(self, B):
-        syst = NISIN(
-            wire_width=self.wire_width,
-            wire_length=self.wire_length,
-            barrier_length=self.barrier_length,
-            hopping_distance=self.hopping_distance,
-        )
+        syst = NISIN(self.parameters)
         data = []
         critB = 0
-        params = dict(
-            wire_width=self.wire_width,
-            wire_length=self.wire_length,
-            muSc=self.muSc,
-            mu=self.mu,
-            delta=self.delta,
-            alpha=self.alpha,
-            t=self.t,
-            barrier_height=self.barrier_height,
-            M=self.M,
-            added_sinusoid=self.added_sinusoid,
-            stagger_ratio=self.stagger_ratio,
-            barrier_length=self.barrier_length,
-            gfactor=self.gfactor,
-            bohr_magneton=self.bohr_magneton,
-            hopping_distance=self.hopping_distance,
-            period=self.period,
-        )
-
         energy = 0
-        params["B"] = B
-        smatrix = kwant.smatrix(syst, energy, params=params)
+        self.parameters["B"] = B
+        smatrix = kwant.smatrix(syst, energy, params=self.parameters)
         reflection = smatrix.transmission((0, 0), (0, 0))
-        topological_visibility = np.linalg.det(reflection)
-        topological_invariant = np.sign(topological_visibility)
+        print(reflection)
+        # topological_visibility = np.linalg.det(reflection)
+        topological_invariant = np.sign(reflection)
         return topological_invariant
 
     def plot(self, ax_model, ax_x, ax_y):
