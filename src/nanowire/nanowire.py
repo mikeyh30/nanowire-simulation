@@ -29,7 +29,7 @@ class Nanowire:
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
             eigs = np.sort(eigs[0])
             energies.append(eigs)
-            if critB == 0 and np.abs(eigs[10] - eigs[9]) / 2 < 1e-3:
+            if critB == 0 and np.abs(eigs[10] - eigs[9]) / 2 < 1e-4:
                 critB = b
 
         outcome = dict(B=bValues, E=energies, CritB=critB)
