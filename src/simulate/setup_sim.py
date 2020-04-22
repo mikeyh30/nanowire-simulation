@@ -7,6 +7,7 @@ import argparse
 from shutil import copyfile
 import git
 import numpy as np
+import h5py
 
 
 def gen_data_csv(date, scratch):
@@ -16,12 +17,12 @@ def gen_data_csv(date, scratch):
             dict(zip(simulation_parameters, v))
             for v in product(*simulation_parameters.values())
         ]
-        df = pd.DataFrame(d)
         # Prepare columns for answers
-        df["spectrum_critical_field"] = np.nan
-        df["conductance_critical_field"] = np.nan
-        df.to_csv(scratch + date + "/" + date + ".csv", sep=",", index=False)
-        print("print number of rows: ", df.shape[0])
+        # d["spectrum_critical_field"] = np.nan
+        # d["conductance_critical_field"] = np.nan
+        print("print number of rows: ", len(d))
+        with h5py.File(scratch + date + "/" + date + ".hdf5", "w") as file:
+            file.create_dataset(date, data=d)
     else:
         raise FileExistsError("data csv already exists")
 
