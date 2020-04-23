@@ -19,12 +19,11 @@ def find_critical_field(B_values, energies, min_topological_gap, tolerance=1e-5,
     return topological_B, topological_gap
 
 class Nanowire:
-    def __init__(
-        self,
-        parameters
-    ):
-        parameters['t'] = 3.83 / (parameters['effective_mass'] * (parameters['hopping_distance'] ** 2))
-        parameters['alpha'] = parameters['alpha_R'] / parameters['hopping_distance']
+    def __init__(self, parameters):
+        parameters["t"] = 3.83 / (
+            parameters["effective_mass"] * (parameters["hopping_distance"] ** 2)
+        )
+        parameters["alpha"] = parameters["alpha_R"] / parameters["hopping_distance"]
         self.parameters = parameters
 
     def spectrum(self, B_values=np.linspace(0, 1.0, 201)):
@@ -81,12 +80,12 @@ class Nanowire:
                 self.parameters["B"] = b
                 smatrix = kwant.smatrix(syst, energy, params=self.parameters)
                 N = smatrix.submatrix((0, 0), (0, 0)).shape[0]
-                R_ee = - smatrix.transmission((0, 0), (0, 0))
+                R_ee = -smatrix.transmission((0, 0), (0, 0))
                 R_he = smatrix.transmission((0, 1), (0, 0))
                 print(N, "N")
                 print(R_ee, "R_ee")
                 print(R_he, "R_he")
-                conduct = N-R_ee+R_he
+                conduct = N - R_ee + R_he
                 cond.append(conduct)
                 if (
                     np.isclose(energy, 0, rtol=1e-6)
@@ -107,14 +106,15 @@ class Nanowire:
         self.parameters["B"] = B
         smatrix = kwant.smatrix(syst, energy, params=self.parameters)
         reflection = smatrix.transmission((0, 0), (0, 0))
-        print(reflection)
         # topological_visibility = np.linalg.det(reflection)
-        topological_invariant = np.sign(reflection)
-        return topological_invariant
+        #topological_invariant = np.sign(reflection)
+        return reflection
 
     def plot(self, ax_model, ax_x, ax_y):
         syst = NISIN(self.parameters)
-        length_A = syst.pos(self.parameters['wire_width'] * self.parameters['wire_length'] - 1)[0]
+        length_A = syst.pos(
+            self.parameters["wire_width"] * self.parameters["wire_length"] - 1
+        )[0]
         array_A = np.arange(length_A)
         phi = magnetic_phase(array_A, self.parameters)
         ax_x.plot(array_A, self.parameters['M'] * np.sin(phi))
@@ -126,9 +126,12 @@ class Nanowire:
             unit="nn",
             site_size=0.20,
             site_color=lambda s: "y"
-            if barrier_region(s, self.parameters['barrier_length'],
-                              self.parameters['wire_length'],
-                              self.parameters['wire_width'])
+            if barrier_region(
+                s,
+                self.parameters["barrier_length"],
+                self.parameters["wire_length"],
+                self.parameters["wire_width"],
+            )
             else "b",
             ax=ax_model,
         )

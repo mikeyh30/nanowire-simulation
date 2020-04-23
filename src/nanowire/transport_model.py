@@ -71,13 +71,13 @@ def onsiteNormal(site, p):
 def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
     if barrier_region(site, barrier_length, wire_length, wire_width):
         i = site[1][1] // wire_width
-        distance_from_centre = np.abs(((wire_length-1)/2) - i)
+        distance_from_centre = np.abs(((wire_length - 1) / 2) - i)
         dbarrier_height = barrier_height / barrier_length
-        negative_distance_from_end = distance_from_centre - ((wire_length-1)/2)
+        negative_distance_from_end = distance_from_centre - ((wire_length - 1) / 2)
         height = barrier_height + dbarrier_height * negative_distance_from_end
         return height
     else:
-        raise IndexError('barrier_height called outside of barrier region')
+        raise IndexError("barrier_height called outside of barrier region")
 
 
 def onsiteBarrier(site, p):
@@ -118,10 +118,10 @@ def make_wire(
     hopX=hopX,
     hopY=hopY,
 ):
-    wire_width = params['wire_width']
-    wire_length = params['wire_length']
-    barrier_length = params['barrier_length']
-    hopping_distance = params['hopping_distance']
+    wire_width = params["wire_width"]
+    wire_length = params["wire_length"]
+    barrier_length = params["barrier_length"]
+    hopping_distance = params["hopping_distance"]
 
     syst = kwant.Builder()
     lat = kwant.lattice.square(a=hopping_distance, norbs=4)
