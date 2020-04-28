@@ -16,7 +16,7 @@ nanowire-env/
 
 test*
 
-resources-needed
+dont_track/
 
 *.egg-info
 
