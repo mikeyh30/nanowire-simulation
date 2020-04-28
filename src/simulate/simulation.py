@@ -100,9 +100,9 @@ def simulation_single(
     # Generate data of spectrum and conductance. This takes time
     t = nanowire.parameters['t']
     energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
-
+    params["B"]=0
     # Generate spectrum data and figure
-    spectrum_data = nanowire.spectrum(bValues=np.linspace(0, params["b_max"], 81))
+    spectrum_data = nanowire.paper_spectrum(m_values=np.linspace(0, params["b_max"], 81))
     spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
 
     if simulate_conductance:

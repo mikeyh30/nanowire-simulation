@@ -34,7 +34,25 @@ class Nanowire:
 
         outcome = dict(B=bValues, E=energies, CritB=critB)
         return outcome
+    
+    def paper_spectrum(self, m_values):
+        syst = NISIN(self.parameters)
+        energies = []
+        critB = 0
+        for m in tqdm(m_values, desc="Spec",):
+            self.parameters["M"] = m
+            H = syst.hamiltonian_submatrix(sparse=True, params=self.parameters)
+            H = H.tocsc()
+            # k is the number of eigenvalues, and find them near sigma.
+            eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
+            eigs = np.sort(eigs[0])
+            energies.append(eigs)
+            if critB == 0 and np.abs(eigs[10] - eigs[9]) / 2 < 1e-4:
+                critB = b
 
+        outcome = dict(B=bValues, E=energies, CritB=critB)
+        return outcome
+    
     def conductances(
         self,
         bValues=np.linspace(0, 1.0, 201),
