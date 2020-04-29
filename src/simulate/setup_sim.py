@@ -4,6 +4,7 @@ from itertools import product
 import os
 import yaml
 import argparse
+from shutil import copyfile
 
 
 def gen_data_csv(date, scratch):
@@ -52,11 +53,18 @@ def gen_directories(date, scratch):
     )
 
 
+def save_yml(date, scratch, yml_file_name="sim_parameters_units.yml"):
+    input_yml = os.path.join(os.path.dirname(__file__), "../../", yml_file_name)
+    output_yml = scratch + date + "/" + yml_file_name
+    copyfile(input_yml, output_yml)
+
+
 def setup(date, scratch):
     try:
         gen_directories(date, scratch)
         gen_blank_output_csv(date, scratch)
         gen_data_csv(date, scratch)
+        save_yml(date, scratch)
     except FileExistsError as e:
         print(e)
         return 1
