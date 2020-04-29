@@ -46,6 +46,23 @@ def spectrum(spectrum_data, suffix, data_folder):
     return spectrum_data["CritB"]
 
 
+def paper_spectrum(spectrum_data, suffix, data_folder):
+    pickle.dump(
+        spectrum_data, open(data_folder + "/spec/spec_" + suffix + ".dat", "wb")
+    )
+
+    fig = plt.figure()
+    plt.rcParams["figure.figsize"] = (7, 5)
+    ax = fig.gca()
+    ax.plot(spectrum_data["M"], spectrum_data["E"])
+    ax.set_xlabel("Zeeman Field Strength (T)")
+    ax.set_ylabel("Energies (eV)")
+    plt.ticklabel_format(axis="both", style="sci", scilimits=(0, 0))
+    fig.savefig(data_folder + "/fig-spectrum/model" + suffix + ".png")
+    plt.close(fig)
+    return spectrum_data["CritM"]
+
+
 def conductance(conductance_data, suffix, data_folder):
     pickle.dump(
         conductance_data, open(data_folder + "/cond/cond_" + suffix + ".dat", "wb")
@@ -103,7 +120,7 @@ def simulation_single(
     params["B"]=0
     # Generate spectrum data and figure
     spectrum_data = nanowire.paper_spectrum(m_values=np.linspace(0, params["b_max"], 81))
-    spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
+    spectrum_critical_field = paper_spectrum(spectrum_data, data_suffix, data_folder)
 
     if simulate_conductance:
         # Generate conductance data and figure
