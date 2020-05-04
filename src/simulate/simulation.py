@@ -139,16 +139,21 @@ def simulation_single(
         )
         individual_conductance_figure_filename = "not simulated"
 
+    params.update(
+        {
+            "spectrum_critical_field": spectrum_critical_field,
+            "conductance_critical_field": conductance_critical_field,
+            "conductance_data_filename": conductance_data_filename,
+            "spectrum_data_filename": spectrum_data_filename,
+            "conductance_figure_filename": conductance_figure_filename,
+            "spectrum_figure_filename": spectrum_figure_filename,
+            "individual_conductance_figure_filename": individual_conductance_figure_filename,
+        },
+    )
+
     # Log which data has been saved.
     update_csv(
         params,
-        spectrum_critical_field,
-        conductance_critical_field,
-        conductance_data_filename,
-        spectrum_data_filename,
-        conductance_figure_filename,
-        spectrum_figure_filename,
-        individual_conductance_figure_filename,
         data_folder + "/wiresdata.csv",
     )
 
