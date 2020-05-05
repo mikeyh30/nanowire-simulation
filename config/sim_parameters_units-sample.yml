@@ -19,11 +19,17 @@ period: # [Å]
 M: # [T]
   - 1
 
+m_max: # [T]
+  - 2.5
+
 hopping_distance: # [Å]
   - 200
 
 added_sinusoid: # []
   - True
+
+B: # [T]
+  - 0
 
 b_max: # [T]
   - 2.5
