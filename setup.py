@@ -72,6 +72,7 @@ setup(
         "pyyaml",
         "pandas",
         "pre-commit",
+        "gitpython",
     ],
     entry_points={
         "console_scripts": [

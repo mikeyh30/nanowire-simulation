@@ -5,6 +5,7 @@ import os
 import yaml
 import argparse
 from shutil import copyfile
+import git
 
 
 def gen_data_csv(date, scratch):
@@ -59,12 +60,21 @@ def save_yml(date, scratch, yml_file_name="sim_parameters_units.yml"):
     copyfile(input_yml, output_yml)
 
 
+def save_git_hash(date, scratch):
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+    filename = scratch + date + "/.githash"
+    with open(filename,"w") as file:
+        file.write(sha)
+
+
 def setup(date, scratch):
     try:
         gen_directories(date, scratch)
         gen_blank_output_csv(date, scratch)
         gen_data_csv(date, scratch)
         save_yml(date, scratch)
+        save_git_hash(date,scratch)
     except FileExistsError as e:
         print(e)
         return 1
