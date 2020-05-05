@@ -57,7 +57,7 @@ class SetupConfigurationDevelop(develop):
 setup(
     name="nanowire-simulation",
     author="Michael Hynes",
-    version="0.1.0",
+    version="0.2.0",
     packages=find_packages("src", exclude=[]),
     python_requires=">=3.5",
     package_dir={"": "src"},
