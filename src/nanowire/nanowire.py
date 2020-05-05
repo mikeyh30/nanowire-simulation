@@ -35,7 +35,7 @@ class Nanowire:
         outcome = dict(B=bValues, E=energies, CritB=critB)
         return outcome
     
-    def paper_spectrum(self, m_values):
+    def magnetization_spectrum(self, m_values):
         syst = NISIN(self.parameters)
         energies = []
         critM = 0

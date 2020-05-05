@@ -46,7 +46,7 @@ def spectrum(spectrum_data, suffix, data_folder):
     return spectrum_data["CritB"]
 
 
-def paper_spectrum(spectrum_data, suffix, data_folder):
+def magnetization_spectrum(spectrum_data, suffix, data_folder):
     pickle.dump(
         spectrum_data, open(data_folder + "/spec/spec_" + suffix + ".dat", "wb")
     )
@@ -55,7 +55,7 @@ def paper_spectrum(spectrum_data, suffix, data_folder):
     plt.rcParams["figure.figsize"] = (7, 5)
     ax = fig.gca()
     ax.plot(spectrum_data["M"], spectrum_data["E"])
-    ax.set_xlabel("Zeeman Field Strength (T)")
+    ax.set_xlabel("Magnetization (T)")
     ax.set_ylabel("Energies (eV)")
     plt.ticklabel_format(axis="both", style="sci", scilimits=(0, 0))
     fig.savefig(data_folder + "/fig-spectrum/model" + suffix + ".png")
@@ -117,10 +117,9 @@ def simulation_single(
     # Generate data of spectrum and conductance. This takes time
     t = nanowire.parameters['t']
     energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
-    params["B"]=0
     # Generate spectrum data and figure
-    spectrum_data = nanowire.paper_spectrum(m_values=np.linspace(0, params["b_max"], 81))
-    spectrum_critical_field = paper_spectrum(spectrum_data, data_suffix, data_folder)
+    spectrum_data = nanowire.magnetization_spectrum(m_values=np.linspace(0, params["m_max"], 81))
+    spectrum_critical_field = magnetization_spectrum(spectrum_data, data_suffix, data_folder)
 
     if simulate_conductance:
         # Generate conductance data and figure

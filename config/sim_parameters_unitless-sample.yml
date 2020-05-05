@@ -16,11 +16,17 @@ period:
 M:
   - 1
 
+m_max:
+  - 1
+
 hopping_distance:
   - 1
 
 added_sinusoid:
   - True
+
+B:
+  - 0
 
 b_max:
   - 1
