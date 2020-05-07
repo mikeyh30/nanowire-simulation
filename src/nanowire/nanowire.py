@@ -7,6 +7,16 @@ from nanowire.nanomagnet_field import rick_fourier
 from nanowire.transport_model import NISIN, barrier_region, magnetic_phase
 import matplotlib.pyplot as plt
 
+def find_critical_field(B_values, energies, min_topological_gap, tolerance=1e-5, energy_level_count=20):
+    topological_B=[]
+    topological_gap=[]
+    middle_energy = energy_level_count // 2
+    for bidx, b in enumerate(B_values):
+        if np.abs(energies[bidx][middle_energy] - energies[bidx][middle_energy-1]) / 2 < tolerance:
+            if np.abs(energies[bidx][middle_energy+1] - energies[bidx][middle_energy]) > min_topological_gap:
+                topological_B.append(b)
+                topological_gap.append(np.abs(energies[bidx][middle_energy+1] - energies[bidx][middle_energy]))
+    return topological_B, topological_gap
 
 class Nanowire:
     def __init__(
@@ -17,11 +27,11 @@ class Nanowire:
         parameters['alpha'] = parameters['alpha_R'] / parameters['hopping_distance']
         self.parameters = parameters
 
-    def spectrum(self, bValues=np.linspace(0, 1.0, 201)):
+    def spectrum(self, B_values=np.linspace(0, 1.0, 201)):
         syst = NISIN(self.parameters)
         energies = []
         critB = 0
-        for b in tqdm(bValues, desc="Spec",):
+        for b in tqdm(B_values, desc="Spec",):
             self.parameters["B"] = b
             H = syst.hamiltonian_submatrix(sparse=True, params=self.parameters)
             H = H.tocsc()
@@ -29,17 +39,17 @@ class Nanowire:
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
             eigs = np.sort(eigs[0])
             energies.append(eigs)
-            if critB == 0 and np.abs(eigs[10] - eigs[9]) / 2 < 1e-4:
-                critB = b
 
-        outcome = dict(B=bValues, E=energies, CritB=critB)
+        topological_B_values = find_critical_field(B_values, energies, 0.2*self.parameters["delta"])
+
+        outcome = dict(B=B_values, E=energies, CritB=topological_B_values[0])
         return outcome
     
-    def magnetization_spectrum(self, m_values):
+    def magnetization_spectrum(self, M_values):
         syst = NISIN(self.parameters)
         energies = []
         critM = 0
-        for m in tqdm(m_values, desc="Spec",):
+        for m in tqdm(M_values, desc="Spec",):
             self.parameters["M"] = m
             H = syst.hamiltonian_submatrix(sparse=True, params=self.parameters)
             H = H.tocsc()
@@ -47,15 +57,15 @@ class Nanowire:
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
             eigs = np.sort(eigs[0])
             energies.append(eigs)
-            if critM == 0 and np.abs(eigs[10] - eigs[9]) / 2 < 1e-4:
-                critM = m
 
-        outcome = dict(M=m_values, E=energies, CritM=critM)
+        topological_M_values = find_critical_field(M_values, energies, 0.2*self.parameters["delta"])
+
+        outcome = dict(M=M_values, E=energies, CritM=topological_M_values[0])
         return outcome
     
     def conductances(
         self,
-        bValues=np.linspace(0, 1.0, 201),
+        B_values=np.linspace(0, 1.0, 201),
         energies=[1e-6 * i for i in range(-120, 120)],
     ):
         syst = NISIN(self.parameters)
@@ -63,7 +73,7 @@ class Nanowire:
         critB = 0
         for energy in tqdm(energies, desc="Cond",):
             cond = []
-            for b in bValues:
+            for b in B_values:
                 self.parameters["B"] = b
                 smatrix = kwant.smatrix(syst, energy, params=self.parameters)
                 conduct = (
@@ -80,7 +90,7 @@ class Nanowire:
                     critB = b
             data.append(cond)
 
-        outcome = dict(B=bValues, BiasV=energies, Cond=data, CritB=critB)
+        outcome = dict(B=B_values, BiasV=energies, Cond=data, CritB=critB)
         return outcome
 
     def plot(self, ax_model, ax_x, ax_y):

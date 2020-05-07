@@ -118,13 +118,13 @@ def simulation_single(
     t = nanowire.parameters['t']
     energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
     # Generate spectrum data and figure
-    spectrum_data = nanowire.magnetization_spectrum(m_values=np.linspace(0, params["m_max"], 81))
+    spectrum_data = nanowire.magnetization_spectrum(M_values=np.linspace(0, params["m_max"], 81))
     spectrum_critical_field = magnetization_spectrum(spectrum_data, data_suffix, data_folder)
 
     if simulate_conductance:
         # Generate conductance data and figure
         conductance_data = nanowire.conductances(
-            bValues=np.linspace(0, params["b_max"], 81), energies=energies
+            B_values=np.linspace(0, params["b_max"], 81), energies=energies
         )
         conductance_critical_field = conductance(
             conductance_data, data_suffix, data_folder
