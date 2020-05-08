@@ -40,9 +40,11 @@ class Nanowire:
             eigs = np.sort(eigs[0])
             energies.append(eigs)
 
-        topological_B_values = find_critical_field(B_values, energies, 0.2*self.parameters["delta"])
+        topological_B_values, topological_gap = find_critical_field(B_values, energies, 0.15*self.parameters["delta"])
+        if not topological_B_values:
+            topological_B_values.append(np.nan)
 
-        outcome = dict(B=B_values, E=energies, CritB=topological_B_values[0])
+        outcome = dict(B=B_values, E=energies, CritB=topological_B_values[0], topological_B_values=topological_B_values, topological_gap=topological_gap)
         return outcome
     
     def magnetization_spectrum(self, M_values):
@@ -58,7 +60,7 @@ class Nanowire:
             eigs = np.sort(eigs[0])
             energies.append(eigs)
 
-        topological_M_values = find_critical_field(M_values, energies, 0.2*self.parameters["delta"])
+        topological_M_values = find_critical_field(M_values, energies, 0.15*self.parameters["delta"])
 
         outcome = dict(M=M_values, E=energies, CritM=topological_M_values[0])
         return outcome
