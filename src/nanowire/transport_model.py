@@ -24,12 +24,11 @@ def magnetic_phase(position, barrier_length, hopping_distance, period):
     return theta
 
 
-# I might need two t terms here
+# No need for two t terms, Builder assumes hermiticity
 def hopX(site0, site1, t, alpha):
     return -t * tauZ + 1j * alpha * tauZsigY
 
 
-# I might need two t terms here
 def hopY(site0, site1, t, alpha):
     return -t * tauZ - 1j * alpha * tauZsigX
 
@@ -66,6 +65,13 @@ def energy_nanomagnet(
     )
 
 
+def energy_tmu(t, mu, alpha=0,hopping_distance=200):
+    return (
+            (4 * t - mu) * tauZ
+            - 1j * alpha * tauZsigY / hopping_distance
+            + 1j * alpha * tauZsigX / hopping_distance
+            )
+
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
 def onsiteSc(
     site,
@@ -81,12 +87,11 @@ def onsiteSc(
     bohr_magneton,
     period,
     hopping_distance,
+    alpha,
 ):
     if added_sinusoid:  # Might consider changing this to if M:, if float zero is good
         return (
-            (4 * t - muSc) * tauZ
-            - 1j * alpha * tauZsigY / hopping_distance
-            + 1j * alpha * tauZsigX / hopping_distance
+            energy_tmu(t, muSc, alpha, hopping_distance)
             + energy_zeeman(gfactor, bohr_magneton, B)
             + energy_superconducting(delta)
             + energy_nanomagnet(
@@ -102,14 +107,14 @@ def onsiteSc(
         )
     else:
         return (
-            (4 * t - muSc) * tauZ
+            energy_tmu(t, mu, alpha, hopping_distance)
             + energy_zeeman(gfactor, bohr_magneton, B)
             + energy_superconducting(delta)
         )
 
 
 def onsiteNormal(site, mu, t):
-    return (4 * t - mu) * tauZ
+    return energy_tmu(t, mu)
 
 
 def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
