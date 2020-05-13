@@ -1,5 +1,5 @@
 import pandas as pd
-
+import h5py
 
 #def update_csv(
 #    simulation_parameters,
@@ -40,6 +40,14 @@ def update_csv(iteration, spectrum_critical_field, conductance_critical_field, d
     df.at[iteration, 'spectrum_critical_field'] = spectrum_critical_field
     df.at[iteration, 'conductance_critical_field'] = conductance_critical_field
     df.to_csv(data_file, sep=",", index=False, mode="w")
+
+
+def add_dataset_hdf(groupname, data_file, **kwargs):
+    with h5py.File(data_file,'a') as file:
+        grp=file[groupname]
+        for key, value in kwargs.items():
+            grp.create_dataset(key,data=value)
+
 
 import time
 

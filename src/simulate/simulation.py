@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 from nanowire.nanowire import Nanowire
-from simulate.update_csv import update_csv
+from simulate.update_csv import add_dataset_hdf
 from simulate.get_parameters import get_scratch, get_yml
 import argparse
 import os
 import pandas as pd
 import yaml
+import h5py
 
 
 def save_model_figure(nanowire, suffix, data_folder):
@@ -103,50 +104,54 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
 
 
 def simulation_single(
-    params, row, date="no-date", scratch="./Scratch/", simulate_conductance=True, simulate_spectrum=True, simulate_magnetization_spectrum=True
+    simulation_run, group, date="no-date", scratch="./Scratch/", simulate_conductance=True, simulate_spectrum=True, simulate_magnetization_spectrum=True
 ):
 
-    data_suffix = "simulation{}".format(row)
-
+    params={}
+    for key, value in group.attrs.items():
+        params[key]=value
     nanowire = Nanowire(params)
 
     data_folder = scratch + date
 
-    save_model_figure(nanowire, data_suffix, data_folder)
+    save_model_figure(nanowire, simulation_run, data_folder)
 
     if simulate_spectrum:
         # Generate spectrum data and figure
         spectrum_data = nanowire.spectrum(B_values=np.linspace(0, params["b_max"], 81))
-        spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
-        params.update({"spectrum_critical_field": spectrum_critical_field})
+        spectrum_critical_field = spectrum(spectrum_data, simulation_run, data_folder)
+        add_dataset_hdf(simulation_run,data_folder+"/"+date+".hdf5",
+                        spectrum_data=spectrum_data,
+                        spectrum_critical_field=spectrum_critical_field)
 
     if simulate_magnetization_spectrum:
         # Generate spectrum data and figure
-        spectrum_data = nanowire.magnetization_spectrum(M_values=np.linspace(0, params["m_max"], 201))
-        mag_spectrum_critical_field = magnetization_spectrum(spectrum_data, data_suffix, data_folder)
-        params.update({"mag_spectrum_critical_field": mag_spectrum_critical_field})
+        mag_spectrum_data = nanowire.magnetization_spectrum(M_values=np.linspace(0, params["m_max"], 81))
+        mag_spectrum_critical_field = magnetization_spectrum(spectrum_data, simulation_run, data_folder)
+        add_dataset_hdf(simulation_run,data_folder+"/"+date+".hdf5",
+                        mag_spectrum_data=mag_spectrum_data,
+                        mag_spectrum_critical_field=mag_spectrum_critical_field))
 
     if simulate_conductance:
         # Generate data of spectrum and conductance. This takes time
         t = nanowire.parameters['t']
         energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
         # Generate conductance data and figure
+        t = nanowire.parameters['t']
+        energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
+
         conductance_data = nanowire.conductances(
             B_values=np.linspace(0, params["b_max"], 81), energies=energies
         )
         conductance_critical_field = conductance(
-            conductance_data, data_suffix, data_folder
+            conductance_data, simulation_run, data_folder
         )
 
         # Save figure of the conductance at a given field.
-        individual_conductance(conductance_data, data_suffix, data_folder)
-        params.update({"conductance_critical_field": conductance_critical_field})
-
-    # Log which data has been saved.
-    update_csv(
-        params,
-        data_folder + "/wiresdata.csv",
-    )
+        individual_conductance(conductance_data, simulation_run, data_folder)
+        add_dataset_hdf(simulation_run,data_folder+"/"+date+".hdf5",
+                        conductance_data=conductance_data,
+                        conductance_critical_field=conductance_critical_field)
 
 
 def simulation_all(params, row, date="no-date", scratch="./Scratch/"):
@@ -169,6 +174,15 @@ def simulation_all_csv(csv_file, date, scratch, simulate_conductance, simulate_s
             simulate_spectrum=simulate_spectrum
         )
 
+def simulation_all_hdf(hdf_file, date, scratch, simulate_conductance):
+    with h5py.File(hdf_file,'a') as file:
+        for simulation_run, group in file.items():
+            simulation_single(simulation_run,
+                group,
+                date=date,
+                scratch=scratch,
+                simulate_conductance=simulate_conductance,
+            )
 
 def main():
     parser = argparse.ArgumentParser(description="take the csv, and the line number")
@@ -181,9 +195,7 @@ def main():
     simulate_magnetization_spectrum = get_yml("globals.yml")["simulate_magnetization_spectrum"]
     simulate_spectrum = get_yml("globals.yml")["simulate_spectrum"]
     
-
-    simulation_all_csv(args.csv_file, args.date, get_scratch(), simulate_conductance, simulate_spectrum, simulate_magnetization_spectrum)
-
+    simulation_all_hdf(args.csv_file, args.date, get_scratch(), simulate_conductance, simulate_spectrum, simulate_magnetization_spectrum)
 
 if __name__ == "__main__":
     main()
