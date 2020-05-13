@@ -73,6 +73,7 @@ setup(
         "pandas",
         "pre-commit",
         "gitpython",
+        "h5py",
     ],
     entry_points={
         "console_scripts": [

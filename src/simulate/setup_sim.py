@@ -12,7 +12,7 @@ import h5py
 
 def gen_data_csv(date, scratch):
     simulation_parameters = get_simulation_parameters()
-    if not os.path.exists(scratch + date + "/" + date + ".csv"):
+    if not os.path.exists(scratch + date + "/" + date + ".hdf5"):
         d = [
             dict(zip(simulation_parameters, v))
             for v in product(*simulation_parameters.values())
@@ -22,7 +22,11 @@ def gen_data_csv(date, scratch):
         # d["conductance_critical_field"] = np.nan
         print("print number of rows: ", len(d))
         with h5py.File(scratch + date + "/" + date + ".hdf5", "w") as file:
-            file.create_dataset(date, data=d)
+            for i,di in enumerate(d): 
+                grp = file.create_group("simulation"+str(i))
+                for key, value in di.items():
+                    grp.attrs[key]=value
+
     else:
         raise FileExistsError("data csv already exists")
 
