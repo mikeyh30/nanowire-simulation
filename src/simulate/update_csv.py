@@ -43,10 +43,15 @@ def update_csv(iteration, spectrum_critical_field, conductance_critical_field, d
 
 
 def add_dataset_hdf(groupname, data_file, **kwargs):
+    def create_dataset(dictionary):
+        for key, value in dictionary.items():
+            if type(value)==dict:
+                create_dataset(value)
+            else:
+                grp.create_dataset(key,data=value)
     with h5py.File(data_file,'a') as file:
         grp=file[groupname]
-        for key, value in kwargs.items():
-            grp.create_dataset(key,data=value)
+        create_dataset(kwargs)
 
 
 import time

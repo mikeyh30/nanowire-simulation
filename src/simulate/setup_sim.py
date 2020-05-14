@@ -10,16 +10,13 @@ import numpy as np
 import h5py
 
 
-def gen_data_csv(date, scratch):
+def gen_hdf5(date, scratch):
     simulation_parameters = get_simulation_parameters()
     if not os.path.exists(scratch + date + "/" + date + ".hdf5"):
         d = [
             dict(zip(simulation_parameters, v))
             for v in product(*simulation_parameters.values())
         ]
-        # Prepare columns for answers
-        # d["spectrum_critical_field"] = np.nan
-        # d["conductance_critical_field"] = np.nan
         print("print number of rows: ", len(d))
         with h5py.File(scratch + date + "/" + date + ".hdf5", "w") as file:
             for i,di in enumerate(d): 
@@ -29,16 +26,6 @@ def gen_data_csv(date, scratch):
 
     else:
         raise FileExistsError("data csv already exists")
-
-
-def gen_blank_output_csv(date, scratch):
-    filename = scratch + date + "/wiresdata.csv"
-    if not os.path.exists(filename):
-        text = "wire_width,wire_length,barrier_length,stagger_ratio,period,M,m_max,hopping_distance,added_sinusoid,B,b_max,bohr_magneton,alpha_R,delta,gfactor,effective_mass,muSc,mu,barrier_height"
-        with open(file=filename, mode="w+") as file:
-            file.write(text)
-    else:
-        raise FileExistsError("output csv already exists")
 
 
 def gen_directories(date, scratch):
@@ -55,8 +42,6 @@ def gen_directories(date, scratch):
     makedirs(
         data_folder,
         "/modelfig",
-        "/cond",
-        "/spec",
         "/fig-conductance",
         "/fig-ind-conductance",
         "/fig-spectrum",
@@ -80,8 +65,7 @@ def save_git_hash(date, scratch):
 def setup(date, scratch):
     try:
         gen_directories(date, scratch)
-        gen_blank_output_csv(date, scratch)
-        gen_data_csv(date, scratch)
+        gen_hdf5(date, scratch)
         save_yml(date, scratch)
         save_git_hash(date,scratch)
     except FileExistsError as e:

@@ -1,7 +1,6 @@
 import kwant
 import matplotlib.pyplot as plt
 import numpy as np
-import pickle
 from nanowire.nanowire import Nanowire
 from simulate.update_csv import add_dataset_hdf
 from simulate.get_parameters import get_scratch, get_yml
@@ -31,10 +30,6 @@ def save_model_figure(nanowire, suffix, data_folder):
 
 
 def spectrum(spectrum_data, suffix, data_folder):
-    pickle.dump(
-        spectrum_data, open(data_folder + "/spec/spec_" + suffix + ".dat", "wb")
-    )
-
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (7, 5)
     ax = fig.gca()
@@ -48,10 +43,6 @@ def spectrum(spectrum_data, suffix, data_folder):
 
 
 def magnetization_spectrum(spectrum_data, suffix, data_folder):
-    pickle.dump(
-        spectrum_data, open(data_folder + "/spec/spec_" + suffix + ".dat", "wb")
-    )
-
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (7, 5)
     ax = fig.gca()
@@ -65,10 +56,6 @@ def magnetization_spectrum(spectrum_data, suffix, data_folder):
 
 
 def conductance(conductance_data, suffix, data_folder):
-    pickle.dump(
-        conductance_data, open(data_folder + "/cond/cond_" + suffix + ".dat", "wb")
-    )
-
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (8, 5)
     ax = fig.gca()
