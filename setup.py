@@ -13,8 +13,12 @@ def run_installer(command_subclass):
         command_subclass_run(self)
         # Define config file locations
         globals_sample = os.path.join(os.getcwd(), "config", "globals-sample.yml")
-        units_sample = os.path.join(os.getcwd(), "config", "sim_parameters_units-sample.yml")
-        unitless_sample = os.path.join(os.getcwd(), "config", "sim_parameters_unitless-sample.yml")
+        units_sample = os.path.join(
+            os.getcwd(), "config", "sim_parameters_units-sample.yml"
+        )
+        unitless_sample = os.path.join(
+            os.getcwd(), "config", "sim_parameters_unitless-sample.yml"
+        )
         globals_file = os.path.join(os.getcwd(), "globals.yml")
         units_file = os.path.join(os.getcwd(), "sim_parameters_units.yml")
         unitless_file = os.path.join(os.getcwd(), "sim_parameters_unitless.yml")
@@ -25,7 +29,7 @@ def run_installer(command_subclass):
 
         # Update globals
         # Read in the file
-        with open('globals.yml', 'r') as file:
+        with open("globals.yml", "r") as file:
             filedata = file.read()
 
         scratch = os.path.join(os.getcwd(), "data/")
@@ -38,7 +42,7 @@ def run_installer(command_subclass):
         filedata = filedata.replace("/path/to/hpc-control/folder/", hpc_control)
 
         # Write the file out again
-        with open('globals.yml', 'w') as file:
+        with open("globals.yml", "w") as file:
             file.write(filedata)
 
     command_subclass.run = modified_run
@@ -48,6 +52,7 @@ def run_installer(command_subclass):
 @run_installer
 class SetupConfigurationInstall(install):
     pass
+
 
 @run_installer
 class SetupConfigurationDevelop(develop):

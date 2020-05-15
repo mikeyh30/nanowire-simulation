@@ -13,7 +13,7 @@ import h5py
 
 
 def save_model_figure(nanowire, suffix, data_folder):
-    makedirs(data_folder,"/modelfig")
+    makedirs(data_folder, "/modelfig")
     fig = plt.figure()
     fig.suptitle("Model grid, and nanomagnet fields")
     ax_model = fig.add_subplot(3, 1, 1)
@@ -32,7 +32,7 @@ def save_model_figure(nanowire, suffix, data_folder):
 
 
 def spectrum(spectrum_data, suffix, data_folder):
-    makedirs(data_folder,"/fig-spectrum")
+    makedirs(data_folder, "/fig-spectrum")
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (7, 5)
     ax = fig.gca()
@@ -46,7 +46,7 @@ def spectrum(spectrum_data, suffix, data_folder):
 
 
 def magnetization_spectrum(spectrum_data, suffix, data_folder):
-    makedirs(data_folder,"/fig-mag-spectrum")
+    makedirs(data_folder, "/fig-mag-spectrum")
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (7, 5)
     ax = fig.gca()
@@ -60,7 +60,7 @@ def magnetization_spectrum(spectrum_data, suffix, data_folder):
 
 
 def conductance(conductance_data, suffix, data_folder):
-    makedirs(data_folder,"/fig-conductance")
+    makedirs(data_folder, "/fig-conductance")
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (8, 5)
     ax = fig.gca()
@@ -82,7 +82,7 @@ def conductance(conductance_data, suffix, data_folder):
 
 
 def individual_conductance(data, suffix, data_folder, index_slice=30):
-    makedirs(data_folder,"/fig-ind-conductance")
+    makedirs(data_folder, "/fig-ind-conductance")
     plt.rcParams["figure.figsize"] = (7, 5)
     cond = np.transpose(data["Cond"])
     fig = plt.figure()
@@ -96,12 +96,18 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
 
 
 def simulation_single(
-    simulation_run, group, date="no-date", scratch="./Scratch/", simulate_conductance=True, simulate_spectrum=True, simulate_magnetization_spectrum=True
+    simulation_run,
+    group,
+    date="no-date",
+    scratch="./Scratch/",
+    simulate_conductance=True,
+    simulate_spectrum=True,
+    simulate_magnetization_spectrum=True,
 ):
 
-    params={}
+    params = {}
     for key, value in group.attrs.items():
-        params[key]=value
+        params[key] = value
     nanowire = Nanowire(params)
 
     data_folder = scratch + date
@@ -112,9 +118,12 @@ def simulation_single(
         # Generate spectrum data and figure
         spectrum_data = nanowire.spectrum(simulation_run, B_values=np.linspace(0, params["b_max"], 81))
         spectrum_critical_field = spectrum(spectrum_data, simulation_run, data_folder)
-        add_dataset_hdf(simulation_run,data_folder+"/"+date+".hdf5",
-                        spectrum_data=spectrum_data,
-                        spectrum_critical_field=spectrum_critical_field)
+        add_dataset_hdf(
+            simulation_run,
+            data_folder + "/" + date + ".hdf5",
+            spectrum_data=spectrum_data,
+            spectrum_critical_field=spectrum_critical_field,
+        )
 
     if simulate_magnetization_spectrum:
         # Generate spectrum data and figure
@@ -129,11 +138,13 @@ def simulation_single(
         t = nanowire.parameters['t']
         energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
         # Generate conductance data and figure
-        t = nanowire.parameters['t']
+        t = nanowire.parameters["t"]
         energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
 
         conductance_data = nanowire.conductances(
-            simulation_run, B_values=np.linspace(0, params["b_max"], 81), energies=energies
+            simulation_run,
+            B_values=np.linspace(0, params["b_max"], 81),
+            energies=energies,
         )
         conductance_critical_field = conductance(
             conductance_data, simulation_run, data_folder
@@ -141,9 +152,12 @@ def simulation_single(
 
         # Save figure of the conductance at a given field.
         individual_conductance(conductance_data, simulation_run, data_folder)
-        add_dataset_hdf(simulation_run,data_folder+"/"+date+".hdf5",
-                        conductance_data=conductance_data,
-                        conductance_critical_field=conductance_critical_field)
+        add_dataset_hdf(
+            simulation_run,
+            data_folder + "/" + date + ".hdf5",
+            conductance_data=conductance_data,
+            conductance_critical_field=conductance_critical_field,
+        )
 
 
 def simulation_all(params, row, date="no-date", scratch="./Scratch/"):
@@ -166,19 +180,22 @@ def simulation_all_csv(csv_file, date, scratch, simulate_conductance, simulate_s
             simulate_spectrum=simulate_spectrum
         )
 
+
 def simulation_all_hdf(hdf_file, date, scratch, simulate_conductance):
-    with h5py.File(hdf_file,'a') as file:
+    with h5py.File(hdf_file, "a") as file:
         for simulation_run, group in file.items():
-            if group['finished_simulation'][0] == False:
-                simulation_single(simulation_run,
+            if group["finished_simulation"][0] == False:
+                simulation_single(
+                    simulation_run,
                     group,
                     date=date,
                     scratch=scratch,
                     simulate_conductance=simulate_conductance,
                 )
-                group['finished_simulation'][0] = True
+                group["finished_simulation"][0] = True
             else:
-                print(simulation_run," already ran")
+                print(simulation_run, " already ran")
+
 
 def main():
     parser = argparse.ArgumentParser(description="take the csv, and the line number")

@@ -19,11 +19,13 @@ def gen_hdf5(date, scratch):
         ]
         print("print number of rows: ", len(d))
         with h5py.File(scratch + date + "/" + date + ".hdf5", "w") as file:
-            for i,di in enumerate(d): 
-                grp = file.create_group("simulation"+str(i))
+            for i, di in enumerate(d):
+                grp = file.create_group("simulation" + str(i))
                 for key, value in di.items():
-                    grp.attrs[key]=value
-                grp.create_dataset("finished_simulation", shape=(1,), dtype=bool, data=False)
+                    grp.attrs[key] = value
+                grp.create_dataset(
+                    "finished_simulation", shape=(1,), dtype=bool, data=False
+                )
     else:
         raise FileExistsError("hdf5 file already exists")
 
@@ -46,16 +48,16 @@ def save_git_hash(date, scratch):
     repo = git.Repo(search_parent_directories=True)
     sha = repo.head.object.hexsha
     filename = scratch + date + "/.githash"
-    with open(filename,"w") as file:
+    with open(filename, "w") as file:
         file.write(sha)
 
 
 def setup(date, scratch):
     try:
-        os.makedirs(scratch+date,exist_ok=True)
+        os.makedirs(scratch + date, exist_ok=True)
         gen_hdf5(date, scratch)
         save_yml(date, scratch)
-        save_git_hash(date,scratch)
+        save_git_hash(date, scratch)
     except FileExistsError as e:
         print(e)
         return 1
