@@ -110,7 +110,7 @@ def simulation_single(
 
     if simulate_spectrum:
         # Generate spectrum data and figure
-        spectrum_data = nanowire.spectrum(B_values=np.linspace(0, params["b_max"], 81))
+        spectrum_data = nanowire.spectrum(simulation_run, B_values=np.linspace(0, params["b_max"], 81))
         spectrum_critical_field = spectrum(spectrum_data, simulation_run, data_folder)
         add_dataset_hdf(simulation_run,data_folder+"/"+date+".hdf5",
                         spectrum_data=spectrum_data,
@@ -118,7 +118,7 @@ def simulation_single(
 
     if simulate_magnetization_spectrum:
         # Generate spectrum data and figure
-        mag_spectrum_data = nanowire.magnetization_spectrum(M_values=np.linspace(0, params["m_max"], 81))
+        mag_spectrum_data = nanowire.magnetization_spectrum(simulation_run, M_values=np.linspace(0, params["m_max"], 81))
         mag_spectrum_critical_field = magnetization_spectrum(spectrum_data, simulation_run, data_folder)
         add_dataset_hdf(simulation_run,data_folder+"/"+date+".hdf5",
                         mag_spectrum_data=mag_spectrum_data,
@@ -133,7 +133,7 @@ def simulation_single(
         energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
 
         conductance_data = nanowire.conductances(
-            B_values=np.linspace(0, params["b_max"], 81), energies=energies
+            simulation_run, B_values=np.linspace(0, params["b_max"], 81), energies=energies
         )
         conductance_critical_field = conductance(
             conductance_data, simulation_run, data_folder
@@ -169,12 +169,16 @@ def simulation_all_csv(csv_file, date, scratch, simulate_conductance, simulate_s
 def simulation_all_hdf(hdf_file, date, scratch, simulate_conductance):
     with h5py.File(hdf_file,'a') as file:
         for simulation_run, group in file.items():
-            simulation_single(simulation_run,
-                group,
-                date=date,
-                scratch=scratch,
-                simulate_conductance=simulate_conductance,
-            )
+            if group['finished_simulation'][0] == False:
+                simulation_single(simulation_run,
+                    group,
+                    date=date,
+                    scratch=scratch,
+                    simulate_conductance=simulate_conductance,
+                )
+                group['finished_simulation'][0] = True
+            else:
+                print(simulation_run," already ran")
 
 def main():
     parser = argparse.ArgumentParser(description="take the csv, and the line number")

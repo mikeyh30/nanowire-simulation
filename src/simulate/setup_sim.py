@@ -23,7 +23,7 @@ def gen_hdf5(date, scratch):
                 grp = file.create_group("simulation"+str(i))
                 for key, value in di.items():
                     grp.attrs[key]=value
-
+                grp.create_dataset("finished_simulation", shape=(1,), dtype=bool, data=False)
     else:
         raise FileExistsError("hdf5 file already exists")
 

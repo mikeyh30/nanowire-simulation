@@ -27,11 +27,11 @@ class Nanowire:
         parameters['alpha'] = parameters['alpha_R'] / parameters['hopping_distance']
         self.parameters = parameters
 
-    def spectrum(self, B_values=np.linspace(0, 1.0, 201)):
+    def spectrum(self, simulation_run, B_values=np.linspace(0, 1.0, 201)):
         syst = NISIN(self.parameters)
         energies = []
         critB = 0
-        for b in tqdm(B_values, desc="Spec",):
+        for b in tqdm(B_values, desc=simulation_run+"/spec",):
             self.parameters["B"] = b
             newparams = {}
             newparams['p'] = self.parameters
@@ -49,11 +49,11 @@ class Nanowire:
         outcome = dict(B=B_values, E=energies, CritB=topological_B_values[0], topological_B_values=topological_B_values, topological_gap=topological_gap)
         return outcome
     
-    def magnetization_spectrum(self, M_values):
+    def magnetization_spectrum(self, simulation_run, M_values):
         syst = NISIN(self.parameters)
         energies = []
         critM = 0
-        for m in tqdm(M_values, desc="Spec",):
+        for m in tqdm(M_values, desc=simulation_run+"/mag-spec",):
             self.parameters["M"] = m
             H = syst.hamiltonian_submatrix(sparse=True, params=self.parameters)
             H = H.tocsc()
@@ -69,13 +69,14 @@ class Nanowire:
     
     def conductances(
         self,
+        simulation_run,
         B_values=np.linspace(0, 1.0, 201),
         energies=[1e-6 * i for i in range(-120, 120)],
     ):
         syst = NISIN(self.parameters)
         data = []
         critB = 0
-        for energy in tqdm(energies, desc="Cond",):
+        for energy in tqdm(energies, desc=simulation_run+"/cond",):
             cond = []
             for b in B_values:
                 self.parameters["B"] = b
