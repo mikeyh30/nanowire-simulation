@@ -1,4 +1,3 @@
-from numpy import arange
 import os
 import yaml
 

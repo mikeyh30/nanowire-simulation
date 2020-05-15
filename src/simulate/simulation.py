@@ -1,15 +1,11 @@
-import kwant
 import matplotlib.pyplot as plt
 import numpy as np
+import argparse
+import h5py
 from nanowire.nanowire import Nanowire
 from simulate.update_hdf import add_dataset_hdf
 from simulate.get_parameters import get_scratch, get_yml
 from simulate.setup_sim import makedirs
-import argparse
-import os
-import pandas as pd
-import yaml
-import h5py
 
 
 def save_model_figure(nanowire, suffix, data_folder):
@@ -160,28 +156,7 @@ def simulation_single(
         )
 
 
-def simulation_all(params, row, date="no-date", scratch="./Scratch/"):
-    new_params = params
-    for no_magnets in params["Ns"]:
-        new_params["no_magnets"] = no_magnets
-        simulation_single(new_params, row, date, scratch)
-
-
-def simulation_all_csv(csv_file, date, scratch, simulate_conductance, simulate_spectrum, simulate_magnetization_spectrum):
-    df = pd.read_csv(csv_file)
-    for index, row in df.iterrows():
-        simulation_single(
-            row.to_dict(),
-            row=index,
-            date=date,
-            scratch=scratch,
-            simulate_conductance=simulate_conductance,
-            simulate_magnetization_spectrum=simulate_magnetization_spectrum,
-            simulate_spectrum=simulate_spectrum
-        )
-
-
-def simulation_all_hdf(hdf_file, date, scratch, simulate_conductance):
+def simulation_all_hdf(hdf_file, date, scratch, simulate_conductance, simulate_spectrum, simulate_magnetization_spectrum):
     with h5py.File(hdf_file, "a") as file:
         for simulation_run, group in file.items():
             if group["finished_simulation"][0] == False:
@@ -191,6 +166,8 @@ def simulation_all_hdf(hdf_file, date, scratch, simulate_conductance):
                     date=date,
                     scratch=scratch,
                     simulate_conductance=simulate_conductance,
+                    simulate_magnetization_spectrum=simulate_magnetization_spectrum,
+                    simulate_spectrum=simulate_spectrum
                 )
                 group["finished_simulation"][0] = True
             else:
@@ -199,7 +176,7 @@ def simulation_all_hdf(hdf_file, date, scratch, simulate_conductance):
 
 def main():
     parser = argparse.ArgumentParser(description="take the csv, and the line number")
-    parser.add_argument("csv_file", metavar="filename", type=str)
+    parser.add_argument("hdf_file", metavar="filename", type=str)
     parser.add_argument("date", type=str)
 
     args = parser.parse_args()

@@ -1,12 +1,9 @@
-import pandas as pd
 from simulate.get_parameters import get_simulation_parameters, get_scratch
 from itertools import product
 import os
-import yaml
 import argparse
 from shutil import copyfile
 import git
-import numpy as np
 import h5py
 
 

@@ -1,11 +1,8 @@
 from tqdm import tqdm
 import kwant
-import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
-from nanowire.nanomagnet_field import rick_fourier
 from nanowire.transport_model import NISIN, barrier_region, magnetic_phase
-import matplotlib.pyplot as plt
 
 
 def find_critical_field(
