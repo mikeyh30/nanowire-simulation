@@ -4,6 +4,7 @@ import numpy as np
 from nanowire.nanowire import Nanowire
 from simulate.update_csv import add_dataset_hdf
 from simulate.get_parameters import get_scratch, get_yml
+from simulate.setup_sim import makedirs
 import argparse
 import os
 import pandas as pd
@@ -12,6 +13,7 @@ import h5py
 
 
 def save_model_figure(nanowire, suffix, data_folder):
+    makedirs(data_folder,"/modelfig")
     fig = plt.figure()
     fig.suptitle("Model grid, and nanomagnet fields")
     ax_model = fig.add_subplot(3, 1, 1)
@@ -30,6 +32,7 @@ def save_model_figure(nanowire, suffix, data_folder):
 
 
 def spectrum(spectrum_data, suffix, data_folder):
+    makedirs(data_folder,"/fig-spectrum")
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (7, 5)
     ax = fig.gca()
@@ -43,6 +46,7 @@ def spectrum(spectrum_data, suffix, data_folder):
 
 
 def magnetization_spectrum(spectrum_data, suffix, data_folder):
+    makedirs(data_folder,"/fig-mag-spectrum")
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (7, 5)
     ax = fig.gca()
@@ -50,12 +54,13 @@ def magnetization_spectrum(spectrum_data, suffix, data_folder):
     ax.set_xlabel("Magnetization (T)")
     ax.set_ylabel("Energies (eV)")
     plt.ticklabel_format(axis="both", style="sci", scilimits=(0, 0))
-    fig.savefig(data_folder + "/fig-spectrum/model" + suffix + ".png")
+    fig.savefig(data_folder + "/fig-mag-spectrum/model" + suffix + ".png")
     plt.close(fig)
     return spectrum_data["CritM"]
 
 
 def conductance(conductance_data, suffix, data_folder):
+    makedirs(data_folder,"/fig-conductance")
     fig = plt.figure()
     plt.rcParams["figure.figsize"] = (8, 5)
     ax = fig.gca()
@@ -77,8 +82,8 @@ def conductance(conductance_data, suffix, data_folder):
 
 
 def individual_conductance(data, suffix, data_folder, index_slice=30):
+    makedirs(data_folder,"/fig-ind-conductance")
     plt.rcParams["figure.figsize"] = (7, 5)
-
     cond = np.transpose(data["Cond"])
     fig = plt.figure()
     ax = fig.gca()

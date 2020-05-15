@@ -25,27 +25,15 @@ def gen_hdf5(date, scratch):
                     grp.attrs[key]=value
 
     else:
-        raise FileExistsError("data csv already exists")
+        raise FileExistsError("hdf5 file already exists")
 
 
-def gen_directories(date, scratch):
-    data_folder = scratch + date
-
-    def makedirs(data_folder, *subfolder):
-        for sub in subfolder:
-            if not os.path.exists(data_folder + sub):
-                os.makedirs(data_folder + sub, exist_ok=True)
-            else:
-                raise FileExistsError(sub, "already exists")
-
-    os.makedirs(data_folder, exist_ok=True)
-    makedirs(
-        data_folder,
-        "/modelfig",
-        "/fig-conductance",
-        "/fig-ind-conductance",
-        "/fig-spectrum",
-    )
+def makedirs(data_folder, *subfolder):
+    for sub in subfolder:
+        if not os.path.exists(data_folder + sub):
+            os.makedirs(data_folder + sub, exist_ok=True)
+        # else:
+        #     raise FileExistsError(sub, "already exists")
 
 
 def save_yml(date, scratch, yml_file_name="sim_parameters_units.yml"):
@@ -64,7 +52,7 @@ def save_git_hash(date, scratch):
 
 def setup(date, scratch):
     try:
-        gen_directories(date, scratch)
+        os.makedirs(scratch+date,exist_ok=True)
         gen_hdf5(date, scratch)
         save_yml(date, scratch)
         save_git_hash(date,scratch)
