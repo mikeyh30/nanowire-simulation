@@ -2,7 +2,7 @@ import kwant
 import matplotlib.pyplot as plt
 import numpy as np
 from nanowire.nanowire import Nanowire
-from simulate.update_csv import add_dataset_hdf
+from simulate.update_hdf import add_dataset_hdf
 from simulate.get_parameters import get_scratch, get_yml
 from simulate.setup_sim import makedirs
 import argparse
