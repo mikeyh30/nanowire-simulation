@@ -159,11 +159,6 @@ def simulation_single(
         {
             "spectrum_critical_field": spectrum_critical_field,
             "conductance_critical_field": conductance_critical_field,
-            "conductance_data_filename": conductance_data_filename,
-            "spectrum_data_filename": spectrum_data_filename,
-            "conductance_figure_filename": conductance_figure_filename,
-            "spectrum_figure_filename": spectrum_figure_filename,
-            "individual_conductance_figure_filename": individual_conductance_figure_filename,
         },
     )
 
