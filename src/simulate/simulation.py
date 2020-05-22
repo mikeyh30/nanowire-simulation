@@ -118,11 +118,13 @@ def simulation_single(
         # Generate spectrum data and figure
         spectrum_data = nanowire.spectrum(B_values=np.linspace(0, params["b_max"], 201))
         spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
+        params.update({"spectrum_critical_field": spectrum_critical_field})
 
     if simulate_magnetization_spectrum:
         # Generate spectrum data and figure
         spectrum_data = nanowire.magnetization_spectrum(M_values=np.linspace(0, params["m_max"], 201))
         mag_spectrum_critical_field = magnetization_spectrum(spectrum_data, data_suffix, data_folder)
+        params.update({"mag_spectrum_critical_field": mag_spectrum_critical_field})
 
     if simulate_conductance:
         # Generate data of spectrum and conductance. This takes time
@@ -138,14 +140,7 @@ def simulation_single(
 
         # Save figure of the conductance at a given field.
         individual_conductance(conductance_data, data_suffix, data_folder)
-
-    params.update(
-        {
-            "spectrum_critical_field": spectrum_critical_field,
-            "mag_spectrum_critical_field": mag_spectrum_critical_field,
-            "conductance_critical_field": conductance_critical_field,
-        },
-    )
+        params.update({"conductance_critical_field": conductance_critical_field})
 
     # Log which data has been saved.
     update_csv(
