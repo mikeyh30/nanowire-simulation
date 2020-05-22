@@ -6,3 +6,7 @@ directories:
 use_units: True
 
 simulate_conductance: True
+
+simulate_magnetization_spectrum: False
+
+simulate_spectrum: True

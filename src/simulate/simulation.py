@@ -103,7 +103,7 @@ def individual_conductance(data, suffix, data_folder, index_slice=30):
 
 
 def simulation_single(
-    params, row, date="no-date", scratch="./Scratch/", simulate_conductance=True
+    params, row, date="no-date", scratch="./Scratch/", simulate_conductance=True, simulate_spectrum=True, simulate_magnetization_spectrum=True
 ):
 
     data_suffix = "simulation{}".format(row)
@@ -114,14 +114,20 @@ def simulation_single(
 
     save_model_figure(nanowire, data_suffix, data_folder)
 
-    # Generate data of spectrum and conductance. This takes time
-    t = nanowire.parameters['t']
-    energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
-    # Generate spectrum data and figure
-    spectrum_data = nanowire.spectrum(B_values=np.linspace(0, params["b_max"], 201))
-    spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
+    if simulate_spectrum:
+        # Generate spectrum data and figure
+        spectrum_data = nanowire.spectrum(B_values=np.linspace(0, params["b_max"], 201))
+        spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
+
+    if simulate_magnetization_spectrum:
+        # Generate spectrum data and figure
+        spectrum_data = nanowire.magnetization_spectrum(M_values=np.linspace(0, params["m_max"], 201))
+        mag_spectrum_critical_field = magnetization_spectrum(spectrum_data, data_suffix, data_folder)
 
     if simulate_conductance:
+        # Generate data of spectrum and conductance. This takes time
+        t = nanowire.parameters['t']
+        energies = np.arange(-0.120 * t, 0.120 * t, 0.001 * t)
         # Generate conductance data and figure
         conductance_data = nanowire.conductances(
             B_values=np.linspace(0, params["b_max"], 81), energies=energies
@@ -133,31 +139,10 @@ def simulation_single(
         # Save figure of the conductance at a given field.
         individual_conductance(conductance_data, data_suffix, data_folder)
 
-        # Filenames of the saved data and figures.
-        conductance_data_filename = data_folder + "/cond/cond_" + data_suffix + ".dat"
-        spectrum_data_filename = data_folder + "/spec/spec_" + data_suffix + ".dat"
-        conductance_figure_filename = (
-            data_folder + "/fig-conductance/model" + data_suffix + ".png"
-        )
-        spectrum_figure_filename = (
-            data_folder + "/fig-spectrum/model" + data_suffix + ".png"
-        )
-        individual_conductance_figure_filename = (
-            data_folder + "/fig-ind-conductance/model" + data_suffix + ".png"
-        )
-    else:
-        conductance_critical_field = "not simulated"
-        conductance_data_filename = "not simulated"
-        spectrum_data_filename = data_folder + "/spec/spec_" + data_suffix + ".dat"
-        conductance_figure_filename = "not simulated"
-        spectrum_figure_filename = (
-            data_folder + "/fig-spectrum/model" + data_suffix + ".png"
-        )
-        individual_conductance_figure_filename = "not simulated"
-
     params.update(
         {
             "spectrum_critical_field": spectrum_critical_field,
+            "mag_spectrum_critical_field": mag_spectrum_critical_field,
             "conductance_critical_field": conductance_critical_field,
         },
     )
@@ -176,7 +161,7 @@ def simulation_all(params, row, date="no-date", scratch="./Scratch/"):
         simulation_single(new_params, row, date, scratch)
 
 
-def simulation_all_csv(csv_file, date, scratch, simulate_conductance):
+def simulation_all_csv(csv_file, date, scratch, simulate_conductance, simulate_spectrum, simulate_magnetization_spectrum):
     df = pd.read_csv(csv_file)
     for index, row in df.iterrows():
         simulation_single(
@@ -185,6 +170,8 @@ def simulation_all_csv(csv_file, date, scratch, simulate_conductance):
             date=date,
             scratch=scratch,
             simulate_conductance=simulate_conductance,
+            simulate_magnetization_spectrum=simulate_magnetization_spectrum,
+            simulate_spectrum=simulate_spectrum
         )
 
 
@@ -196,8 +183,11 @@ def main():
     args = parser.parse_args()
 
     simulate_conductance = get_yml("globals.yml")["simulate_conductance"]
+    simulate_magnetization_spectrum = get_yml("globals.yml")["simulate_magnetization_spectrum"]
+    simulate_spectrum = get_yml("globals.yml")["simulate_spectrum"]
+    
 
-    simulation_all_csv(args.csv_file, args.date, get_scratch(), simulate_conductance)
+    simulation_all_csv(args.csv_file, args.date, get_scratch(), simulate_conductance, simulate_spectrum, simulate_magnetization_spectrum)
 
 
 if __name__ == "__main__":
