@@ -7,12 +7,12 @@ sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
 sX = np.array([[0.0, 1.0], [1.0, 0.0]])
 sY = np.array([[0.0, -1j], [1j, 0.0]])
 
-tauZ = ta.array(np.kron(sZ, s0))
-tauX = ta.array(np.kron(sX, s0))
-tauY = ta.array(np.kron(sY, s0))
-sigZ = ta.array(np.kron(s0, sZ))
-sigX = ta.array(np.kron(s0, sX))
-sigY = ta.array(np.kron(s0, sY))
+tauZsig0 = ta.array(np.kron(sZ, s0))
+tauXsig0 = ta.array(np.kron(sX, s0))
+tauYsig0 = ta.array(np.kron(sY, s0))
+tau0sigZ = ta.array(np.kron(s0, sZ))
+tau0sigX = ta.array(np.kron(s0, sX))
+tau0sigY = ta.array(np.kron(s0, sY))
 tauZsigX = ta.array(np.kron(sZ, sX))
 tauZsigY = ta.array(np.kron(sZ, sY))
 tauYsigY = ta.array(np.kron(sY, sY))
@@ -26,24 +26,16 @@ def magnetic_phase(position, p):
 
 # No need for two t terms, Builder assumes hermiticity
 def hopX(site0, site1, p):
-    return -p['t'] * tauZ + 1j * p['alpha'] * tauZsigY
+    return -p['t'] * tauZsig0 + 1j * p['alpha'] * tauZsigY
 
 
 def hopY(site0, site1, p):
-    return -p['t'] * tauZ - 1j * p['alpha'] * tauZsigX
+    return -p['t'] * tauZsig0 - 1j * p['alpha'] * tauZsigX
 
 
 def sinuB(position, p, stagger_ratio):
     theta = magnetic_phase(position, p)
-    return sigY * np.cos(theta) + sigX * np.sin(theta)
-
-
-def energy_zeeman(p):
-    return 0.5 * p['gfactor'] * p['bohr_magneton'] * p['B'] * sigX
-
-
-def energy_superconducting(p):
-    return p['delta'] * tauX
+    return tau0sigY * np.cos(theta) + tau0sigX * np.sin(theta)
 
 
 def energy_nanomagnet(position,p):
@@ -56,32 +48,24 @@ def energy_nanomagnet(position,p):
     )
 
 
-def energy_tmu(p):
-    return (
-            (4 * p['t'] - p['mu']) * tauZ
-            - 1j * p['alpha'] * tauZsigY / p['hopping_distance']
-            + 1j * p['alpha'] * tauZsigX / p['hopping_distance']
-            )
-
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
 def onsiteSc(site,p):
+    H_no_magnets = (
+        (4 * p['t'] - p['mu']) * tauZsig0
+        + 0.5 * p['gfactor'] * p['bohr_magneton'] * p['B'] * tau0sigX
+        + p['delta'] * tauXsig0
+    )
     if p['added_sinusoid']:  # Might consider changing this to if M:, if float zero is good
         return (
-            energy_tmu(p)
-            + energy_zeeman(p)
-            + energy_superconducting(p)
-            + energy_nanomagnet(site.pos[0], p)
+            H_no_magnets
+            + 0.5 * p['gfactor'] * p['bohr_magneton'] * p['M'] * sinuB(site.pos[0], p, p['stagger_ratio'])
         )
     else:
-        return (
-            energy_tmu(p)
-            + energy_zeeman(p)
-            + energy_superconducting(p)
-        )
+        return H_no_magnets
 
 
 def onsiteNormal(site, p):
-    return energy_tmu(p)
+    return (4 * p['t'] - p['mu']) * tauZsig0
 
 
 def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
@@ -98,13 +82,13 @@ def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width,
 
 def onsiteBarrier(site, p):
     return (4 * p['t'] - p['mu'] + \
-        barrier_height_func(p['barrier_height'], p['barrier_length'], p['wire_length'], p['wire_width'], site)) * tauZ
+        barrier_height_func(p['barrier_height'], p['barrier_length'], p['wire_length'], p['wire_width'], site)) * tauZsig0
 
 
 def make_lead(p, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
     lead = kwant.Builder(
         kwant.TranslationalSymmetry((-p['hopping_distance'], 0)),
-        conservation_law=-tauZ,
+        conservation_law=-tauZsig0,
         particle_hole=tauYsigY,
     )
     lat = kwant.lattice.square(a=p['hopping_distance'], norbs=4)
