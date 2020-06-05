@@ -93,8 +93,8 @@ def make_lead(p, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
     )
     lat = kwant.lattice.square(a=p['hopping_distance'], norbs=4)
     lead[(lat(0, j) for j in range(p['wire_width']))] = onsiteH
-    lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
-    lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
+    lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = -p['t'] * tauZsig0
+    lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = -p['t'] * tauZsig0
     return lead
 
 
