@@ -46,7 +46,7 @@ def spectrum(spectrum_data, suffix, data_folder):
     return spectrum_data["CritB"]
 
 
-def magnetization_spectrum(spectrum_data, suffix, data_folder):
+def magnetization_spectrum(spectrum_data, suffix, data_folder,mu,B):
     pickle.dump(
         spectrum_data, open(data_folder + "/spec/spec_" + suffix + ".dat", "wb")
     )
@@ -57,6 +57,7 @@ def magnetization_spectrum(spectrum_data, suffix, data_folder):
     ax.plot(spectrum_data["M"], spectrum_data["E"])
     ax.set_xlabel("Magnetization (T)")
     ax.set_ylabel("Energies (eV)")
+    ax.set_title('mu='+str(mu)+', B='+str(B))
     plt.ticklabel_format(axis="both", style="sci", scilimits=(0, 0))
     fig.savefig(data_folder + "/fig-spectrum/model" + suffix + ".png")
     plt.close(fig)
@@ -123,7 +124,9 @@ def simulation_single(
     if simulate_magnetization_spectrum:
         # Generate spectrum data and figure
         spectrum_data = nanowire.magnetization_spectrum(M_values=np.linspace(0, params["m_max"], 201))
-        mag_spectrum_critical_field = magnetization_spectrum(spectrum_data, data_suffix, data_folder)
+        mu=nanowire.parameters('muSc')
+        B=nanowire.parameters('B')
+        mag_spectrum_critical_field = magnetization_spectrum(spectrum_data, data_suffix, data_folder,mu,B)
         params.update({"mag_spectrum_critical_field": mag_spectrum_critical_field})
 
     if simulate_conductance:

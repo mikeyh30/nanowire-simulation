@@ -3,8 +3,8 @@ import kwant
 import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
-from nanowire.nanomagnet_field import rick_fourier
-from nanowire.transport_model import NISIN, barrier_region, magnetic_phase
+# from nanowire.nanomagnet_field import rick_fourier
+from nanowire.transport_model import * #NISIN, barrier_region, magnetic_phase
 import matplotlib.pyplot as plt
 
 def find_critical_field(B_values, energies, min_topological_gap, tolerance=1e-5, energy_level_count=20):
@@ -35,7 +35,20 @@ class Nanowire:
             self.parameters["B"] = b
             newparams = {}
             newparams['p'] = self.parameters
-            H = syst.hamiltonian_submatrix(sparse=True, params=newparams)
+            my_params = {
+                "B": 1,
+                "M_x": f_M_y,
+                "M_y": f_M_y,
+                "delta": f_delta,
+                "g": f_g,
+                "hbar": 1,
+                "m": 1,
+                "mu": f_mu,
+                "mu_B": 1,
+                "alpha": f_alpha,
+                "p": self.parameters,
+            }
+            H = syst.hamiltonian_submatrix(sparse=True, params=my_params)
             H = H.tocsc()
             # k is the number of eigenvalues, and find them near sigma.
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
@@ -99,22 +112,18 @@ class Nanowire:
 
     def plot(self, ax_model, ax_x, ax_y):
         syst = NISIN(self.parameters)
-        length_A = syst.pos(self.parameters['wire_width'] * self.parameters['wire_length'] - 1)[0]
-        array_A = np.arange(length_A)
-        phi = magnetic_phase(array_A, self.parameters)
-        ax_x.plot(array_A, self.parameters['M'] * np.sin(phi))
-        ax_y.plot(array_A, self.parameters['M'] * np.cos(phi))
+        # length_A = syst.pos(self.parameters['wire_width'] * self.parameters['wire_length'] - 1)[0]
+        # array_A = np.arange(length_A)
+        # phi = magnetic_phase(array_A, self.parameters)
+        # ax_x.plot(array_A, self.parameters['M'] * np.sin(phi))
+        # ax_y.plot(array_A, self.parameters['M'] * np.cos(phi))
 
         return kwant.plotter.plot(
             syst,
             show=False,
             unit="nn",
             site_size=0.20,
-            site_color=lambda s: "y"
-            if barrier_region(s, self.parameters['barrier_length'],
-                              self.parameters['wire_length'],
-                              self.parameters['wire_width'])
-            else "b",
+            site_color=lambda s: "y" if barrier_region(self.parameters,site=s) else "b",
             ax=ax_model,
         )
 

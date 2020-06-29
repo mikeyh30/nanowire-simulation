@@ -1,6 +1,7 @@
 import kwant
 import kwant.continuum
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Extend_Builder(kwant.builder.Builder):
@@ -40,27 +41,27 @@ def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width,
         raise IndexError("barrier_height called outside of barrier region")
 
 
-def f_M(x, p):  # , p, stagger_ratio):
+def f_M(x, p, pos=True):  # , p, stagger_ratio):
     theta = magnetic_phase(x, p)
     M_x = np.sin(theta)
     M_y = np.cos(theta)
     return M_x, M_y
 
 
-def f_M_x(x, p):
+def f_M_x(x, p, pos=True):
     return f_M(x, p)[0]
 
 
-def f_M_y(x, p):
+def f_M_y(x, p, pos=True):
     return f_M(x, p)[1]
 
 
-def f_mu(x, p):
-    if barrier_region(p, x=x, y=True):
+def f_mu(x, p, pos=True):
+    if barrier_region(p, x=x, y=True, pos=pos):
         mu = p[
             "mu"
         ]  # + barrier_height_func(p['barrier_height'], p['barrier_length'], p['wire_length'], p['wire_width'], site)
-    elif sc_region(p, x=x, y=True):
+    elif sc_region(p, x=x, y=True, pos=pos):
         mu = p["muSc"]
     else:
         mu = p["mu"]
@@ -68,31 +69,31 @@ def f_mu(x, p):
     return mu
 
 
-def f_alpha(x, p):
-    if wire_region(p, x=x, y=True):
+def f_alpha(x, p, pos=True):
+    if wire_region(p, x=x, y=True, pos=pos):
         return p["alpha_R"]
     return 0
 
 
-def f_delta(x, p):
-    if sc_region(p, x=x, y=True):
+def f_delta(x, p, pos=True):
+    if sc_region(p, x=x, y=True, pos=pos):
         return p["delta"]
     return 0
 
 
-def f_g(x, p):
-    if wire_region(p, x=x, y=True):
+def f_g(x, p, pos=True):
+    if wire_region(p, x=x, y=True, pos=pos):
         return p["gfactor"]
     return 1
 
 
 def syst_shape(site, p):
-    (x, y) = site.pos
+    (x, y) = site.tag
     return wire_region(p, x=x, y=y)
 
 
 def lead_shape(site, p):
-    (x, y) = site.pos
+    (x, y) = site.tag
     return 0 <= y < p["wire_width"]
 
 
@@ -100,11 +101,16 @@ def decorate_region(func):
     def _region(p, **kwargs):
         x_basis = kwargs.get("x")
         y_basis = kwargs.get("y")
-        site_basis = kwargs.get("site")
+        site = kwargs.get("site")
+        position_basis = kwargs.get("pos")
+
+        if position_basis:
+            x_basis = int(x_basis / p['hopping_distance'])
+            y_basis = int(y_basis / p['hopping_distance'])
+
         if x_basis != None and y_basis != None:
             x, y = x_basis, y_basis
-        elif kwargs.get("site"):
-            site = kwargs.get("site")
+        elif site != None:
             if type(site) == kwant.builder.Site:
                 x = site[1][0]
                 y = site[1][1]
@@ -115,6 +121,7 @@ def decorate_region(func):
                 raise TypeError("type= ", type(site))
         else:
             raise TypeError("type= ", type(x_basis), type(y_basis))
+
         return func(p, x=x, y=y)
 
     return _region
@@ -137,7 +144,7 @@ def sc_region(p, x, y):
     )
 
 
-def main(param):
+def NISIN(param):
     hamiltonian = """
         + ((hbar**2)/(2*m)) * (k_x**2+k_y**2) * kron(sigma_0,sigma_z)
         - mu(x, p) * kron(sigma_0,sigma_z)
@@ -148,19 +155,23 @@ def main(param):
         + 0.5 * g(x, p) * mu_B * (M_x(x, p) * kron(sigma_x,sigma_0) + M_y(x, p) * kron(sigma_y,sigma_0))
     """
 
-    template = kwant.continuum.discretize(hamiltonian, grid=p["hopping_distance"])
+    template = kwant.continuum.discretize(hamiltonian, grid=param["hopping_distance"])
     syst = Extend_Builder()  # kwant.TranslationalSymmetry((-p['hopping_distance'], 0)))
 
     syst.custom_fill(template, syst_shape, param, (0, 0))
     lead = Extend_Builder(
-        kwant.TranslationalSymmetry((-p["hopping_distance"], 0))
+        kwant.TranslationalSymmetry((-param["hopping_distance"], 0))
     )  # , conservation_law=-tauZsig0, particle_hole=tauYsigY)
     lead.custom_fill(template, lead_shape, param, (0, 0))
 
     syst.attach_lead(lead)
     syst.attach_lead(lead.reversed())
 
-    syst = syst.finalized()
+    return syst.finalized()
+
+def main(param):
+    syst = NISIN(param)
+
     my_params = {
         "B": 1,
         "M_x": f_M_y,
@@ -174,6 +185,20 @@ def main(param):
         "alpha": f_alpha,
         "p": p,
     }
+    
+    fig = plt.figure()
+    ax_model = fig.add_subplot(1, 1, 1)
+    ax_model.axis("equal")
+    kwant.plotter.plot(
+        syst,
+        show=False,
+        unit="nn",
+        site_size=0.20,
+        site_color=lambda s: "y" if barrier_region(p,site=s) else "b",
+        ax=ax_model,
+    )
+    plt.show()
+
     kwant.plotter.bands(
         syst.leads[0], params=my_params, momenta=np.linspace(-0.3, 0.3, 201), show=True
     )
