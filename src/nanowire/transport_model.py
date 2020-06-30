@@ -7,114 +7,65 @@ sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
 sX = np.array([[0.0, 1.0], [1.0, 0.0]])
 sY = np.array([[0.0, -1j], [1j, 0.0]])
 
-tauZ = ta.array(np.kron(sZ, s0))
-tauX = ta.array(np.kron(sX, s0))
-tauY = ta.array(np.kron(sY, s0))
-sigZ = ta.array(np.kron(s0, sZ))
-sigX = ta.array(np.kron(s0, sX))
-sigY = ta.array(np.kron(s0, sY))
+tauZsig0 = ta.array(np.kron(sZ, s0))
+tauXsig0 = ta.array(np.kron(sX, s0))
+tauYsig0 = ta.array(np.kron(sY, s0))
+tau0sigZ = ta.array(np.kron(s0, sZ))
+tau0sigX = ta.array(np.kron(s0, sX))
+tau0sigY = ta.array(np.kron(s0, sY))
 tauZsigX = ta.array(np.kron(sZ, sX))
 tauZsigY = ta.array(np.kron(sZ, sY))
 tauYsigY = ta.array(np.kron(sY, sY))
 
 
-def magnetic_phase(position, barrier_length, hopping_distance, period):
-    counter = np.mod(position - (1 + barrier_length) * hopping_distance, period)
-    theta = (counter / period) * 2 * np.pi
+def magnetic_phase(position, p):
+    counter = np.mod(position - (1 + p['barrier_length']) * p['hopping_distance'], p['period'])
+    theta = (counter / p['period']) * 2 * np.pi
     return theta
 
 
 # No need for two t terms, Builder assumes hermiticity
-def hopX(site0, site1, t, alpha):
-    return -t * tauZ + 1j * alpha * tauZsigY
+def hopX(site0, site1, p):
+    return -p['t'] * tauZsig0 + 1j * p['alpha'] * tauZsigY
 
 
-def hopY(site0, site1, t, alpha):
-    return -t * tauZ - 1j * alpha * tauZsigX
+def hopY(site0, site1, p):
+    return -p['t'] * tauZsig0 - 1j * p['alpha'] * tauZsigX
 
 
-def sinuB(position, barrier_length, hopping_distance, period, stagger_ratio):
-    theta = magnetic_phase(position, barrier_length, hopping_distance, period)
-    return sigY * np.cos(theta) + sigX * np.sin(theta)
+def sinuB(position, p, stagger_ratio):
+    theta = magnetic_phase(position, p)
+    return tau0sigY * np.cos(theta) + tau0sigX * np.sin(theta)
 
 
-def energy_zeeman(gfactor, bohr_magneton, B):
-    return 0.5 * gfactor * bohr_magneton * B * sigX
-
-
-def energy_superconducting(delta):
-    return delta * tauX
-
-
-def energy_nanomagnet(
-    gfactor,
-    bohr_magneton,
-    M,
-    position,
-    barrier_length,
-    hopping_distance,
-    period,
-    stagger_ratio,
-):
+def energy_nanomagnet(position,p):
     return (
         0.5
-        * gfactor
-        * bohr_magneton
-        * M
-        * sinuB(position, barrier_length, hopping_distance, period, stagger_ratio)
+        * p['gfactor']
+        * p['bohr_magneton']
+        * p['M']
+        * sinuB(position, p, p['stagger_ratio'])
     )
 
 
-def energy_tmu(t, mu, alpha=0,hopping_distance=200):
-    return (
-            (4 * t - mu) * tauZ
-            - 1j * alpha * tauZsigY / hopping_distance
-            + 1j * alpha * tauZsigX / hopping_distance
-            )
-
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
-def onsiteSc(
-    site,
-    muSc,
-    t,
-    B,
-    delta,
-    M,
-    added_sinusoid,
-    barrier_length,
-    stagger_ratio,
-    gfactor,
-    bohr_magneton,
-    period,
-    hopping_distance,
-    alpha,
-):
-    if added_sinusoid:  # Might consider changing this to if M:, if float zero is good
+def onsiteSc(site,p):
+    H_no_magnets = (
+        (4 * p['t'] - p['mu']) * tauZsig0
+        + 0.5 * p['gfactor'] * p['bohr_magneton'] * p['B'] * tau0sigX
+        + p['delta'] * tauXsig0
+    )
+    if p['added_sinusoid']:  # Might consider changing this to if M:, if float zero is good
         return (
-            energy_tmu(t, muSc, alpha, hopping_distance)
-            + energy_zeeman(gfactor, bohr_magneton, B)
-            + energy_superconducting(delta)
-            + energy_nanomagnet(
-                gfactor,
-                bohr_magneton,
-                M,
-                site.pos[0],
-                barrier_length,
-                hopping_distance,
-                period,
-                stagger_ratio,
-            )
+            H_no_magnets
+            + 0.5 * p['gfactor'] * p['bohr_magneton'] * p['M'] * sinuB(site.pos[0], p, p['stagger_ratio'])
         )
     else:
-        return (
-            energy_tmu(t, mu, alpha, hopping_distance)
-            + energy_zeeman(gfactor, bohr_magneton, B)
-            + energy_superconducting(delta)
-        )
+        return H_no_magnets
 
 
-def onsiteNormal(site, mu, t):
-    return energy_tmu(t, mu)
+def onsiteNormal(site, p):
+    return (4 * p['t'] - p['mu']) * tauZsig0
 
 
 def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
@@ -129,20 +80,21 @@ def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width,
         raise IndexError('barrier_height called outside of barrier region')
 
 
-def onsiteBarrier(site, mu, t, barrier_height, barrier_length, wire_length, wire_width):
-    return (4 * t - mu + barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site)) * tauZ
+def onsiteBarrier(site, p):
+    return (4 * p['t'] - p['mu'] + \
+        barrier_height_func(p['barrier_height'], p['barrier_length'], p['wire_length'], p['wire_width'], site)) * tauZsig0
 
 
-def make_lead(wire_width, hopping_distance, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
+def make_lead(p, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
     lead = kwant.Builder(
-        kwant.TranslationalSymmetry((-hopping_distance, 0)),
-        conservation_law=-tauZ,
+        kwant.TranslationalSymmetry((-p['hopping_distance'], 0)),
+        conservation_law=-tauZsig0,
         particle_hole=tauYsigY,
     )
-    lat = kwant.lattice.square(a=hopping_distance, norbs=4)
-    lead[(lat(0, j) for j in range(wire_width))] = onsiteH
-    lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
-    lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
+    lat = kwant.lattice.square(a=p['hopping_distance'], norbs=4)
+    lead[(lat(0, j) for j in range(p['wire_width']))] = onsiteH
+    lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = -p['t'] * tauZsig0
+    lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = -p['t'] * tauZsig0
     return lead
 
 
@@ -201,7 +153,7 @@ def make_wire(
     # Hopping:
     syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
     syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
-    lead = make_lead(wire_width, hopping_distance, onsiteNormal, hopX, hopY)
+    lead = make_lead(params, onsiteNormal, hopX, hopY)
     syst.attach_lead(lead)
     syst.attach_lead(lead.reversed())
 

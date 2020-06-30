@@ -33,7 +33,9 @@ class Nanowire:
         critB = 0
         for b in tqdm(B_values, desc="Spec",):
             self.parameters["B"] = b
-            H = syst.hamiltonian_submatrix(sparse=True, params=self.parameters)
+            newparams = {}
+            newparams['p'] = self.parameters
+            H = syst.hamiltonian_submatrix(sparse=True, params=newparams)
             H = H.tocsc()
             # k is the number of eigenvalues, and find them near sigma.
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
@@ -99,10 +101,7 @@ class Nanowire:
         syst = NISIN(self.parameters)
         length_A = syst.pos(self.parameters['wire_width'] * self.parameters['wire_length'] - 1)[0]
         array_A = np.arange(length_A)
-        phi = magnetic_phase(
-            array_A, self.parameters['barrier_length'],
-            self.parameters['hopping_distance'], self.parameters['period']
-        )
+        phi = magnetic_phase(array_A, self.parameters)
         ax_x.plot(array_A, self.parameters['M'] * np.sin(phi))
         ax_y.plot(array_A, self.parameters['M'] * np.cos(phi))
 
