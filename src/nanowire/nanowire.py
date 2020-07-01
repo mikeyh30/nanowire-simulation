@@ -26,7 +26,7 @@ class Nanowire:
         parameters["alpha"] = parameters["alpha_R"] / parameters["hopping_distance"]
         self.parameters = parameters
 
-    def spectrum(self, B_values=np.linspace(0, 1.0, 201)):
+    def spectrum(self, B_values=np.linspace(0, 1.0, 201), tolerance=1e-5):
         syst = NISIN(self.parameters)
         energies = []
         critB = 0
@@ -41,7 +41,7 @@ class Nanowire:
             eigs = np.sort(eigs[0])
             energies.append(eigs)
 
-        topological_B_values, topological_gap = find_critical_field(B_values, energies, 0.15 * self.parameters["delta"])
+        topological_B_values, topological_gap = find_critical_field(B_values, energies, 0.15*self.parameters["delta"], tolerance=tolerance)
         if not topological_B_values:
             topological_B_values.append(np.nan)
 
