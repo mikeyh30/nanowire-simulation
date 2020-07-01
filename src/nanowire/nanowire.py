@@ -102,11 +102,13 @@ class Nanowire:
         syst = NISIN(self.parameters)
         data = []
         critB = 0
-        energy = 0
+        energy = 0.1
         self.parameters["B"] = B
-        smatrix = kwant.smatrix(syst, energy, params=self.parameters)
+        newparams = {}
+        newparams['p'] = self.parameters
+        smatrix = kwant.smatrix(syst, energy, params=newparams)
         reflection = smatrix.transmission((0, 0), (0, 0))
-        # topological_visibility = np.linalg.det(reflection)
+        topological_visibility = np.linalg.det(reflection)
         #topological_invariant = np.sign(reflection)
         return reflection
 

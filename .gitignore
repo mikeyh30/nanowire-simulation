@@ -16,8 +16,6 @@ nanowire-env/
 
 activate
 
-test*
-
 dont_track/
 
 *.egg-info

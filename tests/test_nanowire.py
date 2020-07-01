@@ -1,0 +1,35 @@
+from pytest import approx, raises
+from nanowire.nanowire import * 
+import kwant
+
+p = {
+    "wire_width": 7,
+    "wire_length": 80,
+    "barrier_length": 1,
+    "stagger_ratio": 0.5,
+    "period": 16,
+    "M": 1,
+    "m_max": 5,
+    "hopping_distance": 1,
+    "added_sinusoid": True,
+    "B": 1,
+    "b_max": 3,
+    "bohr_magneton": 1,
+    "alpha_R": 0.32,
+    "delta": 0.1,
+    "gfactor": 1,
+    "effective_mass": 1,
+    "muSc": 0.22,
+    "mu": 0.3,
+    "barrier_height": 2,
+}
+
+def test_topological_visibility():
+    params=p.copy()
+    # params['p']=p
+    nanowire = Nanowire(params)
+    B = 0.1
+    nanowire.topological_visibility(B)
+
+if __name__ == "__main__":
+    test_topological_visibility()
