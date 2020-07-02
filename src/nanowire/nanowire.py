@@ -19,12 +19,31 @@ def find_critical_field(B_values, energies, min_topological_gap, tolerance=1e-5,
                 topological_gap.append(np.abs(energies[bidx][middle_energy + 1] - energies[bidx][middle_energy]))
     return topological_B, topological_gap
 
+<<<<<<< HEAD
+=======
+s0 = np.identity(2)
+sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
+sX = np.array([[0.0, 1.0], [1.0, 0.0]])
+sY = np.array([[0.0, -1j], [1j, 0.0]])
+tau0sigZ = ta.array(np.kron(s0, sZ))
+>>>>>>> New spin_density function
 
 class Nanowire:
     def __init__(self, parameters):
         parameters["t"] = 3.83 / (parameters["effective_mass"] * (parameters["hopping_distance"] ** 2))
         parameters["alpha"] = parameters["alpha_R"] / parameters["hopping_distance"]
         self.parameters = parameters
+
+    def spin_density(self, B, energy=-1, sum=True):
+        syst = NISIN(self.parameters)
+        newparams={'p':self.parameters}
+        newparams['p']['B']=B
+        wf = kwant.wave_function(syst, energy=energy, params=newparams)
+        psi = wf(0)[0]
+        rho_sz = kwant.operator.Density(syst, onsite=tau0sigZ, sum=sum)
+        spin_z = rho_sz(psi)
+        return spin_z, syst
+            
 
     def spectrum(self, B_values=np.linspace(0, 1.0, 201), tolerance=1e-5):
         syst = NISIN(self.parameters)

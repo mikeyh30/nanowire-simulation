@@ -1,5 +1,5 @@
-#from pytest import approx, raises
-from nanowire.nanowire import * 
+from pytest import approx
+from nanowire.nanowire import *
 import math
 
 p = {
@@ -24,16 +24,21 @@ p = {
     "barrier_height": 2,
 }
 
+
 def test_spectrum():
     nanowire = Nanowire(p)
-    outcome = nanowire.spectrum(B_values=np.linspace(0, 10, 3),tolerance=0.001)
-    assert outcome['CritB'] == 5.0
-    outcome2 = nanowire.spectrum(B_values=np.linspace(0, 10, 3),tolerance=0.00001)
-    assert math.isnan(outcome2['CritB'])
+    outcome = nanowire.spectrum(B_values=np.linspace(0, 10, 3), tolerance=0.001)
+    assert outcome["CritB"] == 5.0
+    outcome2 = nanowire.spectrum(B_values=np.linspace(0, 10, 3), tolerance=0.00001)
+    assert math.isnan(outcome2["CritB"])
     return outcome
 
+
+def test_spin_density():
+    nanowire = Nanowire(p)
+    spin_z, _ = nanowire.spin_density(0, 1, True)
+    assert spin_z == approx(0.4766, 0.0001)
+
+
 if __name__ == "__main__":
-    outcome = test_spectrum()
-    import matplotlib.pyplot as plt
-    plt.plot(outcome['E'])
-    plt.show()
+    test_spin_density()
