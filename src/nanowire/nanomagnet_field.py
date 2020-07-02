@@ -10,19 +10,14 @@ def staggered_sinusoid(theta, ratio):
     norm_ratio = ratio * 2 * np.pi
 
     new_theta = np.where(
-        norm_theta < norm_ratio,
-        norm_theta / (2 * ratio),
-        np.pi + (norm_theta - norm_ratio) / (2 - 2 * ratio),
+        norm_theta < norm_ratio, norm_theta / (2 * ratio), np.pi + (norm_theta - norm_ratio) / (2 - 2 * ratio),
     )
 
     return (np.sin(new_theta), np.sin(new_theta + np.pi / 2))
 
 
 def rick_sinusiod(theta):
-    rick_data = os.path.join(
-        os.path.dirname(__file__),
-        "../../data/rick-simulation-profiles/2pi_1D_slice.csv",
-    )
+    rick_data = os.path.join(os.path.dirname(__file__), "../../data/rick-simulation-profiles/2pi_1D_slice.csv",)
     df = pd.read_csv(rick_data)
     norm_theta = (theta / (2 * np.pi)) % 1
     Xrange = df.shape[0]

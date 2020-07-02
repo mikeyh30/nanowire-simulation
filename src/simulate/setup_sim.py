@@ -11,10 +11,7 @@ import git
 def gen_data_csv(date, scratch):
     simulation_parameters = get_simulation_parameters()
     if not os.path.exists(scratch + date + "/" + date + ".csv"):
-        d = [
-            dict(zip(simulation_parameters, v))
-            for v in product(*simulation_parameters.values())
-        ]
+        d = [dict(zip(simulation_parameters, v)) for v in product(*simulation_parameters.values())]
         df = pd.DataFrame(d)
         df.to_csv(scratch + date + "/" + date + ".csv", sep=",", index=False)
         print("print number of rows: ", df.shape[0])
@@ -44,13 +41,7 @@ def gen_directories(date, scratch):
 
     os.makedirs(data_folder, exist_ok=True)
     makedirs(
-        data_folder,
-        "/modelfig",
-        "/cond",
-        "/spec",
-        "/fig-conductance",
-        "/fig-ind-conductance",
-        "/fig-spectrum",
+        data_folder, "/modelfig", "/cond", "/spec", "/fig-conductance", "/fig-ind-conductance", "/fig-spectrum",
     )
 
 
@@ -64,7 +55,7 @@ def save_git_hash(date, scratch):
     repo = git.Repo(search_parent_directories=True)
     sha = repo.head.object.hexsha
     filename = scratch + date + "/.githash"
-    with open(filename,"w") as file:
+    with open(filename, "w") as file:
         file.write(sha)
 
 
@@ -74,7 +65,7 @@ def setup(date, scratch):
         gen_blank_output_csv(date, scratch)
         gen_data_csv(date, scratch)
         save_yml(date, scratch)
-        save_git_hash(date,scratch)
+        save_git_hash(date, scratch)
     except FileExistsError as e:
         print(e)
         return 1

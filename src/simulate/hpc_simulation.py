@@ -17,11 +17,7 @@ def main():
     simulate_conductance = get_yml("globals.yml")["simulate_conductance"]
 
     simulation_single(
-        params,
-        row=args.line_number,
-        date=args.date,
-        scratch=get_scratch(),
-        simulate_conductance=simulate_conductance,
+        params, row=args.line_number, date=args.date, scratch=get_scratch(), simulate_conductance=simulate_conductance,
     )
 
 

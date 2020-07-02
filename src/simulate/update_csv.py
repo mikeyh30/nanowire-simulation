@@ -1,10 +1,7 @@
 import pandas as pd
 
 
-def update_csv(
-    simulation_parameters,
-    data_file,
-):
+def update_csv(simulation_parameters, data_file):
     df = pd.read_csv(data_file, sep=",")
     newline = df.append(simulation_parameters, ignore_index=True)
     newline.to_csv(data_file, sep=",", index=False)

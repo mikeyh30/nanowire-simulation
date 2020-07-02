@@ -19,18 +19,18 @@ tauYsigY = ta.array(np.kron(sY, sY))
 
 
 def magnetic_phase(position, p):
-    counter = np.mod(position - (1 + p['barrier_length']) * p['hopping_distance'], p['period'])
-    theta = (counter / p['period']) * 2 * np.pi
+    counter = np.mod(position - (1 + p["barrier_length"]) * p["hopping_distance"], p["period"])
+    theta = (counter / p["period"]) * 2 * np.pi
     return theta
 
 
 # No need for two t terms, Builder assumes hermiticity
 def hopX(site0, site1, p):
-    return -p['t'] * tauZsig0 + 1j * p['alpha'] * tauZsigY
+    return -p["t"] * tauZsig0 + 1j * p["alpha"] * tauZsigY
 
 
 def hopY(site0, site1, p):
-    return -p['t'] * tauZsig0 - 1j * p['alpha'] * tauZsigX
+    return -p["t"] * tauZsig0 - 1j * p["alpha"] * tauZsigX
 
 
 def sinuB(position, p, stagger_ratio):
@@ -38,63 +38,57 @@ def sinuB(position, p, stagger_ratio):
     return tau0sigY * np.cos(theta) + tau0sigX * np.sin(theta)
 
 
-def energy_nanomagnet(position,p):
-    return (
-        0.5
-        * p['gfactor']
-        * p['bohr_magneton']
-        * p['M']
-        * sinuB(position, p, p['stagger_ratio'])
-    )
+def energy_nanomagnet(position, p):
+    return 0.5 * p["gfactor"] * p["bohr_magneton"] * p["M"] * sinuB(position, p, p["stagger_ratio"])
 
 
 # This is the onsite Hamiltonian, this is where the B-field can be varied.
-def onsiteSc(site,p):
+def onsiteSc(site, p):
     H_no_magnets = (
-        (4 * p['t'] - p['mu']) * tauZsig0
-        + 0.5 * p['gfactor'] * p['bohr_magneton'] * p['B'] * tau0sigX
-        + p['delta'] * tauXsig0
+        (4 * p["t"] - p["mu"]) * tauZsig0
+        + 0.5 * p["gfactor"] * p["bohr_magneton"] * p["B"] * tau0sigX
+        + p["delta"] * tauXsig0
     )
-    if p['added_sinusoid']:  # Might consider changing this to if M:, if float zero is good
-        return (
-            H_no_magnets
-            + 0.5 * p['gfactor'] * p['bohr_magneton'] * p['M'] * sinuB(site.pos[0], p, p['stagger_ratio'])
+    if p["added_sinusoid"]:  # Might consider changing this to if M:, if float zero is good
+        return H_no_magnets + 0.5 * p["gfactor"] * p["bohr_magneton"] * p["M"] * sinuB(
+            site.pos[0], p, p["stagger_ratio"]
         )
     else:
         return H_no_magnets
 
 
 def onsiteNormal(site, p):
-    return (4 * p['t'] - p['mu']) * tauZsig0
+    return (4 * p["t"] - p["mu"]) * tauZsig0
 
 
 def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
     if barrier_region(site, barrier_length, wire_length, wire_width):
         i = site[1][1] // wire_width
-        distance_from_centre = np.abs(((wire_length-1)/2) - i)
+        distance_from_centre = np.abs(((wire_length - 1) / 2) - i)
         dbarrier_height = barrier_height / barrier_length
-        negative_distance_from_end = distance_from_centre - ((wire_length-1)/2)
+        negative_distance_from_end = distance_from_centre - ((wire_length - 1) / 2)
         height = barrier_height + dbarrier_height * negative_distance_from_end
         return height
     else:
-        raise IndexError('barrier_height called outside of barrier region')
+        raise IndexError("barrier_height called outside of barrier region")
 
 
 def onsiteBarrier(site, p):
-    return (4 * p['t'] - p['mu'] + \
-        barrier_height_func(p['barrier_height'], p['barrier_length'], p['wire_length'], p['wire_width'], site)) * tauZsig0
+    return (
+        4 * p["t"]
+        - p["mu"]
+        + barrier_height_func(p["barrier_height"], p["barrier_length"], p["wire_length"], p["wire_width"], site)
+    ) * tauZsig0
 
 
 def make_lead(p, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
     lead = kwant.Builder(
-        kwant.TranslationalSymmetry((-p['hopping_distance'], 0)),
-        conservation_law=-tauZsig0,
-        particle_hole=tauYsigY,
+        kwant.TranslationalSymmetry((-p["hopping_distance"], 0)), conservation_law=-tauZsig0, particle_hole=tauYsigY,
     )
-    lat = kwant.lattice.square(a=p['hopping_distance'], norbs=4)
-    lead[(lat(0, j) for j in range(p['wire_width']))] = onsiteH
-    lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = -p['t'] * tauZsig0
-    lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = -p['t'] * tauZsig0
+    lat = kwant.lattice.square(a=p["hopping_distance"], norbs=4)
+    lead[(lat(0, j) for j in range(p["wire_width"]))] = onsiteH
+    lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = -p["t"] * tauZsig0
+    lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = -p["t"] * tauZsig0
     return lead
 
 
@@ -105,9 +99,7 @@ def barrier_region(site, barrier_length, wire_length, wire_width):
     else:
         i = site // wire_width
         j = site % wire_width
-    return (
-        (0 <= i < barrier_length) or (wire_length - barrier_length <= i < wire_length)
-    ) and (0 <= j < wire_width)
+    return ((0 <= i < barrier_length) or (wire_length - barrier_length <= i < wire_length)) and (0 <= j < wire_width)
 
 
 def make_wire(
@@ -118,21 +110,15 @@ def make_wire(
     hopX=hopX,
     hopY=hopY,
 ):
-    wire_width = params['wire_width']
-    wire_length = params['wire_length']
-    barrier_length = params['barrier_length']
-    hopping_distance = params['hopping_distance']
+    wire_width = params["wire_width"]
+    wire_length = params["wire_length"]
+    barrier_length = params["barrier_length"]
+    hopping_distance = params["hopping_distance"]
 
     syst = kwant.Builder()
     lat = kwant.lattice.square(a=hopping_distance, norbs=4)
 
-    syst[
-        (
-            lat(i, j)
-            for i in range(barrier_length, wire_length - barrier_length)
-            for j in range(wire_width)
-        )
-    ] = onsiteSc
+    syst[(lat(i, j) for i in range(barrier_length, wire_length - barrier_length) for j in range(wire_width))] = onsiteSc
     # fmt: off
     syst[
         (
@@ -143,11 +129,7 @@ def make_wire(
     ] = onsiteBarrier
     # fmt: on
     syst[
-        (
-            lat(i, j)
-            for i in range(wire_length - barrier_length, wire_length)
-            for j in range(wire_width)
-        )
+        (lat(i, j) for i in range(wire_length - barrier_length, wire_length) for j in range(wire_width))
     ] = onsiteBarrier
 
     # Hopping:
