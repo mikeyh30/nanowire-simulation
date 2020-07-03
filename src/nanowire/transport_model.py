@@ -16,6 +16,7 @@ tau0sigY = ta.array(np.kron(s0, sY))
 tauZsigX = ta.array(np.kron(sZ, sX))
 tauZsigY = ta.array(np.kron(sZ, sY))
 tauYsigY = ta.array(np.kron(sY, sY))
+tauYsigZ = ta.array(np.kron(sY, sZ))
 
 
 def magnetic_phase(position, p):
@@ -42,14 +43,11 @@ def energy_nanomagnet(position, p):
     return 0.5 * p["gfactor"] * p["bohr_magneton"] * p["M"] * sinuB(position, p, p["stagger_ratio"])
 
 
-# This is the onsite Hamiltonian, this is where the B-field can be varied.
-def onsiteSc(site, p):
-    H_no_magnets = (
-        (4 * p["t"] - p["mu"]) * tauZsig0
-        + 0.5 * p["gfactor"] * p["bohr_magneton"] * p["B"] * tau0sigX
-        + p["delta"] * tauXsig0
-    )
-    if p["added_sinusoid"]:  # Might consider changing this to if M:, if float zero is good
+# Particle-hole symmetry (lead=True)             {tauY,tauX} {sigY,sigZ}
+# Particle-hole symmetry (lead=False & sinusoid) {tauY,tauX} {sigZ}
+def onsiteNormal(site, p, lead=False):
+    H_no_magnets = (4 * p["t"] - p["mu"]) * tauZsig0 + 0.5 * p["gfactor"] * p["bohr_magneton"] * p["B"] * tau0sigX
+    if p["added_sinusoid"] and not lead:
         return H_no_magnets + 0.5 * p["gfactor"] * p["bohr_magneton"] * p["M"] * sinuB(
             site.pos[0], p, p["stagger_ratio"]
         )
@@ -57,8 +55,24 @@ def onsiteSc(site, p):
         return H_no_magnets
 
 
-def onsiteNormal(site, p):
-    return (4 * p["t"] - p["mu"]) * tauZsig0
+def onsite_normal(site, p):
+    return onsiteNormal(site, p, lead=False)
+
+
+def onsiteSc(site, p):
+    return onsiteNormal(site, p, lead=False) + p["delta"] * tauXsig0
+
+
+def onsite_lead(site, p):
+    return onsiteNormal(site, p, lead=True)
+
+
+def onsite_barrier(site, p):
+    return (
+        4 * p["t"]
+        - p["mu"]
+        + barrier_height_func(p["barrier_height"], p["barrier_length"], p["wire_length"], p["wire_width"], site)
+    ) * tauZsig0
 
 
 def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
@@ -73,25 +87,6 @@ def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width,
         raise IndexError("barrier_height called outside of barrier region")
 
 
-def onsiteBarrier(site, p):
-    return (
-        4 * p["t"]
-        - p["mu"]
-        + barrier_height_func(p["barrier_height"], p["barrier_length"], p["wire_length"], p["wire_width"], site)
-    ) * tauZsig0
-
-
-def make_lead(p, onsiteH=onsiteNormal, hopX=hopX, hopY=hopY):
-    lead = kwant.Builder(
-        kwant.TranslationalSymmetry((-p["hopping_distance"], 0)), conservation_law=-tauZsig0, particle_hole=tauYsigY,
-    )
-    lat = kwant.lattice.square(a=p["hopping_distance"], norbs=4)
-    lead[(lat(0, j) for j in range(p["wire_width"]))] = onsiteH
-    lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = -p["t"] * tauZsig0
-    lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = -p["t"] * tauZsig0
-    return lead
-
-
 def barrier_region(site, barrier_length, wire_length, wire_width):
     if type(site) == kwant.builder.Site:
         i = site[1][0]
@@ -102,40 +97,59 @@ def barrier_region(site, barrier_length, wire_length, wire_width):
     return ((0 <= i < barrier_length) or (wire_length - barrier_length <= i < wire_length)) and (0 <= j < wire_width)
 
 
-def make_wire(
-    params,
-    hamiltonian_wire=onsiteSc,
-    hamiltonian_barrier=onsiteBarrier,
-    hamiltonian_normal=onsiteNormal,
-    hopX=hopX,
-    hopY=hopY,
+def make_system(
+    p, onsite_wire=onsiteSc, onsite_barrier=onsite_barrier, onsite_lead=onsite_lead, hopX=hopX, hopY=hopY, norbs=4
 ):
-    wire_width = params["wire_width"]
-    wire_length = params["wire_length"]
-    barrier_length = params["barrier_length"]
-    hopping_distance = params["hopping_distance"]
+    def make_wire_and_barriers(p=p, norbs=norbs, onsite_wire=onsite_wire, onsite_barrier=onsite_barrier):
+        syst = kwant.Builder()
+        lat = kwant.lattice.square(a=p["hopping_distance"], norbs=norbs)
 
-    syst = kwant.Builder()
-    lat = kwant.lattice.square(a=hopping_distance, norbs=4)
+        syst[
+            (
+                lat(i, j)
+                for i in range(p["barrier_length"], p["wire_length"] - p["barrier_length"])
+                for j in range(p["wire_width"])
+            )
+        ] = onsite_wire
+        # fmt: off
+        syst[
+            (
+                lat(i, j)
+                for i in range(0, p["barrier_length"])
+                for j in range(p["wire_width"])
+            )
+        ] = onsite_barrier
+        # fmt: on
+        syst[
+            (
+                lat(i, j)
+                for i in range(p["wire_length"] - p["barrier_length"], p["wire_length"])
+                for j in range(p["wire_width"])
+            )
+        ] = onsite_barrier
 
-    syst[(lat(i, j) for i in range(barrier_length, wire_length - barrier_length) for j in range(wire_width))] = onsiteSc
-    # fmt: off
-    syst[
-        (
-            lat(i, j)
-            for i in range(0, barrier_length)
-            for j in range(wire_width)
+        # Hopping:
+        syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
+        syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
+
+        return syst
+
+    def make_lead(
+        p=p, onsite_lead=onsite_lead, lead_hopX=-p["t"] * tauZsig0, lead_hopY=-p["t"] * tauZsig0, norbs=norbs
+    ):
+        # Conservation law must separate the electron-hole degree of freedom -> tauZ
+        # Particle-hole symmetry operator must be figured out for the Hamiltonian
+        lead = kwant.Builder(
+            kwant.TranslationalSymmetry((-p["hopping_distance"], 0)), conservation_law=-tauZsig0, particle_hole=tauYsigZ
         )
-    ] = onsiteBarrier
-    # fmt: on
-    syst[
-        (lat(i, j) for i in range(wire_length - barrier_length, wire_length) for j in range(wire_width))
-    ] = onsiteBarrier
+        lat = kwant.lattice.square(a=p["hopping_distance"], norbs=norbs)
+        lead[(lat(0, j) for j in range(p["wire_width"]))] = onsite_lead
+        lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = lead_hopX
+        lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = lead_hopY
+        return lead
 
-    # Hopping:
-    syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
-    syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
-    lead = make_lead(params, onsiteNormal, hopX, hopY)
+    syst = make_wire_and_barriers()
+    lead = make_lead()
     syst.attach_lead(lead)
     syst.attach_lead(lead.reversed())
 
@@ -143,4 +157,8 @@ def make_wire(
 
 
 def NISIN(params):
-    return make_wire(params).finalized()
+    return make_system(params).finalized()
+
+
+def NININ(params):
+    return make_system(params, onsite_wire=onsite_normal).finalized()
