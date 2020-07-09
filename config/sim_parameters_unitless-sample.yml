@@ -46,10 +46,13 @@ gfactor:
 effective_mass:
   - 1
 
-muSc:
+mu_wire:
   - 0.22
 
-mu:
+mu_barrier:
+  - 0.3
+
+mu_lead:
   - 0.3
 
 barrier_height:

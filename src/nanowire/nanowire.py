@@ -4,7 +4,7 @@ import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
 from nanowire.nanomagnet_field import rick_fourier
-from nanowire.transport_model import NISIN, barrier_region, magnetic_phase
+from nanowire.transport_model import NIXIN, barrier_region, magnetic_phase
 import matplotlib.pyplot as plt
 
 
@@ -20,14 +20,31 @@ def find_critical_field(B_values, energies, min_topological_gap, tolerance=1e-5,
     return topological_B, topological_gap
 
 
+s0 = np.identity(2)
+sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
+sX = np.array([[0.0, 1.0], [1.0, 0.0]])
+sY = np.array([[0.0, -1j], [1j, 0.0]])
+tau0sigZ = ta.array(np.kron(s0, sZ))
+
+
 class Nanowire:
-    def __init__(self, parameters):
+    def __init__(self, parameters, sc=True):
         parameters["t"] = 3.83 / (parameters["effective_mass"] * (parameters["hopping_distance"] ** 2))
         parameters["alpha"] = parameters["alpha_R"] / parameters["hopping_distance"]
         self.parameters = parameters
 
-    def spectrum(self, B_values=np.linspace(0, 1.0, 201)):
-        syst = NISIN(self.parameters)
+    def spin_density(self, B, energy=-1, sum=True):
+        syst = NIXIN(self.parameters)
+        newparams = {"p": self.parameters}
+        newparams["p"]["B"] = B
+        wf = kwant.wave_function(syst, energy=energy, params=newparams)
+        psi = wf(0)[0]
+        rho_sz = kwant.operator.Density(syst, onsite=tau0sigZ, sum=sum)
+        spin_z = rho_sz(psi)
+        return spin_z, syst
+
+    def spectrum(self, B_values=np.linspace(0, 1.0, 201), tolerance=1e-5):
+        syst = NIXIN(self.parameters)
         energies = []
         critB = 0
         for b in tqdm(B_values, desc="Spec",):
@@ -41,7 +58,9 @@ class Nanowire:
             eigs = np.sort(eigs[0])
             energies.append(eigs)
 
-        topological_B_values, topological_gap = find_critical_field(B_values, energies, 0.15 * self.parameters["delta"])
+        topological_B_values, topological_gap = find_critical_field(
+            B_values, energies, 0.15 * self.parameters["delta"], tolerance=tolerance
+        )
         if not topological_B_values:
             topological_B_values.append(np.nan)
 
@@ -55,7 +74,7 @@ class Nanowire:
         return outcome
 
     def magnetization_spectrum(self, M_values):
-        syst = NISIN(self.parameters)
+        syst = NIXIN(self.parameters)
         energies = []
         critM = 0
         for m in tqdm(M_values, desc="Spec",):
@@ -75,7 +94,7 @@ class Nanowire:
     def conductances(
         self, B_values=np.linspace(0, 1.0, 201), energies=[1e-6 * i for i in range(-120, 120)],
     ):
-        syst = NISIN(self.parameters)
+        syst = NIXIN(self.parameters)
         data = []
         critB = 0
         for energy in tqdm(energies, desc="Cond",):
@@ -97,7 +116,7 @@ class Nanowire:
         return outcome
 
     def plot(self, ax_model, ax_x, ax_y):
-        syst = NISIN(self.parameters)
+        syst = NIXIN(self.parameters)
         length_A = syst.pos(self.parameters["wire_width"] * self.parameters["wire_length"] - 1)[0]
         array_A = np.arange(length_A)
         phi = magnetic_phase(array_A, self.parameters)

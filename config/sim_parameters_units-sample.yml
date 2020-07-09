@@ -49,10 +49,13 @@ gfactor: # []
 effective_mass: # [m_e]
   - 0.019
 
-muSc: # [eV]
+mu_wire: # [eV]
   - 0
 
-mu: # [eV]
+mu_barrier: # [eV]
+  - 18.0E-3
+
+mu_lead: # [eV]
   - 18.0E-3
 
 barrier_height: # [eV]
