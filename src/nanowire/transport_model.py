@@ -7,16 +7,27 @@ sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
 sX = np.array([[0.0, 1.0], [1.0, 0.0]])
 sY = np.array([[0.0, -1j], [1j, 0.0]])
 
-tauZsig0 = ta.array(np.kron(sZ, s0))
-tauXsig0 = ta.array(np.kron(sX, s0))
-tauYsig0 = ta.array(np.kron(sY, s0))
-tau0sigZ = ta.array(np.kron(s0, sZ))
-tau0sigX = ta.array(np.kron(s0, sX))
-tau0sigY = ta.array(np.kron(s0, sY))
-tauZsigX = ta.array(np.kron(sZ, sX))
-tauZsigY = ta.array(np.kron(sZ, sY))
-tauYsigY = ta.array(np.kron(sY, sY))
-tauYsigZ = ta.array(np.kron(sY, sZ))
+
+sigma = {"0": s0, "X": sX, "Y": sY, "Z": sZ}
+
+
+def norbitals(p):
+    if p["delta"] == 0:
+        return 2, False
+    elif p["delta"] > 0:
+        return 4, True
+    else:
+        raise ValueError
+
+
+def tauAsigB(A, B, p):
+    norbs, _ = norbitals(p)
+    if norbs == 2:
+        return sigma.get(B, "default")
+    elif norbs == 4:
+        tA = sigma.get(A, "default")
+        sB = sigma.get(B, "default")
+        return ta.array(np.kron(tA, sB))
 
 
 def magnetic_phase(position, p):
@@ -27,16 +38,16 @@ def magnetic_phase(position, p):
 
 # No need for two t terms, Builder assumes hermiticity
 def hopX(site0, site1, p):
-    return -p["t"] * tauZsig0 + 1j * p["alpha"] * tauZsigY
+    return -p["t"] * tauAsigB("Z", "0", p) + 1j * p["alpha"] * tauAsigB("Z", "Y", p)
 
 
 def hopY(site0, site1, p):
-    return -p["t"] * tauZsig0 - 1j * p["alpha"] * tauZsigX
+    return -p["t"] * tauAsigB("Z", "0", p) - 1j * p["alpha"] * tauAsigB("Z", "Y", p)
 
 
 def sinuB(position, p, stagger_ratio):
     theta = magnetic_phase(position, p)
-    return tau0sigY * np.cos(theta) + tau0sigX * np.sin(theta)
+    return tauAsigB("0", "Y", p) * np.cos(theta) + tauAsigB("0", "X", p) * np.sin(theta)
 
 
 def energy_nanomagnet(position, p):
@@ -45,8 +56,10 @@ def energy_nanomagnet(position, p):
 
 # Particle-hole symmetry (lead=True)             {tauY,tauX} {sigY,sigZ}
 # Particle-hole symmetry (lead=False & sinusoid) {tauY,tauX} {sigZ}
-def onsiteNormal(site, p, lead=False):
-    H_no_magnets = (4 * p["t"] - p["mu"]) * tauZsig0 + 0.5 * p["gfactor"] * p["bohr_magneton"] * p["B"] * tau0sigX
+def onsiteNormal(site, p, mu, lead=False):
+    H_no_magnets = (4 * p["t"] - p[mu]) * tauAsigB("Z", "0", p) + 0.5 * p["gfactor"] * p["bohr_magneton"] * p[
+        "B"
+    ] * tauAsigB("0", "X", p)
     if p["added_sinusoid"] and not lead:
         return H_no_magnets + 0.5 * p["gfactor"] * p["bohr_magneton"] * p["M"] * sinuB(
             site.pos[0], p, p["stagger_ratio"]
@@ -55,24 +68,24 @@ def onsiteNormal(site, p, lead=False):
         return H_no_magnets
 
 
-def onsite_normal(site, p):
-    return onsiteNormal(site, p, lead=False)
+def onsite_wire_normal(site, p):
+    return onsiteNormal(site, p, lead=False, mu="mu_wire")
 
 
-def onsiteSc(site, p):
-    return onsiteNormal(site, p, lead=False) + p["delta"] * tauXsig0
+def onsite_wire_sc(site, p):
+    return onsiteNormal(site, p, lead=False, mu="mu_wire") + p["delta"] * tauAsigB("X", "0", p)
 
 
 def onsite_lead(site, p):
-    return onsiteNormal(site, p, lead=True)
+    return onsiteNormal(site, p, lead=True, mu="mu_lead")
 
 
 def onsite_barrier(site, p):
     return (
         4 * p["t"]
-        - p["mu"]
+        - p["mu_barrier"]
         + barrier_height_func(p["barrier_height"], p["barrier_length"], p["wire_length"], p["wire_width"], site)
-    ) * tauZsig0
+    ) * tauAsigB("Z", "0", p)
 
 
 def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
@@ -98,7 +111,7 @@ def barrier_region(site, barrier_length, wire_length, wire_width):
 
 
 def make_system(
-    p, onsite_wire=onsiteSc, onsite_barrier=onsite_barrier, onsite_lead=onsite_lead, hopX=hopX, hopY=hopY, norbs=4
+    p, onsite_wire=onsite_wire_sc, onsite_barrier=onsite_barrier, onsite_lead=onsite_lead, hopX=hopX, hopY=hopY, norbs=4
 ):
     def make_wire_and_barriers(p=p, norbs=norbs, onsite_wire=onsite_wire, onsite_barrier=onsite_barrier):
         syst = kwant.Builder()
@@ -134,13 +147,16 @@ def make_system(
 
         return syst
 
-    def make_lead(
-        p=p, onsite_lead=onsite_lead, lead_hopX=-p["t"] * tauZsig0, lead_hopY=-p["t"] * tauZsig0, norbs=norbs
-    ):
+    lead_hopX = -p["t"] * tauAsigB("Z", "0", p)
+    lead_hopY = -p["t"] * tauAsigB("Z", "0", p)
+
+    def make_lead(p=p, onsite_lead=onsite_lead, lead_hopX=lead_hopX, lead_hopY=lead_hopY, norbs=norbs):
         # Conservation law must separate the electron-hole degree of freedom -> tauZ
         # Particle-hole symmetry operator must be figured out for the Hamiltonian
         lead = kwant.Builder(
-            kwant.TranslationalSymmetry((-p["hopping_distance"], 0)), conservation_law=-tauZsig0, particle_hole=tauYsigZ
+            kwant.TranslationalSymmetry((-p["hopping_distance"], 0)),
+            conservation_law=-tauAsigB("Z", "0", p),
+            particle_hole=tauAsigB("Y", "Z", p),
         )
         lat = kwant.lattice.square(a=p["hopping_distance"], norbs=norbs)
         lead[(lat(0, j) for j in range(p["wire_width"]))] = onsite_lead
@@ -156,9 +172,10 @@ def make_system(
     return syst
 
 
-def NISIN(params):
-    return make_system(params).finalized()
-
-
-def NININ(params):
-    return make_system(params, onsite_wire=onsite_normal).finalized()
+def NIXIN(params):
+    norbs, superconducting = norbitals(params)
+    if superconducting:
+        onsite_wire = onsite_wire_sc
+    else:
+        onsite_wire = onsite_wire_normal
+    return make_system(params, onsite_wire=onsite_wire, norbs=norbs).finalized()

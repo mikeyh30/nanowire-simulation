@@ -19,8 +19,9 @@ p = {
     "delta": 0.1,
     "gfactor": 1,
     "effective_mass": 1,
-    "muSc": 0.22,
-    "mu": 0.3,
+    "mu_wire": 0.22,
+    "mu_barrier": 0.3,
+    "mu_lead": 0.3,
     "barrier_height": 2,
 }
 
