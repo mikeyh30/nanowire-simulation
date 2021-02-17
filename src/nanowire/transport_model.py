@@ -80,6 +80,14 @@ def onsite_lead(site, p):
     return onsiteNormal(site, p, lead=True, mu="mu_lead")
 
 
+def onsite_l_lead(site, p):
+    return onsiteNormal(site, p, lead=True, mu="mu_l_lead")
+
+
+def onsite_r_lead(site, p):
+    return onsiteNormal(site, p, lead=True, mu="mu_r_lead")
+
+
 def onsite_barrier(site, p):
     return (
         4 * p["t"]
@@ -165,9 +173,10 @@ def make_system(
         return lead
 
     syst = make_wire_and_barriers()
-    lead = make_lead()
-    syst.attach_lead(lead)
-    syst.attach_lead(lead.reversed())
+    l_lead = make_lead(onsite_lead=onsite_l_lead)
+    r_lead = make_lead(onsite_lead=onsite_r_lead)
+    syst.attach_lead(l_lead)
+    syst.attach_lead(r_lead.reversed())
 
     return syst
 
