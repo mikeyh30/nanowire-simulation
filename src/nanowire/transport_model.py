@@ -1,4 +1,8 @@
+import warnings
 import kwant
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+import kwant.continuum
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 import numpy as np
 import tinyarray as ta
 
@@ -9,6 +13,26 @@ sY = np.array([[0.0, -1j], [1j, 0.0]])
 
 
 sigma = {"0": s0, "X": sX, "Y": sY, "Z": sZ}
+
+
+def hamiltonian(rashba=False, superconducting=False):
+    hamiltonian_normal = (
+        "A * (k_x**2 + k_y**2) * kron(sigma_z, sigma_0) +"
+        "-mu_wire * kron(sigma_z, sigma_0) + "
+        "0.5 * gfactor * bohr_magneton * B * kron(sigma_0, sigma_x)"
+    )
+
+    hamiltonian_rashba = "+ alpha * k_x * kron(sigma_z, sigma_y) + alpha * k_y * kron(sigma_z, sigma_x)"
+
+    hamiltonian_superconducting = "+ delta * kron(sigma_x, sigma_0)"
+
+    hamiltonian = (
+        hamiltonian_normal
+        + rashba * hamiltonian_rashba
+        + superconducting * hamiltonian_superconducting
+    )
+
+    return hamiltonian
 
 
 def norbitals(p):
@@ -36,13 +60,6 @@ def magnetic_phase(position, p):
     return theta
 
 
-# No need for two t terms, Builder assumes hermiticity
-def hopX(site0, site1, p):
-    return -p["t"] * tauAsigB("Z", "0", p) + 1j * p["alpha"] * tauAsigB("Z", "Y", p)
-
-
-def hopY(site0, site1, p):
-    return -p["t"] * tauAsigB("Z", "0", p) - 1j * p["alpha"] * tauAsigB("Z", "Y", p)
 
 
 def sinuB(position, p, stagger_ratio):
@@ -54,50 +71,10 @@ def energy_nanomagnet(position, p):
     return 0.5 * p["gfactor"] * p["bohr_magneton"] * p["M"] * sinuB(position, p, p["stagger_ratio"])
 
 
-# Particle-hole symmetry (lead=True)             {tauY,tauX} {sigY,sigZ}
-# Particle-hole symmetry (lead=False & sinusoid) {tauY,tauX} {sigZ}
-def onsiteNormal(site, p, mu, lead=False):
-    H_no_magnets = (4 * p["t"] - p[mu]) * tauAsigB("Z", "0", p) + 0.5 * p["gfactor"] * p["bohr_magneton"] * p[
-        "B"
-    ] * tauAsigB("0", "X", p)
-    if p["added_sinusoid"] and not lead:
-        return H_no_magnets + 0.5 * p["gfactor"] * p["bohr_magneton"] * p["M"] * sinuB(
-            site.pos[0], p, p["stagger_ratio"]
-        )
-    else:
-        return H_no_magnets
-
-
-def onsite_wire_normal(site, p):
-    return onsiteNormal(site, p, lead=False, mu="mu_wire")
-
-
-def onsite_wire_sc(site, p):
-    return onsiteNormal(site, p, lead=False, mu="mu_wire") + p["delta"] * tauAsigB("X", "0", p)
-
-
-def onsite_lead(site, p):
-    return onsiteNormal(site, p, lead=True, mu="mu_lead")
-
-
-def onsite_l_lead(site, p):
-    return onsiteNormal(site, p, lead=True, mu="mu_l_lead")
-
-
-def onsite_r_lead(site, p):
-    return onsiteNormal(site, p, lead=True, mu="mu_r_lead")
-
-
-def onsite_barrier(site, p):
-    return (
-        4 * p["t"]
-        - p["mu_barrier"]
-        + barrier_height_func(p["barrier_height"], p["barrier_length"], p["wire_length"], p["wire_width"], site)
-    ) * tauAsigB("Z", "0", p)
 
 
 def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
-    if barrier_region(site, barrier_length, wire_length, wire_width):
+    if barrier_region(site, wire_width, wire_length, barrier_length):
         i = site[1][1] // wire_width
         distance_from_centre = np.abs(((wire_length - 1) / 2) - i)
         dbarrier_height = barrier_height / barrier_length
@@ -108,73 +85,63 @@ def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width,
         raise IndexError("barrier_height called outside of barrier region")
 
 
-def barrier_region(site, barrier_length, wire_length, wire_width):
+def central_region(site, w, c_l, b_l, a):
+    (x, y) = site.pos
+    return b_l*a <= x < c_l*a + b_l*a and 0 <= y < w*a
+
+
+def barrier_region(site, w, c_l, b_l, a):
     if type(site) == kwant.builder.Site:
-        i = site[1][0]
-        j = site[1][1]
+        (x, y) = site.pos
     else:
-        i = site // wire_width
-        j = site % wire_width
-    return ((0 <= i < barrier_length) or (wire_length - barrier_length <= i < wire_length)) and (0 <= j < wire_width)
+        x = site // w
+        y = site % w
+    left_barrier = 0 <= x < b_l*a and 0 <= y < w*a
+    right_barrier = c_l*a + b_l*a <= x < c_l*a + 2 * b_l*a and 0 <= y < w*a
+    return left_barrier or right_barrier
 
 
 def make_system(
-    p, onsite_wire=onsite_wire_sc, onsite_barrier=onsite_barrier, onsite_lead=onsite_lead, hopX=hopX, hopY=hopY, norbs=4
+#    p, onsite_wire=onsite_wire_sc, onsite_barrier=onsite_barrier, onsite_lead=onsite_lead, hopX=hopX, hopY=hopY, norbs=4
+    w, c_l, b_l, central_ham, barrier_ham, a
 ):
-    def make_wire_and_barriers(p=p, norbs=norbs, onsite_wire=onsite_wire, onsite_barrier=onsite_barrier):
-        syst = kwant.Builder()
-        lat = kwant.lattice.square(a=p["hopping_distance"], norbs=norbs)
+    syst = kwant.Builder()
 
-        syst[
-            (
-                lat(i, j)
-                for i in range(p["barrier_length"], p["wire_length"] - p["barrier_length"])
-                for j in range(p["wire_width"])
-            )
-        ] = onsite_wire
-        # fmt: off
-        syst[
-            (
-                lat(i, j)
-                for i in range(0, p["barrier_length"])
-                for j in range(p["wire_width"])
-            )
-        ] = onsite_barrier
-        # fmt: on
-        syst[
-            (
-                lat(i, j)
-                for i in range(p["wire_length"] - p["barrier_length"], p["wire_length"])
-                for j in range(p["wire_width"])
-            )
-        ] = onsite_barrier
+    wrapped_central_region = lambda site : central_region(site, w, c_l, b_l, a)
+    wrapped_barrier_region = lambda site : barrier_region(site, w, c_l, b_l, a)
 
-        # Hopping:
-        syst[kwant.builder.HoppingKind((1, 0), lat, lat)] = hopX
-        syst[kwant.builder.HoppingKind((0, 1), lat, lat)] = hopY
+    syst.fill(barrier_ham, wrapped_barrier_region, (0, 0))
+    syst.fill(central_ham, wrapped_central_region, (b_l*a, 0))
+    syst.fill(barrier_ham, wrapped_barrier_region, (b_l*a + c_l*a, 0))
 
-        return syst
-
-    lead_hopX = -p["t"] * tauAsigB("Z", "0", p)
-    lead_hopY = -p["t"] * tauAsigB("Z", "0", p)
-
-    def make_lead(p=p, onsite_lead=onsite_lead, lead_hopX=lead_hopX, lead_hopY=lead_hopY, norbs=norbs):
+    def make_lead():#p=p, onsite_lead=onsite_lead, lead_hopX=lead_hopX, lead_hopY=lead_hopY, norbs=norbs):
         # Conservation law must separate the electron-hole degree of freedom -> tauZ
         # Particle-hole symmetry operator must be figured out for the Hamiltonian
+        tau_z = np.kron(np.array([[1, 0], [0, -1]]), np.eye(2))
+        tau_y_sig_z = np.kron(np.array([[0, -1j], [1j, 0]]), np.array([[1, 0], [0, -1]]))
+
         lead = kwant.Builder(
-            kwant.TranslationalSymmetry((-p["hopping_distance"], 0)),
-            conservation_law=-tauAsigB("Z", "0", p),
-            particle_hole=tauAsigB("Y", "Z", p),
+            kwant.TranslationalSymmetry((-a, 0)),
+            conservation_law=-tau_z,
+            particle_hole=tau_y_sig_z,
         )
+
+        def lead_shape(site):
+            (x, y) = site.pos
+            return 0 <= x < 1 and 0 <= y < w
+
+        lead.fill(barrier_ham, lead_shape, (0, 0))
+        return lead
+
         lat = kwant.lattice.square(a=p["hopping_distance"], norbs=norbs)
         lead[(lat(0, j) for j in range(p["wire_width"]))] = onsite_lead
         lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = lead_hopX
         lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = lead_hopY
         return lead
 
-    syst = make_wire_and_barriers()
-    l_lead = make_lead(onsite_lead=onsite_l_lead)
-    r_lead = make_lead(onsite_lead=onsite_r_lead)
+    # TODO Look into where the different chemical potentials are used for each lead
+    l_lead = make_lead()#onsite_lead=onsite_l_lead)
+    r_lead = make_lead()#onsite_lead=onsite_r_lead)
     syst.attach_lead(l_lead)
     syst.attach_lead(r_lead.reversed())
 
@@ -183,8 +150,10 @@ def make_system(
 
 def NIXIN(params):
     norbs, superconducting = norbitals(params)
-    if superconducting:
-        onsite_wire = onsite_wire_sc
-    else:
-        onsite_wire = onsite_wire_normal
-    return make_system(params, onsite_wire=onsite_wire, norbs=norbs).finalized()
+    w = params['wire_width']
+    c_l = params['wire_length'] - 2 * params['barrier_length']
+    b_l = params['barrier_length']
+    a = params['hopping_distance']
+    central_ham = kwant.continuum.discretize(hamiltonian(True, superconducting), coords="xy", grid=a)
+    barrier_ham = kwant.continuum.discretize(hamiltonian(True, False), coords="xy", grid=a)
+    return make_system(w, c_l, b_l, central_ham, barrier_ham, a).finalized()

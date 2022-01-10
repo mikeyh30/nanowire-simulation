@@ -1,4 +1,3 @@
-import kwant
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
@@ -6,9 +5,7 @@ from nanowire.nanowire import Nanowire
 from simulate.update_csv import update_csv
 from simulate.get_parameters import get_scratch, get_yml
 import argparse
-import os
 import pandas as pd
-import yaml
 
 
 def save_model_figure(nanowire, suffix, data_folder):

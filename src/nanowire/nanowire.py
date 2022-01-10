@@ -1,5 +1,7 @@
 from tqdm import tqdm
+import warnings
 import kwant
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 import tinyarray as ta
 import numpy as np
 import scipy.sparse.linalg
@@ -49,9 +51,10 @@ class Nanowire:
         critB = 0
         for b in tqdm(B_values, desc="Spec",):
             self.parameters["B"] = b
-            newparams = {}
-            newparams["p"] = self.parameters
-            H = syst.hamiltonian_submatrix(sparse=True, params=newparams)
+            newparams = self.parameters
+            newparams["A"] = 3.82 / newparams["effective_mass"]
+            newparams["B"] = b
+            H = syst.hamiltonian_submatrix(sparse=True, params=self.parameters)
             H = H.tocsc()
             # k is the number of eigenvalues, and find them near sigma.
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
@@ -130,7 +133,7 @@ class Nanowire:
             site_size=0.20,
             site_color=lambda s: "y"
             if barrier_region(
-                s, self.parameters["barrier_length"], self.parameters["wire_length"], self.parameters["wire_width"]
+                s, self.parameters["barrier_length"], self.parameters["wire_length"], self.parameters["wire_width"], self.parameters["hopping_distance"]
             )
             else "b",
             ax=ax_model,
