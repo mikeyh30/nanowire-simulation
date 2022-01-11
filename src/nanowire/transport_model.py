@@ -26,6 +26,8 @@ def hamiltonian(rashba=False, superconducting=False):
 
     hamiltonian_superconducting = "+ delta * kron(sigma_x, sigma_0)"
 
+    # hamiltonian_micromagnets = "+ 0.5 * gfactor * bohr magneton * M * sin(x) * kron(sigma_0, sigma_x)"
+
     hamiltonian = (
         hamiltonian_normal
         + rashba * hamiltonian_rashba
@@ -128,7 +130,7 @@ def make_system(
 
         def lead_shape(site):
             (x, y) = site.pos
-            return 0 <= x < 1 and 0 <= y < w
+            return 0 <= x < 1 and 0 <= y < w*a
 
         lead.fill(barrier_ham, lead_shape, (0, 0))
         return lead
