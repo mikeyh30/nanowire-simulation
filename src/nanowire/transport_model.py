@@ -22,7 +22,7 @@ def hamiltonian(rashba=False, superconducting=False):
         "0.5 * gfactor * bohr_magneton * B * kron(sigma_0, sigma_x)"
     )
 
-    hamiltonian_rashba = "+ alpha * k_x * kron(sigma_z, sigma_y) + alpha * k_y * kron(sigma_z, sigma_x)"
+    hamiltonian_rashba = "+ alpha_R * k_x * kron(sigma_z, sigma_y) + alpha_R * k_y * kron(sigma_z, sigma_x)"
 
     hamiltonian_superconducting = "+ delta * kron(sigma_x, sigma_0)"
 

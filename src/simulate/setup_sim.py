@@ -21,7 +21,7 @@ def gen_data_csv(date, scratch):
 def gen_blank_output_csv(date, scratch):
     filename = scratch + date + "/wiresdata.csv"
     if not os.path.exists(filename):
-        text = "wire_width,wire_length,barrier_length,stagger_ratio,period,M,m_max,hopping_distance,added_sinusoid,B,b_max,bohr_magneton,alpha_R,delta,gfactor,effective_mass,mu_wire,mu_barrier,mu_l_lead,mu_r_lead,barrier_height"
+        text = "row,wire_width,wire_length,barrier_length,stagger_ratio,period,M,m_max,hopping_distance,added_sinusoid,B,b_max,bohr_magneton,alpha_R,delta,gfactor,effective_mass,mu_wire,mu_barrier,mu_l_lead,mu_r_lead,barrier_height"
         with open(file=filename, mode="w+") as file:
             file.write(text)
     else:

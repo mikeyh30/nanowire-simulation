@@ -32,7 +32,7 @@ tau0sigZ = ta.array(np.kron(s0, sZ))
 class Nanowire:
     def __init__(self, parameters, sc=True):
         parameters["t"] = 3.83 / (parameters["effective_mass"] * (parameters["hopping_distance"] ** 2))
-        parameters["alpha"] = parameters["alpha_R"] / parameters["hopping_distance"]
+        #parameters["alpha"] = parameters["alpha_R"] / parameters["hopping_distance"]
         self.parameters = parameters
 
     def spin_density(self, B, energy=-1, sum=True):

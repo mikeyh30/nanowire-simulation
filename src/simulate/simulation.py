@@ -101,6 +101,8 @@ def simulation_single(
 
     data_suffix = "simulation{}".format(row)
 
+    params.update({"row": row})
+
     nanowire = Nanowire(params)
 
     data_folder = scratch + date
