@@ -15,7 +15,7 @@ sY = np.array([[0.0, -1j], [1j, 0.0]])
 sigma = {"0": s0, "X": sX, "Y": sY, "Z": sZ}
 
 
-def hamiltonian(rashba=False, superconducting=False):
+def hamiltonian(rashba=False, superconducting=False, micromagnets=False):
     hamiltonian_normal = (
         "A * (k_x**2 + k_y**2) * kron(sigma_z, sigma_0) +"
         "-mu_wire * kron(sigma_z, sigma_0) + "
@@ -26,12 +26,16 @@ def hamiltonian(rashba=False, superconducting=False):
 
     hamiltonian_superconducting = "+ delta * kron(sigma_x, sigma_0)"
 
-    # hamiltonian_micromagnets = "+ 0.5 * gfactor * bohr magneton * M * sin(x) * kron(sigma_0, sigma_x)"
+    hamiltonian_micromagnets_x = "+ 0.5 * gfactor * bohr_magneton * M * sinM(x) * kron(sigma_0, sigma_x)"
+
+    hamiltonian_micromagnets_y = "+ 0.5 * gfactor * bohr_magneton * M * cosM(y) * kron(sigma_0, sigma_y)"
 
     hamiltonian = (
         hamiltonian_normal
         + rashba * hamiltonian_rashba
         + superconducting * hamiltonian_superconducting
+        + micromagnets * hamiltonian_micromagnets_x
+        + micromagnets * hamiltonian_micromagnets_y
     )
 
     return hamiltonian
@@ -46,35 +50,12 @@ def norbitals(p):
         raise ValueError
 
 
-def tauAsigB(A, B, p):
-    norbs, _ = norbitals(p)
-    if norbs == 2:
-        return sigma.get(B, "default")
-    elif norbs == 4:
-        tA = sigma.get(A, "default")
-        sB = sigma.get(B, "default")
-        return ta.array(np.kron(tA, sB))
-
-
 def magnetic_phase(position, p):
     counter = np.mod(position - (1 + p["barrier_length"]) * p["hopping_distance"], p["period"])
     theta = (counter / p["period"]) * 2 * np.pi
     return theta
 
-
-
-
-def sinuB(position, p, stagger_ratio):
-    theta = magnetic_phase(position, p)
-    return tauAsigB("0", "Y", p) * np.cos(theta) + tauAsigB("0", "X", p) * np.sin(theta)
-
-
-def energy_nanomagnet(position, p):
-    return 0.5 * p["gfactor"] * p["bohr_magneton"] * p["M"] * sinuB(position, p, p["stagger_ratio"])
-
-
-
-
+    
 def barrier_height_func(barrier_height, barrier_length, wire_length, wire_width, site):
     if barrier_region(site, wire_width, wire_length, barrier_length):
         i = site[1][1] // wire_width
@@ -135,12 +116,6 @@ def make_system(
         lead.fill(barrier_ham, lead_shape, (0, 0))
         return lead
 
-        lat = kwant.lattice.square(a=p["hopping_distance"], norbs=norbs)
-        lead[(lat(0, j) for j in range(p["wire_width"]))] = onsite_lead
-        lead[kwant.builder.HoppingKind((1, 0), lat, lat)] = lead_hopX
-        lead[kwant.builder.HoppingKind((0, 1), lat, lat)] = lead_hopY
-        return lead
-
     # TODO Look into where the different chemical potentials are used for each lead
     l_lead = make_lead()#onsite_lead=onsite_l_lead)
     r_lead = make_lead()#onsite_lead=onsite_r_lead)
@@ -156,6 +131,6 @@ def NIXIN(params):
     c_l = params['wire_length'] - 2 * params['barrier_length']
     b_l = params['barrier_length']
     a = params['hopping_distance']
-    central_ham = kwant.continuum.discretize(hamiltonian(True, superconducting), coords="xy", grid=a)
-    barrier_ham = kwant.continuum.discretize(hamiltonian(True, False), coords="xy", grid=a)
+    central_ham = kwant.continuum.discretize(hamiltonian(True, superconducting, True), coords="xy", grid=a)
+    barrier_ham = kwant.continuum.discretize(hamiltonian(True, False, True), coords="xy", grid=a)
     return make_system(w, c_l, b_l, central_ham, barrier_ham, a).finalized()

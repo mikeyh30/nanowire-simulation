@@ -53,8 +53,9 @@ class Nanowire:
             self.parameters["B"] = b
             newparams = self.parameters
             newparams["A"] = 3.82 / newparams["effective_mass"]
-            newparams["B"] = b
-            H = syst.hamiltonian_submatrix(sparse=True, params=self.parameters)
+            newparams["sinM"] = np.sin
+            newparams["cosM"] = np.cos
+            H = syst.hamiltonian_submatrix(sparse=True, params=newparams)
             H = H.tocsc()
             # k is the number of eigenvalues, and find them near sigma.
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
@@ -82,7 +83,11 @@ class Nanowire:
         critM = 0
         for m in tqdm(M_values, desc="Spec",):
             self.parameters["M"] = m
-            H = syst.hamiltonian_submatrix(sparse=True, params=self.parameters)
+            newparams = self.parameters
+            newparams["A"] = 3.82 / newparams["effective_mass"]
+            newparams["sinM"] = np.sin
+            newparams["cosM"] = np.cos
+            H = syst.hamiltonian_submatrix(sparse=True, params=newparams)
             H = H.tocsc()
             # k is the number of eigenvalues, and find them near sigma.
             eigs = scipy.sparse.linalg.eigsh(H, k=20, sigma=0)
