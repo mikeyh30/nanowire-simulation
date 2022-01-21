@@ -114,6 +114,7 @@ def simulation_single(
         spectrum_data = nanowire.spectrum(B_values=np.linspace(0, params["b_max"], 81))
         spectrum_critical_field = spectrum(spectrum_data, data_suffix, data_folder)
         params.update({"spectrum_critical_field": spectrum_critical_field})
+        params.update({"superconducting_gap": spectrum_data["superconducting_gap"]})
 
     if simulate_magnetization_spectrum:
         # Generate spectrum data and figure

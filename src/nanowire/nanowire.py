@@ -22,6 +22,12 @@ def find_critical_field(B_values, energies, min_topological_gap, tolerance=1e-5,
     return topological_B, topological_gap
 
 
+def zero_field_superconducting_gap(energies):
+    positive_energies = [e for e in energies[0] if e>=0]
+    negative_energies = [e for e in energies[0] if e<0]
+    return min(positive_energies) - max(negative_energies)
+
+
 s0 = np.identity(2)
 sZ = np.array([[1.0, 0.0], [0.0, -1.0]])
 sX = np.array([[0.0, 1.0], [1.0, 0.0]])
@@ -74,6 +80,7 @@ class Nanowire:
             CritB=topological_B_values[0],
             topological_B_values=topological_B_values,
             topological_gap=topological_gap,
+            superconducting_gap=zero_field_superconducting_gap(energies),
         )
         return outcome
 
