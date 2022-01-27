@@ -101,9 +101,10 @@ class Nanowire:
             eigs = np.sort(eigs[0])
             energies.append(eigs)
 
-        topological_M_values = find_critical_field(M_values, energies, 0.15 * self.parameters["delta"])
+        topological_M_values, _ = find_critical_field(M_values, energies, 0.15 * self.parameters["delta"])
+        critM = topological_M_values[0] if len(topological_M_values)>0 else np.nan
 
-        outcome = dict(M=M_values, E=energies, CritM=topological_M_values[0])
+        outcome = dict(M=M_values, E=energies, CritM=critM)
         return outcome
 
     def conductances(
@@ -143,7 +144,7 @@ class Nanowire:
             show=False,
             unit="nn",
             site_size=0.20,
-            site_color=lambda s: "y"
+            site_color=lambda s: "b"
             if barrier_region(
                 s, self.parameters["barrier_length"], self.parameters["wire_length"], self.parameters["wire_width"], self.parameters["hopping_distance"]
             )

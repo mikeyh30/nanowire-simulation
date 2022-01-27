@@ -26,9 +26,9 @@ def hamiltonian(rashba=False, superconducting=False, micromagnets=False):
 
     hamiltonian_superconducting = "+ delta * kron(sigma_x, sigma_0)"
 
-    hamiltonian_micromagnets_x = "+ 0.5 * gfactor * bohr_magneton * M * sinM(x) * kron(sigma_0, sigma_x)"
+    hamiltonian_micromagnets_x = "+ 0.5 * gfactor * bohr_magneton * M * sinM(x/period) * kron(sigma_0, sigma_x)"
 
-    hamiltonian_micromagnets_y = "+ 0.5 * gfactor * bohr_magneton * M * cosM(y) * kron(sigma_0, sigma_y)"
+    hamiltonian_micromagnets_y = "+ 0.5 * gfactor * bohr_magneton * M * cosM(y/period) * kron(sigma_0, sigma_y)"
 
     hamiltonian = (
         hamiltonian_normal

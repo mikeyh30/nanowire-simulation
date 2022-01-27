@@ -22,7 +22,7 @@ def save_model_figure(nanowire, suffix, data_folder):
     ax_y.set_xlabel(r"Length ($\AA$)")
     xlim = fig.gca().figure.axes[0].dataLim.intervalx
     plt.xlim(xlim)
-    plt.savefig(data_folder + "/modelfig/" + suffix + ".png")
+    plt.savefig(data_folder + "/modelfig/" + suffix + ".eps",format="eps",dpi=1000)
     plt.close()
 
 
