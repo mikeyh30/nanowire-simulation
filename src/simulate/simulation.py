@@ -22,7 +22,7 @@ def save_model_figure(nanowire, suffix, data_folder):
     ax_y.set_xlabel(r"Length ($\AA$)")
     xlim = fig.gca().figure.axes[0].dataLim.intervalx
     plt.xlim(xlim)
-    plt.savefig(data_folder + "/modelfig/" + suffix + ".eps",format="eps",dpi=1000)
+    plt.savefig(data_folder + "/modelfig/" + suffix + ".eps", format="eps", dpi=1000)
     plt.close()
 
 
@@ -63,7 +63,11 @@ def conductance(conductance_data, suffix, data_folder):
     plt.rcParams["figure.figsize"] = (8, 5)
     ax = fig.gca()
     contour = ax.contourf(
-        conductance_data["B"], conductance_data["BiasV"], conductance_data["Cond"], 100, cmap="viridis",
+        conductance_data["B"],
+        conductance_data["BiasV"],
+        conductance_data["Cond"],
+        100,
+        cmap="viridis",
     )
     ax.set_xlabel("Zeeman Field Strength (T)")
     ax.set_ylabel("Bias (V)")
@@ -136,7 +140,8 @@ def simulation_single(
 
     # Log which data has been saved.
     update_csv(
-        params, data_folder + "/wiresdata.csv",
+        params,
+        data_folder + "/wiresdata.csv",
     )
 
 

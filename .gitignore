@@ -25,3 +25,5 @@ globals.yml
 sim_parameters_unitless.yml
 
 sim_parameters_units.yml
+
+.ipynb_checkpoints/

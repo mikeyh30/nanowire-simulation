@@ -40,7 +40,13 @@ def gen_directories(date, scratch):
 
     os.makedirs(data_folder, exist_ok=True)
     makedirs(
-        data_folder, "/modelfig", "/cond", "/spec", "/fig-conductance", "/fig-ind-conductance", "/fig-spectrum",
+        data_folder,
+        "/modelfig",
+        "/cond",
+        "/spec",
+        "/fig-conductance",
+        "/fig-ind-conductance",
+        "/fig-spectrum",
     )
 
 
