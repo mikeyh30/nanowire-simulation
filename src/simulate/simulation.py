@@ -122,7 +122,7 @@ def simulation_single(
 
     if simulate_magnetization_spectrum:
         # Generate spectrum data and figure
-        spectrum_data = nanowire.magnetization_spectrum(M_values=np.linspace(0, params["m_max"], 201))
+        spectrum_data = nanowire.magnetization_spectrum(M_values=np.linspace(0, params["m_max"], 81))
         mag_spectrum_critical_field = magnetization_spectrum(spectrum_data, data_suffix, data_folder)
         params.update({"mag_spectrum_critical_field": mag_spectrum_critical_field})
 
