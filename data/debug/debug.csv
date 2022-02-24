@@ -1,0 +1,2 @@
+wire_width,wire_length,barrier_length,stagger_ratio,period,M,m_max,hopping_distance,added_sinusoid,B,b_max,bohr_magneton,alpha_R,delta,gfactor,effective_mass,mu_wire,mu_barrier,mu_lead,barrier_height
+7,80,1,0.5,2000,1,2.5,250,True,0,2.5,5.8e-05,0.32,0.00018,15,0.019,0,0.018,0.018,0.02
