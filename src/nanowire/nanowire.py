@@ -78,7 +78,7 @@ class Nanowire:
         newparams["mu_wire"] = newparams["mu_wire"] + mu_offset
         for b in tqdm(
             B_values,
-            desc="Spec",
+            desc="Spec" + str(self.parameters["row"]),
         ):
             newparams["B"] = b
             H = syst.hamiltonian_submatrix(sparse=True, params=newparams)
@@ -113,7 +113,7 @@ class Nanowire:
         newparams["mu_wire"] = newparams["mu_wire"] + mu_offset
         for m in tqdm(
             M_values,
-            desc="Spec",
+            desc="MSpec" + str(self.parameters["row"]),
         ):
             newparams["M"] = m
             H = syst.hamiltonian_submatrix(sparse=True, params=newparams)
@@ -139,7 +139,7 @@ class Nanowire:
         critB = 0
         for energy in tqdm(
             energies,
-            desc="Cond",
+            desc="Cond" + str(self.parameters["row"]),
         ):
             cond = []
             for b in B_values:

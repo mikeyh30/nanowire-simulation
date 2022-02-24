@@ -159,7 +159,7 @@ def simulation_all_csv(
     for index, row in df.iterrows():
         simulation_single(
             row.to_dict(),
-            row=index,
+            row=f"{index:0>5}",
             date=date,
             scratch=scratch,
             simulate_conductance=simulate_conductance,
