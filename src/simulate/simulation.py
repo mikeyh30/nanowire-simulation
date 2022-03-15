@@ -62,7 +62,7 @@ def density(density_data, suffix, data_folder, params):
     ax.axis('scaled')
     ax.set_ylabel('Size (nm)', fontsize=12)
     fig.savefig(data_folder + "/fig-dens/model" + suffix + ".eps", format="eps", dpi=1000)
-    fig.close()
+    plt.close(fig)
 
 
 def magnetization_spectrum(spectrum_data, suffix, data_folder):
