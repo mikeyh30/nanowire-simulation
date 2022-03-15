@@ -104,6 +104,16 @@ class Nanowire:
         )
         return outcome
 
+    def density(self, num_states, num_orbitals):
+        syst = NIXIN(self.parameters)
+        newparams = self.parameters.copy()
+        mu_offset = self.zero_mu()
+        newparams["mu_wire"] = newparams["mu_wire"] + mu_offset
+        H = syst.hamiltonian_submatrix(params=newparams, sparse=True).tocsc()
+        _, states = scipy.sparse.linalg.eigsh(H, sigma=0, k=num_states)
+        densities = (np.linalg.norm(states.reshape(-1, num_orbitals, num_states), axis=1) ** 2)
+        return densities
+
     def magnetization_spectrum(self, M_values):
         syst = NIXIN(self.parameters)
         energies = []

@@ -44,9 +44,11 @@ def gen_directories(date, scratch):
         "/modelfig",
         "/cond",
         "/spec",
+        "/dens",
         "/fig-conductance",
         "/fig-ind-conductance",
         "/fig-spectrum",
+        "/fig-dens"
     )
 
 

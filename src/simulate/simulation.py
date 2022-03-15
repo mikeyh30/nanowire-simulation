@@ -41,6 +41,30 @@ def spectrum(spectrum_data, suffix, data_folder):
     return spectrum_data["CritB"]
 
 
+def density(density_data, suffix, data_folder, params):
+    pickle.dump(density_data, open(data_folder + "/dens/dens_" + suffix + ".dat", "wb"))
+    wf1=[]
+    wf2=[]
+    for x in range(params['wire_width']*params['wire_length']):
+        wf1.append(density_data[x][0])
+        wf2.append(density_data[x][1])
+    wf = np.array(wf1)+np.array(wf2)
+    wfplot=wf.reshape(params['wire_length'],params['wire_width']).transpose()
+
+    mult = params['hopping_distance']/10 # divide by ten for A->nm
+    xlist = np.linspace(0, params['wire_length']*mult, params['wire_length'])
+    ylist = np.linspace(0, params['wire_width']*mult, params['wire_width'])
+    x, y = np.meshgrid(xlist, ylist)  
+    fig,ax=plt.subplots(1,1,figsize=(15,4))
+
+    cp = ax.contourf(x, y, wfplot,50)
+    fig.colorbar(cp,orientation="horizontal", label='Density') # Add a colorbar to a plot
+    ax.axis('scaled')
+    ax.set_ylabel('Size (nm)', fontsize=12)
+    fig.savefig(data_folder + "/fig-dens/model" + suffix + ".eps", format="eps", dpi=1000)
+    fig.close()
+
+
 def magnetization_spectrum(spectrum_data, suffix, data_folder):
     pickle.dump(spectrum_data, open(data_folder + "/spec/spec_" + suffix + ".dat", "wb"))
 
@@ -101,6 +125,7 @@ def simulation_single(
     simulate_conductance=True,
     simulate_spectrum=True,
     simulate_magnetization_spectrum=True,
+    simulate_density=False,
 ):
 
     data_suffix = "simulation{}".format(row)
@@ -138,6 +163,10 @@ def simulation_single(
         individual_conductance(conductance_data, data_suffix, data_folder)
         params.update({"conductance_critical_field": conductance_critical_field})
 
+    if simulate_density:
+        density_data = nanowire.density(2,4)
+        density(density_data,data_suffix,data_folder,params)
+
     # Log which data has been saved.
     update_csv(
         params,
@@ -153,7 +182,7 @@ def simulation_all(params, row, date="no-date", scratch="./Scratch/"):
 
 
 def simulation_all_csv(
-    csv_file, date, scratch, simulate_conductance, simulate_spectrum, simulate_magnetization_spectrum
+    csv_file, date, scratch, simulate_conductance, simulate_spectrum, simulate_magnetization_spectrum,simulate_density
 ):
     df = pd.read_csv(csv_file)
     for index, row in df.iterrows():
@@ -165,6 +194,7 @@ def simulation_all_csv(
             simulate_conductance=simulate_conductance,
             simulate_magnetization_spectrum=simulate_magnetization_spectrum,
             simulate_spectrum=simulate_spectrum,
+            simulate_density=simulate_density,
         )
 
 
@@ -178,6 +208,7 @@ def main():
     simulate_conductance = get_yml("globals.yml")["simulate_conductance"]
     simulate_magnetization_spectrum = get_yml("globals.yml")["simulate_magnetization_spectrum"]
     simulate_spectrum = get_yml("globals.yml")["simulate_spectrum"]
+    simulate_density = get_yml("globals.yml")["simulate_density"]
 
     simulation_all_csv(
         args.csv_file,
@@ -186,6 +217,7 @@ def main():
         simulate_conductance,
         simulate_spectrum,
         simulate_magnetization_spectrum,
+        simulate_density,
     )
 
 
